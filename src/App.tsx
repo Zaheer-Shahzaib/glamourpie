@@ -1,10 +1,8 @@
 // Base Mantine + TypeScript + Routing + Auth layout
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { MantineProvider, AppShell, Button, Text, AppShellNavbar, AppShellHeader } from '@mantine/core';
+import { Button, Text } from '@mantine/core';
 import { useState } from 'react';
 import Home from './pages/homePage';
-import Dashboard from './pages/dashboardPage';
-import { theme } from './theme/theme';
 import CollapseDesktop from './pages/dashboardPage';
 
 // --- Auth Simulation ---

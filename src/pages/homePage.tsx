@@ -1,7 +1,3 @@
-'use client';
-
-import { createElement } from 'react';
-
 import {
   Box,
   Button,
@@ -14,16 +10,10 @@ import {
   Paper,
   PaperProps,
   SimpleGrid,
-  Spoiler,
   Stack,
   Text,
-  ThemeIcon,
-  ThemeIconProps,
   Title,
-  Tooltip,
-  UnstyledButton,
   rem,
-  useMantineColorScheme,
   useMantineTheme,
 } from '@mantine/core';
 import { useMediaQuery } from '@mantine/hooks';
@@ -37,8 +27,9 @@ import {
 import GuestLayout from '../layout/Guest';
 import { Link } from 'react-router-dom';
 import Pricing from './price';
-import Faqs from '../Components/Faqs/Faqs';
+
 import classes from '../styles/Home.module.scss'
+import Faqs from '../Components/Faqs/Faqs';
 const DASHBOARDS = [
   {
     icon: '/showcase/dashboard-default.png', 
