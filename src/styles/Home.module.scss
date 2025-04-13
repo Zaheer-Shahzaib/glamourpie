@@ -1,0 +1,85 @@
+
+.hero {
+  background-color: var(--mantine-color-black);
+  color: var(--mantine-color-white);
+  padding: calc(var(--mantine-spacing-xl) * 4);
+  height: 500px;
+  @media (max-width: 768px) {
+    padding-top: var(--mantine-spacing-xl);
+  }
+  .title {
+    font-weight: 800;
+    font-size: 40px;
+    color: var(--mantine-color-white);
+    letter-spacing: -1px;
+    margin-bottom: var(--mantine-spacing-xs);
+  
+    @media (max-width: 768px) {
+      font-size: 28px;
+      text-align: left;
+    }
+    
+  .highlight {
+    color: var(--mantine-primary-color-filled);
+  }
+  }
+}
+
+
+
+.stackControl {
+  text-transform: capitalize;
+  background-color: var(--mantine-color-dark-6);
+  color: var(--mantine-color-white);
+  padding: 6px 10px;
+  border-radius: var(--mantine-radius-md);
+}
+
+.variantImg {
+  max-height: 4480px;
+  width: 100%;
+  object-fit: contain;
+}
+
+.variantTitle {
+  text-align: center;
+  margin-top: var(--mantine-spacing-md);
+  font-weight: 600;
+}
+
+.paper {
+  height: 100%;
+  background-color: transparent;
+}
+
+.paperImage {
+  height: 100%;
+  background-color: transparent;
+  transition: all ease 200ms;
+}
+
+.paperImage * {
+  font-weight: 700;
+}
+
+.image {
+  transition: all ease 200ms;
+  border-radius: var(--mantine-radius-default);
+}
+
+.image:hover {
+  transform: scale(1.05);
+}
+
+.statsTitle {
+  color: var(--mantine-primary-color-filled);
+}
+
+.contactPaper {
+  background-color: transparent;
+  text-align: center;
+}
+
+.featureCard {
+  background-color: transparent;
+}
