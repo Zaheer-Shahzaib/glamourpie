@@ -5,7 +5,6 @@ import { useState } from "react";
 import {
   Container,
   Flex,
-  Image,
   Paper,
   PaperProps,
   SimpleGrid,
@@ -14,12 +13,7 @@ import {
   Text,
   Title,
 } from "@mantine/core";
-import { IconChevronRight } from "@tabler/icons-react";
 import PricingCard from "../Components/PricingCard/PricingCard";
-import Surface from "../Components/Surface/Surface";
-
-const ICON_SIZE = 16;
-
 const PAPER_PROPS: PaperProps = {
   p: "md",
   shadow: "md",
@@ -136,7 +130,6 @@ function Pricing() {
                 <Text>Monthly</Text>
               </Flex>
             </Stack>
-           
           </Paper>
           <SimpleGrid
             cols={{ base: 1, sm: 2, lg: 3 }}

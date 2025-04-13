@@ -1,17 +1,5 @@
-import {
-  Box,
-  Burger,
-  Button,
-  Container,
-  Drawer,
-  Group,
-  ScrollArea,
-  rem,
-  useMantineTheme,
-} from "@mantine/core";
-import { useDisclosure, useMediaQuery } from "@mantine/hooks";
-import { IconBrandGithub, IconPlayerPlay } from "@tabler/icons-react";
-// import { PATH_AUTH, PATH_DASHBOARD, PATH_DOCS, PATH_GITHUB } from '@/routes';
+import { Box, Button, Container, Group } from "@mantine/core";
+import { IconBrandGithub } from "@tabler/icons-react";
 
 import "./HeaderNav.css";
 import { Link } from "react-router-dom";
@@ -32,21 +20,7 @@ const MOCK_DATA = [
   },
 ];
 
-type HeaderNavProps = {
-  mobileOpened: boolean;
-  toggleMobile: () => void;
-  desktopOpened: boolean;
-  toggleDesktop: () => void;
-};
-
-const HeaderNav = ({
-  mobileOpened,
-  toggleMobile,
-  desktopOpened,
-  toggleDesktop,
-}: HeaderNavProps) => {
-  const theme = useMantineTheme();
-
+const HeaderNav = ({ ...props }) => {
   const items = MOCK_DATA.map((link) => (
     <a
       key={link.label}
@@ -68,24 +42,6 @@ const HeaderNav = ({
           gap='xs'
           className='links'
         >
-          <Burger
-            opened={mobileOpened}
-            onClick={toggleMobile}
-            hiddenFrom='sm'
-            size='sm'
-            className='burger'
-            c={theme.white}
-          />
-          <Burger
-            opened={desktopOpened}
-            onClick={toggleDesktop}
-            visibleFrom='sm'
-            size='sm'
-            style={{
-              backgroundColor: theme.white,
-              color: theme.colors.blue[1],
-            }}
-          />
           {items}
           <Box style={{ flexGrow: 1 }} />
         </Group>
