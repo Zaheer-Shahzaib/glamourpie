@@ -1,0 +1,8 @@
+.user {
+  padding: var(--mantine-spacing-md) !important;
+border-radius: var(--mantine-radius-default) !important;
+
+  .user:hover {
+    background-color: var(--mantine-primary-color-light) !important;
+  }
+}

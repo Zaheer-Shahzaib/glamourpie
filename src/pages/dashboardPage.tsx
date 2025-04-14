@@ -1,5 +1,14 @@
+
+
 import { Text } from "@mantine/core";
+import  MainLayout from '../layout/Main/index';
 
 export default function Dashboard() {
-    return <Text size="xl">Dashboard (Protected)</Text>;
+    return  (
+      <>
+      <MainLayout>
+        <h1>hello</h1>
+      </MainLayout>
+      </>
+    )
   }

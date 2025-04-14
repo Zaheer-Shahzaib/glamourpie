@@ -26,8 +26,8 @@ export const theme = createTheme({
   colors,
   white: "#FFFFFF",
   black: "#000000",
-  primaryColor: "brand",
-  primaryShade: { light: 2, dark: 3 },
+  primaryColor: "stemGreen",
+  primaryShade: { light:7, dark: 8 },
   spacing: {
     none: "0px",
     xxs: "2px",
@@ -49,28 +49,28 @@ export const theme = createTheme({
   },
   scale: 0.96,
   // TODO: in figma we have negative spread value which mantine doesn't support natively. So need to verify following in the UI.
-  shadows: {
-    xs: "0px 1px 2px #181E2714",
-    s: "0px 2px 4px #181E2714",
-    m: "0px 4px 6px #181E2714",
-    l: "0px 6px 8px #181E2714",
-    xl: "0px 8px 12px #181E2714",
-    "2xl": "0px 12px 16px #181E2714",
-  },
+  // shadows: {
+  //   xs: "0px 1px 2px #181E2714",
+  //   s: "0px 2px 4px #181E2714",
+  //   m: "0px 4px 6px #181E2714",
+  //   l: "0px 6px 8px #181E2714",
+  //   xl: "0px 8px 12px #181E2714",
+  //   "2xl": "0px 12px 16px #181E2714",
+  // },
 
-  radius: {
-    none: "0",
-    xxs: "2px",
-    xs: "4px",
-    s: "6px",
-    m: "8px",
-    l: "10px",
-    xl: "12px",
-    "2xl": "16px",
-    "3xl": "20px",
-    "4xl": "24px",
-    full: "9999px",
-  },
+  // radius: {
+  //   none: "0",
+  //   xxs: "2px",
+  //   xs: "4px",
+  //   s: "6px",
+  //   m: "8px",
+  //   l: "10px",
+  //   xl: "12px",
+  //   "2xl": "16px",
+  //   "3xl": "20px",
+  //   "4xl": "24px",
+  //   full: "9999px",
+  // },
   // /** Key of theme.radius or any valid CSS value. Default border-radius used by most components */
   // defaultRadius: MantineRadius;
 
