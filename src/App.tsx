@@ -36,7 +36,7 @@ export default function App() {
   const auth = useAuth();
 
   return (
-    <Router>
+    <Router >
       <Routes>
         <Route
           path='/'

@@ -11,20 +11,17 @@
 }
 
 @mixin light-link {
-  color: var(--mantine-color-black);
+  color: var(--mantine-color-error-1);
 }
 
 @mixin dark-link {
-  color: var(--mantine-color-white);
+  color: var(--mantine-color-black);
 }
 
 @mixin hover-link {
-  background-color: light-dark(
-    var(--mantine-color-dark-5),
-    var(--mantine-color-gray-2)
-  );
-  text-decoration: none;
-  transition: all ease 150ms;
+  color: var(--mantine-color-white);
+  text-decoration: none !important;
+  transition: all ease 150ms !important;
 }
 
 @mixin hover-link-light {
@@ -32,15 +29,7 @@
 }
 
 @mixin hover-link-dark {
-  background-color: var(--mantine-color-dark-4);
-}
-
-@mixin light-label {
-  color: var(--mantine-color-black);
-}
-
-@mixin dark-label {
-  color: var(--mantine-color-white);
+  background-color: var(--mantine-color-gray-8);
 }
 
 // === Styles ===
@@ -49,32 +38,31 @@
   width: 420px;
   margin-top: 15px;
   padding: var(--mantine-spacing-lg);
-  border-radius: var(--mantine-radius-default);
+  border-radius: var(--mantine-radius-sm);
   box-shadow: var(--mantine-shadow-xl);
   border: 1px solid var(--mantine-color-gray-3);
 
-  @include light-card;
-  @include dark-card;
-
+  &.mantine-card {
+    @include light-card;
+    @include dark-card;
+  }
   @media (max-width: 365px) {
     width: 360px;
   }
 }
-
-button.link {
-  padding: 6px 10px;
+.link {
+  padding: 6px !important;
   border-radius: var(--mantine-radius-default);
-  color: light-dark(var(--mantine-color-black), var(--mantine-color-error-1));
+  color: var(--mantine-color-black);
   font-weight: 500;
 
-  @include light-link;
-  @include dark-link;
-  @include hover-link;
-  @include hover-link-light;
-  @include hover-link-dark;
-}
-
-.label {
-  @include light-label;
-  @include dark-label;
+  &.mantine-Text-root {
+    @include light-link;
+    @include dark-link;
+  }
+  &:hover {
+    @include hover-link;
+    @include hover-link-light;
+    @include hover-link-dark;
+  }
 }

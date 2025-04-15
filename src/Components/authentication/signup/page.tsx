@@ -19,7 +19,7 @@ import { Link } from "react-router-dom";
 
 function SignupPage() {
   const LINK_PROPS: TextProps = {
-    className: classes.link,
+    className:classes.link
   };
 
   return (
@@ -37,7 +37,7 @@ function SignupPage() {
 
         <Surface
           component={Paper}
-          className={classes.card}
+          classNames={{root:classes.card}}
         >
           <Flex
             direction={{ base: "column", sm: "row" }}
@@ -47,35 +47,31 @@ function SignupPage() {
               label='First name'
               placeholder='John'
               required
-              classNames={{ label: classes.label }}
-            />
+              />
             <TextInput
               label='Last name'
               placeholder='Doe'
               required
-              classNames={{ label: classes.label }}
-            />
+              />
           </Flex>
           <TextInput
             label='Email'
             placeholder='you@mantine.dev'
             required
             mt='md'
-            classNames={{ label: classes.label }}
           />
           <PasswordInput
             label='Password'
             placeholder='Your password'
             required
             mt='md'
-            classNames={{ label: classes.label }}
           />
           <PasswordInput
             label='Confirm Password'
             placeholder='Confirm password'
             required
             mt='md'
-            classNames={{ label: classes.label }}
+            classNames={{label:classes.label}}
           />
           <Button
             fullWidth
@@ -90,7 +86,10 @@ function SignupPage() {
               size='sm'
               component={Link}
               to={"/"}
-              {...LINK_PROPS}
+              // classNames={{
+              //   root: classes.link,
+              // }}
+              className={classes.link}
             >
               Already have an account? Sign in
             </Text>
