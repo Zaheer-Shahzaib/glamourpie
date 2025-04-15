@@ -10,7 +10,7 @@ import {
   IconSettings,
   IconSwitchHorizontal,
 } from "@tabler/icons-react";
-import { Burger, Code, Group, useMantineTheme } from "@mantine/core";
+import { Burger, useMantineTheme } from "@mantine/core";
 import "./dashboard.css";
 import { useDisclosure } from "@mantine/hooks";
 
@@ -26,7 +26,6 @@ const data = [
 
 export default function DashboardNavBar() {
   const [active, setActive] = useState("Billing");
-  const theme = useMantineTheme();
   const [opened, { toggle }] = useDisclosure();
   const links = data.map((item) => (
     <a

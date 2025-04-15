@@ -1,0 +1,113 @@
+// === Mixins ===
+
+@mixin card-light {
+  background-color: var(--mantine-color-gray-0);
+  color: var(--mantine-color-black);
+}
+
+@mixin card-dark {
+  background-color: var(--mantine-color-dark-7);
+  color: var(--mantine-color-white);
+}
+
+@mixin link-light {
+  color: var(--mantine-color-black);
+}
+
+@mixin link-dark {
+  color: var(--mantine-color-white);
+}
+
+@mixin link-hover {
+  background-color: light-dark(
+    var(--mantine-color-dark-5),
+    var(--mantine-color-gray-2)
+  );
+  text-decoration: none;
+  transition: all ease 150ms;
+}
+
+@mixin link-hover-light {
+  background-color: var(--mantine-color-gray-2);
+}
+
+@mixin link-hover-dark {
+  background-color: var(--mantine-color-dark-4);
+}
+
+@mixin label-light {
+  color: var(--mantine-color-black);
+}
+
+@mixin label-dark {
+  color: var(--mantine-color-white);
+}
+
+// === Styles ===
+
+.card {
+  width: 420px;
+  margin-top: 15px;
+  padding: var(--mantine-spacing-lg);
+  border-radius: var(--mantine-radius-default);
+  box-shadow: var(--mantine-shadow-xl);
+  border: 1px solid var(--mantine-color-gray-3);
+
+  // You can conditionally apply these using theme data attributes
+  // @include card-light;
+  // @include card-dark;
+
+  @media (max-width: 365px) {
+    width: 360px;
+  }
+}
+
+text.link {
+  padding: 6px 10px;
+  border-radius: var(--mantine-radius-default);
+  color: light-dark(var(--mantine-color-black), var(--mantine-color-white));
+  font-weight: 500;
+
+  @include link-light;
+  @include link-dark;
+  @include link-hover;
+  @include link-hover-light;
+  @include link-hover-dark;
+}
+
+.label {
+  @include label-light;
+  @include label-dark;
+}
+
+// === Optional Theming Structure ===
+
+[data-theme="light"] {
+  .card {
+    @include card-light;
+  }
+  .link {
+    @include link-light;
+    @include link-hover-light;
+  }
+  .label {
+    @include label-light;
+  }
+}
+
+[data-theme="dark"] {
+  .card {
+    @include card-dark;
+  }
+  .link {
+    @include link-dark;
+    @include link-hover-dark;
+  }
+  .label {
+    @include label-dark;
+  }
+}
+
+.link:hover {
+  @include link-hover;
+}

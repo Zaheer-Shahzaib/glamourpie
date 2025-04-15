@@ -1,26 +1,34 @@
 // Base Mantine + TypeScript + Routing + Auth layout
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { Button, Text } from '@mantine/core';
-import { useState } from 'react';
-import Home from './pages/homePage';
-import CollapseDesktop from './pages/dashboardPage';
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
+import { useState } from "react";
+import Home from "./pages/homePage";
+import Dashboard from "./pages/dashboardPage";
+import SignupPage from "./Components/authentication/signup/page";
+import LoginPage from "./Components/authentication/login/page";
 
 // --- Auth Simulation ---
 const useAuth = () => {
   const [isAuthenticated, setAuth] = useState(true);
-  return { isAuthenticated, login: () => setAuth(true), logout: () => setAuth(false) };
+  return {
+    isAuthenticated,
+    login: () => setAuth(true),
+    logout: () => setAuth(false),
+  };
 };
-function Login({ login }: { login: () => void }) {
-  return (
-    <div>
-      <Text size="xl">Login Page</Text>
-      <Button onClick={login} mt="md">Log In</Button>
-    </div>
-  );
-}
 
-function ProtectedRoute({ children, isAuthenticated }: { children: React.ReactNode; isAuthenticated: boolean }) {
-  return isAuthenticated ? <>{children}</> : <Navigate to="/login" />;
+function ProtectedRoute({
+  children,
+  isAuthenticated,
+}: {
+  children: React.ReactNode;
+  isAuthenticated: boolean;
+}) {
+  return isAuthenticated ? <>{children}</> : <Navigate to='/login' />;
 }
 
 // --- Main App ---
@@ -28,19 +36,29 @@ export default function App() {
   const auth = useAuth();
 
   return (
-      <Router>
-        <Routes>
-          <Route path="/" element={<Home/>} />
-          <Route path="/login" element={<Login login={auth.login} />} />
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute isAuthenticated={auth.isAuthenticated}>
-               <CollapseDesktop/>
-              </ProtectedRoute>
-            }
-          />
-        </Routes>
-      </Router>
+    <Router>
+      <Routes>
+        <Route
+          path='/'
+          element={<Home />}
+        />
+        <Route
+          path='/signup'
+          element={<SignupPage />}
+        />
+        <Route
+          path='/login'
+          element={<LoginPage />}
+        />
+        <Route
+          path='/dashboard'
+          element={
+            <ProtectedRoute isAuthenticated={auth.isAuthenticated}>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+      </Routes>
+    </Router>
   );
 }

@@ -1,5 +1,5 @@
 import { Box, Button, Container, Group } from "@mantine/core";
-import { IconBrandGithub } from "@tabler/icons-react";
+import { IconBrandGithub, IconStarFilled } from "@tabler/icons-react";
 
 import "./HeaderNav.css";
 import { Link } from "react-router-dom";
@@ -52,7 +52,7 @@ const HeaderNav = ({ ...props }) => {
             href={""}
             variant='transparent'
             c='white'
-            leftSection={<IconBrandGithub size={16} />}
+            leftSection={<IconStarFilled size={16} />}
             className='link'
           >
             Give us a star

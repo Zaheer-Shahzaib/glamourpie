@@ -1,5 +1,5 @@
 export type Id = string | number;
-
+export type SidebarState = 'hidden' | 'mini' | 'full';
 export type KanbanColumn = {
   id: Id;
   title: string;

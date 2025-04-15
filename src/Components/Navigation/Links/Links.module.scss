@@ -1,0 +1,97 @@
+// Theme mixins (defined globally and reused)
+@mixin light {
+  color: var(--mantine-color-white) ;
+}
+
+@mixin dark {
+  color: var(--mantine-color-white) ;
+}
+
+@mixin hover-light {
+  background-color: var(--mantine-color-white) ;
+  color: var(--mantine-primary-color-filled) ;
+}
+
+@mixin hover-dark {
+  background-color: var(--mantine-color-black) ;
+  color: var(--mantine-primary-color-light-color) ;
+}
+
+@mixin active-light {
+  background-color: var(--mantine-primary-color-filled-hover) ;
+  color: var(--mantine-color-white) ;
+}
+
+@mixin active-dark {
+  background-color: var(--mantine-primary-color-light-hover) ;
+  color: var(--mantine-color-black) ;
+}
+
+// Component styles
+button.control {
+  font-weight: 500;
+  display: block;
+  width: 100%;
+  padding: var(--mantine-spacing-xs) var(--mantine-spacing-md);
+  font-size: var(--mantine-font-size-sm);
+  transition: all ease 0.2s;
+
+  @include light ;
+  @include dark ;
+
+  &:hover {
+    @include hover-light;
+    @include hover-dark;
+  }
+
+  &[data-active] {
+    &,
+    &:hover {
+      @include hover-light;
+      @include hover-dark;
+    }
+
+    &[data-mini="true"] {
+      width: 67px ;
+    }
+  }
+
+  &[data-mini="true"] {
+    text-align: center ;
+  }
+ 
+}
+.link {
+  font-weight: 500 ;
+  display: block ;
+  color: red;
+  padding: 50px ;
+  text-decoration: none;
+  padding: var(--mantine-spacing-xl) var(--mantine-spacing-md);
+  margin-left: var(--mantine-spacing-xl) ;
+  font-size: var(--mantine-font-size-sm) ;
+  border-left: 1px solid
+    light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4)) ;
+  transition: all ease 0.2s;
+
+  @include light;
+  @include dark;
+
+  &:hover {
+    @include hover-light;
+    @include hover-dark;
+  }
+
+  &[data-active] {
+    &,
+    &:hover {
+      @include active-light;
+      @include active-dark;
+    }
+  }
+}
+
+
+.chevron {
+  transition: transform 200ms ease ;
+}
