@@ -1,68 +1,144 @@
-import { Box, Button, Container, Group } from "@mantine/core";
-import { IconBrandGithub, IconStarFilled } from "@tabler/icons-react";
+import {
+  Box,
+  Burger,
+  Button,
+  Container,
+  Drawer,
+  Group,
+  ScrollArea,
+  useMantineTheme,
+} from "@mantine/core";
+import { useDisclosure, useMediaQuery } from "@mantine/hooks";
+import {
+  IconLogin2,
+  IconStarsFilled,
+} from "@tabler/icons-react";
 
-import "./HeaderNav.css";
+import classes from "./HeaderNav.module.scss";
 import { Link } from "react-router-dom";
 
 const MOCK_DATA = [
   {
-    link: "",
+    link: "/",
     label: "Home",
-  },
-
-  {
-    link: "",
-    label: "Pricing",
   },
   {
     link: "",
     label: "Services",
   },
+  {
+    link: "",
+    label: "About us",
+  },
+
+  {
+    link: "",
+    label: "Support",
+  },
+  {
+    link: "",
+    label: "Contact Us",
+  },
 ];
 
-const HeaderNav = ({ ...props }) => {
-  const items = MOCK_DATA.map((link) => (
-    <a
-      key={link.label}
-      href={link.link}
-      target='_blank'
-      className={"link"}
-    >
-      {link.label}
-    </a>
-  ));
+const HeaderNav = () => {
+  const theme = useMantineTheme();
+  const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] =
+    useDisclosure(false);
+  const tablet_match = useMediaQuery("(max-width: 768px)");
+
+  const items = MOCK_DATA.map((link) => {
+    return (
+      <a
+        key={link.label}
+        href={link.link}
+        className={classes.link}
+      >
+        {link.label}
+      </a>
+    );
+  });
 
   return (
-    <header className='header'>
-      <Container
-        className='inner'
-        fluid
+    <Box>
+      <header className={classes.header}>
+        <Container
+          classNames={{ root: classes.inner }}
+          fluid
+        >
+          {/* <Logo style={{ color: theme.white }} /> */}
+          <Group
+            gap='xs'
+            display={{ base: "none", sm: "flex" }}
+            className={classes.links}
+          >
+            {items}
+          </Group>
+          <Group>
+            <Button
+              component={Link}
+              target='_blank'
+              to={"PATH_GITHUB.repo"}
+              variant='transparent'
+              c='white'
+              rightSection={<IconLogin2 size={20} />}
+              className={classes.link}
+            >
+              Sign In
+            </Button>
+            <Button
+              component={Link}
+              to={"PATH_AUTH.signin"}
+              rightSection={<IconLogin2 size={20} />}
+            >
+              Sign Up
+            </Button>
+          </Group>
+          <Burger
+            opened={drawerOpened}
+            onClick={toggleDrawer}
+            className={classes.hiddenDesktop}
+            color={theme.white}
+          />
+        </Container>
+      </header>
+      <Drawer
+        opened={drawerOpened}
+        onClose={closeDrawer}
+        size='100%'
+        padding='md'
+        title='Menu'
+        className={classes.hiddenDesktop}
+        zIndex={1000000}
+        transitionProps={{
+          transition: tablet_match ? "slide-up" : "slide-left",
+        }}
       >
-        <Group
-          gap='xs'
-          className='links'
+        <ScrollArea
+          h={`calc(100vh - 60px)`}
+          mx='-md'
         >
           {items}
-          <Box style={{ flexGrow: 1 }} />
-        </Group>
-        <Group>
           <Button
-            component='a'
+            component={Link}
             target='_blank'
-            href={""}
+            to={"PATH_GITHUB.repo"}
             variant='transparent'
             c='white'
-            leftSection={<IconStarFilled size={16} />}
-            className='link'
+            leftSection={<IconStarsFilled size={16} />}
+            className={classes.link}
           >
             Give us a star
           </Button>
-          <Link to={""}>
-            <Button>Live Previews</Button>
-          </Link>
-        </Group>
-      </Container>
-    </header>
+          <Button
+            component={Link}
+            to={"PATH_DASHBOARD.default"}
+          >
+            Live Previews
+          </Button>
+        </ScrollArea>
+      </Drawer>
+    </Box>
   );
 };
 

@@ -66,7 +66,7 @@ const DASHBOARDS = [
 
 const IMAGE_PAPER_PROPS: PaperProps = {
   py: 'md',
-  className: 'paperImage',
+  className: classes.paperImage,
 };
 
 export default function Home() {
@@ -169,17 +169,17 @@ export default function Home() {
               to={''}
                 {...IMAGE_PAPER_PROPS}
               >
-                <Text c={'highlight'} mt="md" ta="center" tt="capitalize" fz="lg">
+                <Text className={classes.paperTitle} mt="md" ta="center" tt="capitalize" fz="lg">
                   {dashboard.title}
                 </Text>
-                <Text ta={'center'} c={theme.colors.dark[5]} mt={'xs'} fz={'md'}>
+                <Text className={classes.paperText} ta={'center'} mt={'xs'} fz={'md'}>
                   {dashboard.desp}
                 </Text>
               </Paper>
             ))}
           </SimpleGrid>
         </Container>
-        <Container fluid {...BOX_PROPS}>
+        <Container id='pricing' fluid {...BOX_PROPS}>
         <Pricing/>
         </Container>
         <Container fluid {...BOX_PROPS}>

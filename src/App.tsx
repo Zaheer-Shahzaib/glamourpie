@@ -4,6 +4,7 @@ import {
   Routes,
   Route,
   Navigate,
+  BrowserRouter,
 } from "react-router-dom";
 import { useState } from "react";
 import Home from "./pages/homePage";
@@ -36,7 +37,8 @@ export default function App() {
   const auth = useAuth();
 
   return (
-    <Router >
+    <BrowserRouter>
+
       <Routes>
         <Route
           path='/'
@@ -59,6 +61,8 @@ export default function App() {
           }
         />
       </Routes>
-    </Router>
+  
+    </BrowserRouter>
+   
   );
 }
