@@ -46,7 +46,7 @@
     @include light-card;
     @include dark-card;
   }
-  @media (max-width: 365px) {
+  @media (max-width: 640px) {
     width: 360px;
   }
 }

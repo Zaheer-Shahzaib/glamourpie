@@ -127,7 +127,7 @@ export default function Home() {
             </Grid.Col>
             <Grid.Col span={{ base: 12, md: 6 }} order={{ base: 1, md: 2 }}>
               <Image
-              src={'../assets/image.png'}
+              src='https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/images/bg-7.png'
               alt="/"
                 radius="md"
               />

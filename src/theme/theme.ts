@@ -26,7 +26,7 @@ export const theme = createTheme({
   colors,
   white: "#FFFFFF",
   black: "#000000",
-  primaryColor: "cyan",
+  primaryColor: "blue",
   primaryShade: { light:4, dark: 6 },
   spacing: {
     none: "0px",

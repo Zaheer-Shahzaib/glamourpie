@@ -1,7 +1,7 @@
 .hero {
   background-color: var(--mantine-color-black);
   color: var(--mantine-color-white);
-  padding: calc(var(--mantine-spacing-xl) * 4);
+  padding: calc(var(--mantine-spacing-xl) * 2);
   height: 500px;
   @media (max-width: 768px) {
     padding-top: var(--mantine-spacing-xl);

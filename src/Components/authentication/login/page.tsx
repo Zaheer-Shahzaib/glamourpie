@@ -17,6 +17,7 @@ import classes from './page.module.scss';
 import Surface from '../../Surface/Surface';
 import { Link, useNavigate } from 'react-router-dom';
 import SignInLayout from './layout';
+import { PATH_AUTH } from '../../../routes';
 
 const LINK_PROPS: TextProps = {
   className: classes.link,
@@ -78,7 +79,7 @@ function LoginPage() {
             />
             <Text
               component={Link}
-              to={'PATH_AUTH.passwordReset'}
+              to={PATH_AUTH.passwordReset}
               size="sm"
               {...LINK_PROPS}
             >
@@ -94,7 +95,7 @@ function LoginPage() {
             fz="sm"
             ta="center"
             component={Link}
-            to={'PATH_AUTH.signup'}
+            to={PATH_AUTH.signup}
             {...LINK_PROPS}
           >
             Do not have an account yet? Create account

@@ -5,38 +5,38 @@ import {
   Container,
   Drawer,
   Group,
+  rem,
   ScrollArea,
+  UnstyledButton,
   useMantineTheme,
 } from "@mantine/core";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
-import {
-  IconLogin2,
-  IconStarsFilled,
-} from "@tabler/icons-react";
+import { IconLogin2, IconUserCircle } from "@tabler/icons-react";
 
 import classes from "./HeaderNav.module.scss";
 import { Link } from "react-router-dom";
+import { PATH_AUTH, PATH_PAGES } from "../../../routes";
 
 const MOCK_DATA = [
   {
-    link: "/",
+    link: PATH_PAGES.root,
     label: "Home",
   },
   {
-    link: "",
+    link: PATH_PAGES.services,
     label: "Services",
   },
   {
-    link: "",
+    link: PATH_PAGES.about,
     label: "About us",
   },
 
   {
-    link: "",
+    link: PATH_PAGES.support,
     label: "Support",
   },
   {
-    link: "",
+    link: PATH_PAGES.contact,
     label: "Contact Us",
   },
 ];
@@ -77,19 +77,18 @@ const HeaderNav = () => {
           <Group>
             <Button
               component={Link}
-              target='_blank'
-              to={"PATH_GITHUB.repo"}
+              to={PATH_AUTH.signin}
               variant='transparent'
               c='white'
-              rightSection={<IconLogin2 size={20} />}
+              leftSection={<IconLogin2 size={20} />}
               className={classes.link}
             >
               Sign In
             </Button>
             <Button
               component={Link}
-              to={"PATH_AUTH.signin"}
-              rightSection={<IconLogin2 size={20} />}
+              to={PATH_AUTH.signup}
+              leftSection={<IconUserCircle size={20} />}
             >
               Sign Up
             </Button>
@@ -115,27 +114,18 @@ const HeaderNav = () => {
         }}
       >
         <ScrollArea
-          h={`calc(100vh - 60px)`}
+          h={`calc(100vh - ${rem(60)})`}
           mx='-md'
+          scrollbarSize={0}
         >
-          {items}
-          <Button
-            component={Link}
-            target='_blank'
-            to={"PATH_GITHUB.repo"}
-            variant='transparent'
-            c='white'
-            leftSection={<IconStarsFilled size={16} />}
-            className={classes.link}
+          <Group
+            display={{ base: "flex" }}
+            className={classes.links}
+            style={{ flexDirection: "column" }}
+            align="start"
           >
-            Give us a star
-          </Button>
-          <Button
-            component={Link}
-            to={"PATH_DASHBOARD.default"}
-          >
-            Live Previews
-          </Button>
+            {items}
+          </Group>
         </ScrollArea>
       </Drawer>
     </Box>

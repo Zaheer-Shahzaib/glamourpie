@@ -16,6 +16,7 @@ import classes from "./page.module.scss";
 import Surface from "../../Surface/Surface";
 import SignUpLayout from "./layout";
 import { Link } from "react-router-dom";
+import { PATH_AUTH } from "../../../routes";
 
 function SignupPage() {
   const LINK_PROPS: TextProps = {
@@ -85,10 +86,7 @@ function SignupPage() {
             <Text
               size='sm'
               component={Link}
-              to={"/"}
-              // classNames={{
-              //   root: classes.link,
-              // }}
+              to={PATH_AUTH.signin}
               className={classes.link}
             >
               Already have an account? Sign in
