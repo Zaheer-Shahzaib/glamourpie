@@ -1,8 +1,8 @@
-import { ReactNode } from 'react';
+import { ReactNode } from "react";
 
-import { Box } from '@mantine/core';
+import { Box } from "@mantine/core";
 
-import classes from './App.module.scss'
+import classes from "./App.module.scss";
 
 type AppMainProps = {
   children: ReactNode;
@@ -10,7 +10,11 @@ type AppMainProps = {
 
 const AppMain = ({ children }: AppMainProps) => {
   return (
-    <Box py="lg" px="md" className={classes.main}>
+    <Box
+      py='lg'
+      px='md'
+      className={classes.main}
+    >
       {children}
     </Box>
   );

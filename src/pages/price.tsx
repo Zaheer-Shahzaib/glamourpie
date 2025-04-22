@@ -18,11 +18,11 @@ const PAPER_PROPS: PaperProps = {
   p: "md",
   shadow: "md",
   radius: "md",
-  style:{
+  style: {
     height: "100%",
     display: "flex",
     flexDirection: "column",
-  }
+  },
 };
 
 const PRICING = [

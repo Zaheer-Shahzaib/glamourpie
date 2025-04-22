@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { ReactNode } from 'react';
+import { ReactNode } from "react";
 
-import { Center, Image, Stack } from '@mantine/core';
+import { Center, Image, Stack } from "@mantine/core";
 
 type AuthProps = {
   children: ReactNode;
@@ -12,18 +12,18 @@ function SignInLayout({ children }: AuthProps) {
   return (
     <Center
       style={{
-        height: '100vh',
-        width: '100vw',
+        height: "100vh",
+        width: "100vw",
       }}
     >
       <Stack>
         <Center>
           <Image
-            src="/logo-no-background.png"
-            alt="DesignSparx logo"
+            src='/logo-no-background.png'
+            alt='DesignSparx logo'
             width={96}
             height={96}
-            style={{ objectFit: 'contain' }}
+            style={{ objectFit: "contain" }}
           />
         </Center>
         {children}

@@ -20,7 +20,7 @@ import { PATH_AUTH } from "../../../routes";
 
 function SignupPage() {
   const LINK_PROPS: TextProps = {
-    className:classes.link
+    className: classes.link,
   };
 
   return (
@@ -38,7 +38,7 @@ function SignupPage() {
 
         <Surface
           component={Paper}
-          classNames={{root:classes.card}}
+          classNames={{ root: classes.card }}
         >
           <Flex
             direction={{ base: "column", sm: "row" }}
@@ -48,12 +48,12 @@ function SignupPage() {
               label='First name'
               placeholder='John'
               required
-              />
+            />
             <TextInput
               label='Last name'
               placeholder='Doe'
               required
-              />
+            />
           </Flex>
           <TextInput
             label='Email'
@@ -72,7 +72,7 @@ function SignupPage() {
             placeholder='Confirm password'
             required
             mt='md'
-            classNames={{label:classes.label}}
+            classNames={{ label: classes.label }}
           />
           <Button
             fullWidth
