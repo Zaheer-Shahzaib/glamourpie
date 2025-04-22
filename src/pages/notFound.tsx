@@ -1,11 +1,8 @@
-import React from "react";
 import {
   Button,
   Container,
   Text,
   Title,
-  Image,
-  Stack,
   Group,
 } from "@mantine/core";
 import { useNavigate } from "react-router-dom";
