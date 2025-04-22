@@ -15,7 +15,7 @@ import ResetPassword from './Components/authentication/password-reset/page';
 
 // --- Auth Simulation ---
 const useAuth = () => {
-  const [isAuthenticated, setAuth] = useState(false);
+  const [isAuthenticated, setAuth] = useState(true);
   return {
     isAuthenticated,
     login: () => setAuth(true),
@@ -30,7 +30,7 @@ function ProtectedRoute({
   children: React.ReactNode;
   isAuthenticated: boolean;
 }) {
-  return isAuthenticated ? <>{children}</> : <Navigate to='/auth/login' />;
+  return isAuthenticated ? <>{children}</> : <Navigate to={PATH_AUTH.signin} />;
 }
 
 // --- Main App ---

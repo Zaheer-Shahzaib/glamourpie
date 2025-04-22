@@ -17,7 +17,7 @@ import classes from './page.module.scss';
 import Surface from '../../Surface/Surface';
 import { Link, useNavigate } from 'react-router-dom';
 import SignInLayout from './layout';
-import { PATH_AUTH } from '../../../routes';
+import { PATH_AUTH, PATH_DASHBOARD } from '../../../routes';
 
 const LINK_PROPS: TextProps = {
   className: classes.link,
@@ -54,7 +54,7 @@ function LoginPage() {
       <Surface component={Paper} className={classes.card}>
         <form
           onSubmit={form.onSubmit(() => {
-            navigate('/');
+            navigate({pathname: PATH_DASHBOARD.root});
           })}
         >
           <TextInput

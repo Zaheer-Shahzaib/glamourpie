@@ -1,7 +1,6 @@
 {
   "name": "glamourpie-client",
   "version": "0.1.0",
-  "homepage": "https://glamourpie.com/",
   "private": true,
   "dependencies": {
     "@mantine/core": "^7.17.4",

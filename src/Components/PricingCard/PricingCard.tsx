@@ -1,17 +1,19 @@
 import {
   Button,
+  Container,
   Group,
   List,
   Paper,
   PaperProps,
+  Stack,
   Text,
   ThemeIcon,
   Title,
   rem,
-} from '@mantine/core';
-import { IconArrowRight, IconCheck } from '@tabler/icons-react';
-import CountUp from 'react-countup';
-import Surface from '../Surface/Surface';
+} from "@mantine/core";
+import { IconArrowRight, IconCheck } from "@tabler/icons-react";
+import CountUp from "react-countup";
+import Surface from "../Surface/Surface";
 
 type PricingCardProps = {
   tier: string;
@@ -39,52 +41,85 @@ const PricingCard = (props: PricingCardProps) => {
   } = props;
 
   return (
-    <Surface component={Paper} {...others}>
-      <Group gap={4} align="center" justify="center">
+    <Surface
+      component={Paper}
+      {...others}
+    >
+      <Group
+        gap={4}
+        align='center'
+        justify='center'
+      >
         <sup style={{ fontSize: rem(24) }}>$</sup>
-        <Group align="flex-end" gap={1}>
+        <Group
+          align='flex-end'
+          gap={1}
+        >
           <Title size={48}>
             <CountUp end={monthly ? price.year : price.month} />
           </Title>
-          <Text size="md" fw={500} mb={6}>
+          <Text
+            size='md'
+            fw={500}
+            mb={6}
+          >
             /mo
           </Text>
         </Group>
       </Group>
-      <Title ta="center" my="md" tt="capitalize" order={3} fw={600}>
+      <Title
+        ta='center'
+        my='md'
+        tt='capitalize'
+        order={3}
+        fw={600}
+      >
         {tier}
       </Title>
-      <Text ta="center">{description}</Text>
+      <Text ta='center'>{description}</Text>
       <List
-        spacing="xs"
-        size="md"
+        spacing='xs'
+        size='md'
         center
-        my="xl"
+        my='xl'
         icon={
-          <ThemeIcon size={24} radius="xl" variant="light">
+          <ThemeIcon
+            size={24}
+            radius='xl'
+            variant='light'
+          >
             <IconCheck size={16} />
           </ThemeIcon>
         }
       >
         {features.map((f, i) => (
-          <List.Item key={`${f}-${i}`} mb="md">
+          <List.Item
+            key={`${f}-${i}`}
+            mb='md'
+          >
             {f}
           </List.Item>
         ))}
       </List>
-      <Button
-        variant={preferred ? 'filled' : 'outline'}
-        rightSection={<IconArrowRight size={18} />}
-        fullWidth
-        size="md"
-        mb="sm"
-        style={{ textTransform: 'capitalize' }}
-      >
-        {actionText}
-      </Button>
-      <Text ta="center" c="dimmed" size="sm">
-        No card required
-      </Text>
+      <Stack justify="flex-end" mt={"xl"} h={'inherit'} >
+        <Button
+          variant={preferred ? "filled" : "outline"}
+          rightSection={<IconArrowRight size={18} />}
+          fullWidth
+          size='md'
+          mb='sm'
+          style={{ textTransform: "capitalize" }}
+        >
+          {actionText}
+        </Button>
+        <Text
+          ta='center'
+          c='dimmed'
+          size='sm'
+        >
+          No card required
+        </Text>
+      </Stack>
     </Surface>
   );
 };
