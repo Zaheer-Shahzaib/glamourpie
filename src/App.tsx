@@ -12,6 +12,7 @@ import SignupPage from "./Components/authentication/signup/page";
 import LoginPage from "./Components/authentication/login/page";
 import { PATH_AUTH, PATH_DASHBOARD } from "./routes/index"; // Import external routes
 import ResetPassword from './Components/authentication/password-reset/page';
+import ErrorPage from "./pages/notFound";
 
 // --- Auth Simulation ---
 const useAuth = () => {
@@ -63,6 +64,7 @@ export default function App() {
             </ProtectedRoute>
           }
         />
+          <Route path="*" element={<ErrorPage />} />
       </Routes>
     </Router>
   );
