@@ -26,17 +26,19 @@ import { SidebarState } from "../../types/index";
 import { LinksGroup } from "./Links/Links";
 import UserProfileButton from "../UserButton";
 import userProfileData from "../../constant/userProfileData.json";
+import { useNavigate } from "react-router-dom";
+import { PATH_DASHBOARD } from "../../routes";
 const mockdata = [
   {
     title: "Dashboard",
     links: [
-      { label: "Default", icon: IconChartBar, link: "" },
+      { label: "Default", icon: IconChartBar, link: PATH_DASHBOARD.root },
       {
         label: "Analytics",
         icon: IconChartInfographic,
-        link: "",
+        link: PATH_DASHBOARD.analytics,
       },
-      { label: "SaaS", icon: IconChartArcs3, link: "" },
+      { label: "SaaS", icon: IconChartArcs3, link: PATH_DASHBOARD.saas },
     ],
   },
   {
@@ -98,6 +100,7 @@ const Navigation = ({
   sidebarState,
 }: NavigationProps) => {
   const tablet_match = useMediaQuery("(max-width: 768px)");
+  const navigate = useNavigate();
 
   const links = mockdata.map((m) => (
     <Box
@@ -127,7 +130,9 @@ const Navigation = ({
             setTimeout(() => {
               onClose();
             }, 250);
+
           }}
+          
         />
       ))}
     </Box>

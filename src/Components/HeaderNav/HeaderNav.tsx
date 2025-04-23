@@ -196,7 +196,7 @@ const HeaderNav = (props: HeaderNavProps) => {
 
   return (
     <Group justify="space-between">
-      <Group gap={0}>
+      <Group gap={1}>
         <Tooltip label="Toggle side navigation">
           <Burger visibleFrom="md" size="sm" onClick={onSidebarStateChange} />
         </Tooltip>
@@ -224,7 +224,7 @@ const HeaderNav = (props: HeaderNavProps) => {
         )}
         <Menu shadow="lg" width={320}>
           <Menu.Target>
-            <Indicator processing size={10} offset={6}>
+            <Indicator processing color={theme.colors.green[7]} size={10} offset={6}>
               <Tooltip label="Messages">
                 <ActionIcon size="lg" title="Nessages">
                   <IconMessageCircle size={ICON_SIZE} />
@@ -244,7 +244,7 @@ const HeaderNav = (props: HeaderNavProps) => {
         </Menu>
         <Menu shadow="lg" width={320}>
           <Menu.Target>
-            <Indicator processing size={10} offset={6}>
+            <Indicator processing color={theme.colors.green[7]} size={10} offset={6}>
               <Tooltip label="Notifications">
                 <ActionIcon size="lg" title="Notifications">
                   <IconBell size={ICON_SIZE} />
