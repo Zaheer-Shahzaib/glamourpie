@@ -11,8 +11,7 @@ type GuestLayoutProps = {
 function GuestLayout({ children }: GuestLayoutProps) {
   return (
     <AppShell
-      header={{ height: 60 }}
-      padding='md'
+      header={{ height: 60 }} 
     >
       <AppShell.Header>
         <HeaderNav />

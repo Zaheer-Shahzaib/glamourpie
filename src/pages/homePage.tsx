@@ -14,7 +14,6 @@ import {
   Text,
   Title,
   rem,
-  useMantineTheme,
 } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
 import {
@@ -70,7 +69,6 @@ const IMAGE_PAPER_PROPS: PaperProps = {
 
 export default function Home() {
   const tablet_match = useMediaQuery("(max-width: 768px)");
-  const theme = useMantineTheme();
 
   const BOX_PROPS: ContainerProps = {
     pt: rem(120),

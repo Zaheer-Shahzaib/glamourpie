@@ -10,9 +10,10 @@ import Home from "./pages/homePage";
 import Dashboard from "./pages/dashboardPage";
 import SignupPage from "./Components/authentication/signup/page";
 import LoginPage from "./Components/authentication/login/page";
-import { PATH_AUTH, PATH_DASHBOARD } from "./routes/index"; // Import external routes
+import { PATH_AUTH, PATH_DASHBOARD, PATH_PAGES } from "./routes/index"; // Import external routes
 import ResetPassword from './Components/authentication/password-reset/page';
 import ErrorPage from "./pages/notFound";
+import { ContactUs } from "./pages/contact-us";
 
 // --- Auth Simulation ---
 const useAuth = () => {
@@ -45,6 +46,7 @@ export default function App() {
           path='/'
           element={<Home />}
         />
+        <Route path={PATH_PAGES.contact} element={<ContactUs />} />
         <Route path={PATH_AUTH.root}>
           <Route
             path={PATH_AUTH.signin}
