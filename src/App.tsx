@@ -12,6 +12,7 @@ import SignupPage from "./Components/authentication/signup/page";
 import LoginPage from "./Components/authentication/login/page";
 import { PATH_AUTH, PATH_DASHBOARD } from "./routes/index"; // Import external routes
 import ResetPassword from './Components/authentication/password-reset/page';
+import Pricing from "./pages/price";
 import ErrorPage from "./pages/notFound";
 
 // --- Auth Simulation ---
@@ -52,10 +53,14 @@ export default function App() {
           />
           <Route
             path={PATH_AUTH.signup}
-            element={<SignupPage />}         
+            element={<SignupPage />}
           />
-          <Route path={PATH_AUTH.passwordReset} element={<ResetPassword />} />
+          <Route
+            path={PATH_AUTH.passwordReset}
+            element={<ResetPassword />}
+          />
         </Route>
+        {/* Protected Routes */}
         <Route
           path={PATH_DASHBOARD.root}
           element={
@@ -63,8 +68,14 @@ export default function App() {
               <Dashboard />
             </ProtectedRoute>
           }
+        >
+          <Route path={PATH_DASHBOARD.default} element={<Dashboard />} />
+          <Route path={PATH_DASHBOARD.analytics} element={<Pricing />} />
+        </Route>
+        <Route
+          path='*'
+          element={<ErrorPage />}
         />
-          <Route path="*" element={<ErrorPage />} />
       </Routes>
     </Router>
   );

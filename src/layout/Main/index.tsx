@@ -52,7 +52,7 @@ export default function MainLayout({ children }: Props) {
           boxShadow: tablet_match ? theme.shadows.md : theme.shadows.sm,
         }}
       >
-        <Container fluid py="sm" px="lg">
+        <Container fluid py="sm"  px="lg" pl={15}>
           <HeaderNav
             mobileOpened={mobileOpened}
             toggleMobile={toggleMobile}
