@@ -4,6 +4,7 @@ import {
   Routes,
   Route,
   Navigate,
+  Outlet,
 } from "react-router-dom";
 import { useState } from "react";
 import Home from "./pages/homePage";
@@ -15,30 +16,29 @@ import ResetPassword from './Components/authentication/password-reset/page';
 import Pricing from "./pages/price";
 import ErrorPage from "./pages/notFound";
 import { ContactUs } from "./pages/contact-us";
+import { useAuth } from "./Context/useAuth";
+import ProtectedRoute from "./hooks/protectedRoute";
 
 // --- Auth Simulation ---
-const useAuth = () => {
-  const [isAuthenticated, setAuth] = useState(true);
-  return {
-    isAuthenticated,
-    login: () => setAuth(true),
-    logout: () => setAuth(false),
-  };
-};
+// export const useAuth = () => {
+//   const [isAuthenticated, setAuth] = useState(true);
+//   return {
+//     isAuthenticated,
+//     login: () => setAuth(true),
+//     logout: () => setAuth(false),
+//   };
+// };
 
-function ProtectedRoute({
-  children,
-  isAuthenticated,
-}: {
-  children: React.ReactNode;
-  isAuthenticated: boolean;
-}) {
-  return isAuthenticated ? <>{children}</> : <Navigate to={PATH_AUTH.signin} />;
-}
-
+// function ProtectedRoute({
+//   isAuthenticated,
+// }: {
+//   isAuthenticated: boolean;
+// }) {
+//   return isAuthenticated ? <Outlet /> : <Navigate to={PATH_AUTH.signin} />;
+// }
 // --- Main App ---
 export default function App() {
-  const auth = useAuth();
+  const {isAuthenticated  } = useAuth();
 
   return (
     <Router>
@@ -65,11 +65,7 @@ export default function App() {
         {/* Protected Routes */}
         <Route
           path={PATH_DASHBOARD.root}
-          element={
-            <ProtectedRoute isAuthenticated={auth.isAuthenticated}>
-              <Dashboard />
-            </ProtectedRoute>
-          }
+          element={<ProtectedRoute isAuthenticated={isAuthenticated} />}
         >
           <Route path={PATH_DASHBOARD.default} element={<Dashboard />} />
           <Route path={PATH_DASHBOARD.analytics} element={<Pricing />} />

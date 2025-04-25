@@ -5,27 +5,16 @@
   padding-bottom: 0;
   display: flex;
   flex-direction: column;
-  border-right: 1px solid light-dark(
-    var(--mantine-primary-color-filled-hover),
-    var(--mantine-color-dark-4)
-  );
-
-  &[data-theme="light"] {
-    background-color: var(--mantine-primary-color-filled);
-  }
-
-  &[data-theme="dark"] {
-    background-color: var(--mantine-color-dark-7);
-  }
+  border-right: 1px solid var(--mantine-color-gray-3);
 
   &[data-sidebar-state="full"] {
     width: 300px;
 
-    @media (max-width: 62rem) {
+    @media (max-width: 992px) {
       width: 100%;
     }
 
-    @media (max-width: 48rem) {
+    @media (max-width: 768px) {
       width: 100%;
     }
   }
@@ -56,21 +45,21 @@
     overflow: hidden;
   }
 
-  @media (max-width: 62rem) {
+  @media (max-width: 992px) {
     width: 100%;
   }
 }
 
 .header {
-  padding: 0 var(--mantine-spacing-md) var(--mantine-spacing-sm);
+  padding: 0 var(--mantine-spacing-md) var(--mantine-spacing-sm) var(--mantine-spacing-md);
   margin-left: calc(var(--mantine-spacing-md) * -1);
   margin-right: calc(var(--mantine-spacing-md) * -1);
-  border-bottom: 1px solid light-dark(var(--mantine-color-gray-2), var(--mantine-color-dark-4));
+  border-bottom: 1px solid var(--mantine-color-gray-3);
   color: var(--mantine-color-white);
 }
 
 .logo {
-  // Add styles with here if needed
+  // Theme-specific overrides can go here if needed
 }
 
 .links {
@@ -89,12 +78,48 @@
 }
 
 .linkHeader {
-  color: light-dark(var(--mantine-color-error-1), var(--mantine-color-gray-3));
+  font-weight: 500;
+  color: var(--mantine-color-error);
 }
 
 .footer {
   margin-left: calc(var(--mantine-spacing-md) * -1);
   margin-right: calc(var(--mantine-spacing-md) * -1);
-  border-top: 1px solid light-dark(var(--mantine-color-gray-2), var(--mantine-color-dark-4));
+  border-top: 1px solid var(--mantine-color-gray-3);
   color: var(--mantine-color-white);
+}
+
+// Theme overrides
+html[data-mantine-color-scheme="light"] {
+  .navbar {
+    background-color: var(--mantine-primary-color-filled);
+    border-right-color: var(--mantine-primary-color-filled-hover);
+  }
+
+  .header,
+  .footer {
+    color: var(--mantine-color-black);
+    border-color: var(--mantine-color-gray-2);
+  }
+
+  .linkHeader {
+    color: var(--mantine-color-black);
+  }
+}
+
+html[data-mantine-color-scheme="dark"] {
+  .navbar {
+    background-color: var(--mantine-color-dark-7);
+    border-right-color: var(--mantine-color-dark-4);
+  }
+
+  .header,
+  .footer {
+    color: var(--mantine-color-white);
+    border-color: var(--mantine-color-dark-4);
+  }
+
+  .linkHeader {
+    color: var(--mantine-primary-color-filled);
+  }
 }
