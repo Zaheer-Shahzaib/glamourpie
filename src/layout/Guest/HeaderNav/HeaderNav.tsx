@@ -16,32 +16,39 @@ import { IconLogin2, IconUserCircle } from "@tabler/icons-react";
 import classes from "./HeaderNav.module.scss";
 import { Link } from "react-router-dom";
 import { PATH_AUTH, PATH_PAGES } from "../../../routes";
+import { useScroll } from "../../../Context/scrollContext";
 
-const MOCK_DATA = [
-  {
-    link: PATH_PAGES.root,
-    label: "Home",
-  },
-  {
-    link: PATH_PAGES.services,
-    label: "Services",
-  },
-  {
-    link: PATH_PAGES.about,
-    label: "About us",
-  },
 
-  {
-    link: PATH_PAGES.support,
-    label: "Support",
-  },
-  {
-    link: PATH_PAGES.contact,
-    label: "Contact Us",
-  },
-];
 
 const HeaderNav = () => {
+  const { scrollToSection } = useScroll();
+  const MOCK_DATA = [
+    {
+      link: PATH_PAGES.root,
+      label: "Home",
+      
+    },
+    {
+      label: "Services",
+      link: PATH_PAGES.services,
+    },
+    {
+      link: PATH_PAGES.about,
+      label: "Pricing",
+      onclick: () => {
+        scrollToSection("pricing");
+      }
+    },
+  
+    {
+      link: PATH_PAGES.support,
+      label: "Support",
+    },
+    {
+      link: PATH_PAGES.contact,
+      label: "Contact Us",
+    },
+  ];
   const theme = useMantineTheme();
   const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] =
     useDisclosure(false);
@@ -51,8 +58,16 @@ const HeaderNav = () => {
     return (
       <a
         key={link.label}
-        href={link.link}
+        href={link.link ? link.link : "#"}
         className={classes.link}
+        onClick={(e) => {
+          e.preventDefault();
+          if (link.onclick) {
+            link.onclick();
+          } else {
+            window.location.href = link.link;
+          }
+        }}
       >
         {link.label}
       </a>

@@ -57,7 +57,7 @@ function LoginPage() {
         >
           <form
             onSubmit={form.onSubmit(() => {
-              navigate({ pathname: PATH_DASHBOARD.root });
+              navigate({ pathname: PATH_DASHBOARD.default });
             })}
           >
             <TextInput

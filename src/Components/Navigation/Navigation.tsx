@@ -32,7 +32,7 @@ const mockdata = [
   {
     title: "Dashboard",
     links: [
-      { label: "Default", icon: IconChartBar, link: PATH_DASHBOARD.root },
+      { label: "Default", icon: IconChartBar, link: PATH_DASHBOARD.default },
       {
         label: "Analytics",
         icon: IconChartInfographic,
