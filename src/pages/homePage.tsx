@@ -29,6 +29,7 @@ import Pricing from "./price";
 
 import classes from "../styles/Home.module.scss";
 import Faqs from "../Components/Faqs/Faqs";
+import Services from "../Components/services";
 const DASHBOARDS = [
   {
     icon: "/showcase/dashboard-default.png",
@@ -220,6 +221,13 @@ export default function Home() {
         >
           <Pricing />
         </Container>
+        <Container
+         id='services'
+          fluid
+          {...BOX_PROPS}
+          >
+            <Services/>
+          </Container>
         <Container
           fluid
           {...BOX_PROPS}

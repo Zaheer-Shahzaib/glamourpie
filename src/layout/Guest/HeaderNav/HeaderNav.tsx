@@ -31,6 +31,9 @@ const HeaderNav = () => {
     {
       label: "Services",
       link: PATH_PAGES.services,
+      onclick: () => {
+        scrollToSection("services");
+      }
     },
     {
       link: PATH_PAGES.about,
