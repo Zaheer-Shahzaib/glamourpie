@@ -234,7 +234,7 @@ export default function Home() {
         >
           <Faqs />
         </Container>
-        <Box {...BOX_PROPS}>
+        <Box {...BOX_PROPS} id="support">
           <Paper className={classes.contactPaper}>
             <Title
               order={3}

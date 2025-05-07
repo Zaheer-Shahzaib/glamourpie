@@ -46,6 +46,9 @@ const HeaderNav = () => {
     {
       link: PATH_PAGES.support,
       label: "Support",
+       onclick: () => {
+        scrollToSection("support");
+      }
     },
     {
       link: PATH_PAGES.contact,

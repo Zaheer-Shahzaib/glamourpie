@@ -112,7 +112,7 @@ export function ServicesCard({
         <Icon size={20} />
           <Text fw={500}>{title}</Text>
         </Group>
-        <Badge color={badge === "Available" ? "green" : "yellow"}>
+        <Badge color={badge === "Available" ? theme.colors.green[4] : theme.colors.yellow[4]}>
           {badge}
         </Badge>
       </Group>
