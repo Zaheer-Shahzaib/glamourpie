@@ -244,6 +244,8 @@ export default function Home() {
             </Title>
             <Button
               variant='subtle'
+              component="a"
+              href='/contact-us'
               rightSection={<IconArrowRight size={16} />}
             >
               Contact Us
