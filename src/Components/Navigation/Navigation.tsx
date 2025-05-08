@@ -36,7 +36,7 @@ const mockdata = [
       {
         label: "Analytics",
         icon: IconChartInfographic,
-        link: PATH_DASHBOARD.analytics,
+        link: '',
       },
       // { label: "SaaS", icon: IconChartArcs3, link: PATH_DASHBOARD.saas },
     ],

@@ -68,7 +68,6 @@ export default function App() {
           element={<ProtectedRoute isAuthenticated={isAuthenticated} />}
         >
           <Route path={PATH_DASHBOARD.default} element={<Dashboard />} />
-          <Route path={PATH_DASHBOARD.analytics} element={<Pricing />} />
         </Route>
         <Route
           path='*'
