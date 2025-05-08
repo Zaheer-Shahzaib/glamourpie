@@ -72,7 +72,7 @@ export default function Home() {
   const tablet_match = useMediaQuery("(max-width: 768px)");
 
   const BOX_PROPS: ContainerProps = {
-    pt: rem(120),
+    pt: rem(100),
     pb: rem(80),
     px: tablet_match ? rem(36) : rem(40 * 3),
     className: "section",
@@ -156,7 +156,7 @@ export default function Home() {
             </Grid.Col>
           </Grid>
         </Box>
-        <Flex
+        {/* <Flex
           direction={{ base: "column", sm: "row" }}
           justify={{ sm: "space-evenly" }}
           align='center'
@@ -168,7 +168,7 @@ export default function Home() {
           <Text>Updated: December, 8 2023</Text>
           <Text>v 2.0</Text>
           <Text>View changelog</Text>
-        </Flex>
+        </Flex> */}
         <Container
           fluid
           {...BOX_PROPS}

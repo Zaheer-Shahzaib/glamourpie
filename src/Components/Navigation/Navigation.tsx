@@ -38,7 +38,7 @@ const mockdata = [
         icon: IconChartInfographic,
         link: PATH_DASHBOARD.analytics,
       },
-      { label: "SaaS", icon: IconChartArcs3, link: PATH_DASHBOARD.saas },
+      // { label: "SaaS", icon: IconChartArcs3, link: PATH_DASHBOARD.saas },
     ],
   },
   {
@@ -46,8 +46,8 @@ const mockdata = [
     links: [
       { label: "Profile", icon: IconUserCircle, link: "" },
       { label: "Settings", icon: IconUserCode, link: "" },
-      { label: "Chat", icon: IconMessages, link: "" },
-      { label: "Projects", icon: IconBriefcase, link: "" },
+      // { label: "Chat", icon: IconMessages, link: "" },
+      // { label: "Projects", icon: IconBriefcase, link: "" },
       { label: "Orders", icon: IconListDetails, link: "" },
       {
         label: "Invoices",
@@ -72,20 +72,20 @@ const mockdata = [
       },
     ],
   },
-  {
-    title: "Auth",
-    links: [
-      { label: "Sign In", icon: IconLogin2, link: "" },
-      { label: "Sign Up", icon: IconUserPlus, link: "" },
-      {
-        label: "Reset Password",
-        icon: IconRotateRectangle,
-        link: "",
-      },
-      { label: "Clerk", icon: IconUserShield, link: "" },
-      { label: "Auth0", icon: IconBrandAuth0, link: "" },
-    ],
-  },
+  // {
+  //   title: "Auth",
+  //   links: [
+  //     { label: "Sign In", icon: IconLogin2, link: "" },
+  //     { label: "Sign Up", icon: IconUserPlus, link: "" },
+  //     {
+  //       label: "Reset Password",
+  //       icon: IconRotateRectangle,
+  //       link: "",
+  //     },
+  //     { label: "Clerk", icon: IconUserShield, link: "" },
+  //     { label: "Auth0", icon: IconBrandAuth0, link: "" },
+  //   ],
+  // },
 ];
 
 type NavigationProps = {
