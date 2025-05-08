@@ -51,17 +51,17 @@ function DashBoard() {
             error={statsError}
             paperProps={PAPER_PROPS}
           />
-            <Grid gutter={{ base: 5, xs: "md", md: "xl", xl: 50 }}>
+            {/* <Grid gutter={{ base: 5, xs: "md", md: "xl", xl: 50 }}>
               <Grid.Col span={8}>
                 <RevenueChart {...PAPER_PROPS} />
               </Grid.Col>
-              <Grid.Col span={4}>
+              <Grid.Col span={4}> */}
                 {/* <SalesChart {...PAPER_PROPS} /> */}
-              </Grid.Col>
-              <Grid.Col span={4}>
+              {/* </Grid.Col>
+              <Grid.Col span={4}> */}
                 {/* <MobileDesktopChart {...PAPER_PROPS} /> */}
-              </Grid.Col>
-              <Grid.Col span={8}>
+              {/* </Grid.Col>
+              <Grid.Col span={8}> */}
                 {/* <Paper {...PAPER_PROPS}> */}
                   {/* <Group
                     justify='space-between'
@@ -88,8 +88,8 @@ function DashBoard() {
                   loading={projectsLoading}
                 /> */}
                 {/* </Paper> */}
-              </Grid.Col>
-            </Grid>
+              {/* </Grid.Col>
+            </Grid> */}
           </Stack>
         </Container>
       </MainLayout>
