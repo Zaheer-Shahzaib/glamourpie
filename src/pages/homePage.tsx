@@ -3,7 +3,6 @@ import {
   Button,
   Container,
   ContainerProps,
-  Flex,
   Grid,
   Group,
   Image,
@@ -100,6 +99,7 @@ export default function Home() {
           <Grid
             align='center'
             justify='center'
+            gutter={{ base: 5, xs: 'md', md: 'xl', xl: 50 }}
           >
             <Grid.Col
               span={{ base: 12, md: 6 }}
@@ -108,14 +108,14 @@ export default function Home() {
               <Stack>
                 <Text>Build like a Pro</Text>
                 <Title className={classes.title}>
-                  Automate Your{" "}
+                  Automate Your  
                   <Text
                     component='span'
                     inherit
                     className={classes.highlight}
                   >
-                    Amazon
-                  </Text>{" "}
+                    Amazon   
+                  </Text>
                   Invoices – Fast, Easy & Accurate
                 </Title>
                 <Text>
@@ -147,11 +147,14 @@ export default function Home() {
             <Grid.Col
               span={{ base: 12, md: 6 }}
               order={{ base: 1, md: 2 }}
+              style={{ justifyItems: "center" }}
             >
               <Image
-                src='https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/images/bg-7.png'
-                alt='/'
+                src="/assets/upload-invoice.jpeg"
+                alt='image'
                 radius='md'
+                h={tablet_match ? rem(300) : rem(500)}
+                w={tablet_match ? rem(300) : rem(500)}
               />
             </Grid.Col>
           </Grid>
@@ -222,19 +225,22 @@ export default function Home() {
           <Pricing />
         </Container>
         <Container
-         id='services'
+          id='services'
           fluid
           {...BOX_PROPS}
-          >
-            <Services/>
-          </Container>
+        >
+          <Services />
+        </Container>
         <Container
           fluid
           {...BOX_PROPS}
         >
           <Faqs />
         </Container>
-        <Box {...BOX_PROPS} id="support">
+        <Box
+          {...BOX_PROPS}
+          id='support'
+        >
           <Paper className={classes.contactPaper}>
             <Title
               order={3}
@@ -244,7 +250,7 @@ export default function Home() {
             </Title>
             <Button
               variant='subtle'
-              component="a"
+              component='a'
               href='/contact-us'
               rightSection={<IconArrowRight size={16} />}
             >

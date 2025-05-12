@@ -3,9 +3,9 @@ import {
   Button,
   Card,
   Center,
-  Flex,
   Group,
   Image,
+  ImageProps,
   Paper,
   SimpleGrid,
   Stack,
@@ -13,80 +13,71 @@ import {
   Title,
   useMantineTheme,
 } from "@mantine/core";
-import {
-  IconDeviceMobile,
-  IconFileInvoice,
-  IconProps,
-  IconReceipt2,
-  IconReportMoney,
-  IconStar,
-  IconUpload,
-  IconWallet,
-} from "@tabler/icons-react";
-
 export const serviceCards = [
   {
     title: "Create Invoice/Quote",
     badge: "Coming Soon",
     description:
       "Generate professional invoices and quotes in just a few clicks.",
-    icon: IconFileInvoice,
+       image: "/assets/create-invoice.jpg",
+
   },
   {
     title: "Send Payment Receipt",
     badge: "Coming Soon",
     description:
       "Easily send payment receipts to your customers with complete details.",
-    icon: IconReceipt2,
+    image: "/assets/send-recipent.jpg",
   },
   {
     title: "Easily Manage Expenses",
     badge: "Coming Soon",
     description:
       "Track, categorize, and manage all your business expenses efficiently.",
-    icon: IconWallet,
+    image: "/assets/manage-expense.jpg",
   },
   {
     title: "Track Invoices & Payments",
     badge: "Coming Soon",
     description:
       "Stay updated with real-time tracking of invoices and received payments.",
-    icon: IconReportMoney,
+    image: "/assets/track-invoice.jpeg",
   },
   {
     title: "Mobile Availability",
     badge: "Coming Soon",
     description:
       "Access your dashboard and manage finances anytime, anywhere on mobile.",
-    icon: IconDeviceMobile,
+    image: "/assets/mobile-app.jpg",
   },
   {
     title: "Automatic Invoice Uploading",
     badge: "Available",
     description:
       "Save time with automatic uploading and organization of your invoices.",
-    icon: IconUpload,
+    image: "/assets/upload-invoice.jpeg",
   },
   {
     title: "Automatic Review Request",
     badge: "Coming Soon",
     description:
       "Automatically send review requests after each transaction to gather feedback.",
-    icon: IconStar,
+    image: '/assets/review-request.jpg',
   },
 ];
+
 type ServicesCardProps = {
   title: string;
   badge: string;
   description: string;
-  icon: React.FC<IconProps>;
+  image: ImageProps["src"];
 };
 
 export function ServicesCard({
   title,
   badge,
   description,
-  icon: Icon,
+  image,
 }: ServicesCardProps) {
   const theme = useMantineTheme();
   const isComingSoon = badge === "Coming Soon";
@@ -97,11 +88,16 @@ export function ServicesCard({
       padding='lg'
       radius='md'
     >
-      {/* <Card.Section>
+      <Card.Section>
         <Center>
-
+          <Image
+            src={image}
+            alt={title}
+            
+            style={{ borderRadius: "20px", marginBottom: 10 }}
+          />
         </Center>
-      </Card.Section> */}
+      </Card.Section>
 
       <Group
         justify='space-between'
@@ -109,7 +105,6 @@ export function ServicesCard({
         mb='xs'
       >
         <Group>
-        <Icon size={20} />
           <Text fw={500}>{title}</Text>
         </Group>
         <Badge color={badge === "Available" ? theme.colors.green[4] : theme.colors.yellow[4]}>
@@ -171,7 +166,7 @@ export default function Services() {
             title={card.title}
             badge={card.badge}
             description={card.description}
-            icon={card.icon}
+            image={card.image}
           />
         ))}
       </SimpleGrid>

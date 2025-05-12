@@ -5,6 +5,8 @@ import { MantineProvider } from "@mantine/core";
 import { theme } from "./theme/theme";
 import "@mantine/core/styles.css";
 import { AuthProvider } from "./Context/useAuth";
+import { ScrollProvider } from "./Context/scrollContext";
+import {   BrowserRouter as Router } from "react-router-dom";
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
 );
@@ -17,7 +19,11 @@ root.render(
       defaultColorScheme='light'
     >
       <AuthProvider>
-        <App />
+        <Router>
+          <ScrollProvider>
+            <App />
+          </ScrollProvider>
+        </Router>
       </AuthProvider>
     </MantineProvider>
   </React.StrictMode>

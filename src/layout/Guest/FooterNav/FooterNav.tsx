@@ -55,10 +55,10 @@ const FooterNav = () => {
           align={{ base: 'center' }}
         >
           {/* Footer Social Icons */}
-          <Group gap="xs" align="center" justify="flex-end" wrap="nowrap">
+          <Group gap="xs" align="center" wrap="nowrap">
             <ActionIcon
               component="a"
-              href="https://kelvinkiprop.netlify.app/"
+              href="https://glamourpie.vercel.app/"
               target="_blank"
               {...ACTION_ICON_PROPS}
             >
@@ -66,7 +66,7 @@ const FooterNav = () => {
             </ActionIcon>
             <ActionIcon
               component="a"
-              href="https://github.com/kelvink96"
+              href=""
               target="_blank"
               {...ACTION_ICON_PROPS}
             >
@@ -74,7 +74,7 @@ const FooterNav = () => {
             </ActionIcon>
             <ActionIcon
               component="a"
-              href="https://twitter.com/kelvink_96"
+              href=""
               target="_blank"
               {...ACTION_ICON_PROPS}
             >
@@ -82,7 +82,7 @@ const FooterNav = () => {
             </ActionIcon>
             <ActionIcon
               component="a"
-              href="https://www.linkedin.com/in/kelvink96/"
+              href=""
               target="_blank"
               {...ACTION_ICON_PROPS}
             >
@@ -90,7 +90,7 @@ const FooterNav = () => {
             </ActionIcon>
             <ActionIcon
               component="a"
-              href="https://www.facebook.com/kelvinkk96"
+              href=""
               target="_blank"
               {...ACTION_ICON_PROPS}
             >

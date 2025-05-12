@@ -7,7 +7,6 @@ import {
   Group,
   rem,
   ScrollArea,
-  UnstyledButton,
   useMantineTheme,
 } from "@mantine/core";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
@@ -21,25 +20,24 @@ import { useScroll } from "../../../Context/scrollContext";
 
 
 const HeaderNav = () => {
-  const { scrollToSection } = useScroll();
+  const { navigateToSection } = useScroll();
   const MOCK_DATA = [
     {
       link: PATH_PAGES.root,
-      label: "Home",
-      
+      label: "Home",  
     },
     {
       label: "Services",
       link: PATH_PAGES.services,
       onclick: () => {
-        scrollToSection("services");
+        navigateToSection("services", '/');
       }
     },
     {
       link: PATH_PAGES.about,
       label: "Pricing",
       onclick: () => {
-        scrollToSection("pricing");
+        navigateToSection("pricing", '/');
       }
     },
   
@@ -47,7 +45,7 @@ const HeaderNav = () => {
       link: PATH_PAGES.support,
       label: "Support",
        onclick: () => {
-        scrollToSection("support");
+        navigateToSection("support", '/');
       }
     },
     {
@@ -55,6 +53,7 @@ const HeaderNav = () => {
       label: "Contact Us",
     },
   ];
+ 
   const theme = useMantineTheme();
   const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] =
     useDisclosure(false);
@@ -71,6 +70,7 @@ const HeaderNav = () => {
           if (link.onclick) {
             link.onclick();
           } else {
+            console.log(link.link);
             window.location.href = link.link;
           }
         }}

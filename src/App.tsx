@@ -1,19 +1,18 @@
 // Base Mantine + TypeScript + Routing + Auth layout
 import {
-  BrowserRouter as Router,
   Routes,
   Route,
-  Navigate,
-  Outlet,
+  useLocation,
+  useNavigate,
 } from "react-router-dom";
-import { useState } from "react";
+import { useEffect } from "react";
 import Home from "./pages/homePage";
 import Dashboard from "./pages/dashboardPage";
 import SignupPage from "./Components/authentication/signup/page";
 import LoginPage from "./Components/authentication/login/page";
 import { PATH_AUTH, PATH_DASHBOARD, PATH_PAGES } from "./routes/index"; // Import external routes
-import ResetPassword from './Components/authentication/password-reset/page';
-import Pricing from "./pages/price";
+import ResetPassword from "./Components/authentication/password-reset/page";
+
 import ErrorPage from "./pages/notFound";
 import { ContactUs } from "./pages/contact-us";
 import { useAuth } from "./Context/useAuth";
@@ -38,42 +37,61 @@ import ProtectedRoute from "./hooks/protectedRoute";
 // }
 // --- Main App ---
 export default function App() {
-  const {isAuthenticated  } = useAuth();
+  const { isAuthenticated } = useAuth();
+const location = useLocation();
+  const navigate = useNavigate();
 
+  useEffect(() => {
+    // Check if there's a scroll target in the navigation state
+    const state = location.state as { scrollToId?: string };
+    if (state?.scrollToId) {
+      const section = document.getElementById(state.scrollToId);
+      if (section) {
+        console.log("Scrolling to section after navigation:", state.scrollToId);
+        section.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location, navigate]);
   return (
-    <Router>
-      <Routes>
+    <Routes>
+      <Route
+        path={PATH_PAGES.root}
+        element={<Home />}
+      />
+      <Route
+        path={PATH_PAGES.contact}
+        element={<ContactUs />}
+      />
+      <Route path={PATH_AUTH.root}>
         <Route
-          path='/'
-          element={<Home />}
+          path={PATH_AUTH.signin}
+          element={<LoginPage />}
         />
-        <Route path={PATH_PAGES.contact} element={<ContactUs />} />
-        <Route path={PATH_AUTH.root}>
-          <Route
-            path={PATH_AUTH.signin}
-            element={<LoginPage />}
-          />
-          <Route
-            path={PATH_AUTH.signup}
-            element={<SignupPage />}
-          />
-          <Route
-            path={PATH_AUTH.passwordReset}
-            element={<ResetPassword />}
-          />
-        </Route>
-        {/* Protected Routes */}
         <Route
-          path={PATH_DASHBOARD.root}
-          element={<ProtectedRoute isAuthenticated={isAuthenticated} />}
-        >
-          <Route path={PATH_DASHBOARD.default} element={<Dashboard />} />
-        </Route>
-        <Route
-          path='*'
-          element={<ErrorPage />}
+          path={PATH_AUTH.signup}
+          element={<SignupPage />}
         />
-      </Routes>
-    </Router>
+        <Route
+          path={PATH_AUTH.passwordReset}
+          element={<ResetPassword />}
+        />
+      </Route>
+      {/* Protected Routes */}
+      <Route
+        path={PATH_DASHBOARD.root}
+        element={<ProtectedRoute isAuthenticated={isAuthenticated} />}
+      >
+        <Route
+          path={PATH_DASHBOARD.default}
+          element={<Dashboard />}
+        />
+      </Route>
+      <Route
+        path='*'
+        element={<ErrorPage />}
+      />
+    </Routes>
   );
 }
