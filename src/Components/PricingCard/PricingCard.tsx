@@ -86,7 +86,8 @@ const PricingCard = (props: PricingCardProps) => {
           <ThemeIcon
             size={24}
             radius='xl'
-            variant='light'
+            variant={preferred ? "dark" : "filled"}
+            color={preferred ? "blue" : "dark"}
           >
             <IconCheck size={16} />
           </ThemeIcon>
