@@ -1,111 +1,179 @@
 import {
-  ActionIcon,
-  ActionIconProps,
   Container,
-  Divider,
-  Flex,
-  Group,
-  Stack,
+  Grid,
   Text,
-  Title,
-} from '@mantine/core';
+  Anchor,
+  Divider,
+  Group,
+  useMantineTheme,
+} from "@mantine/core";
 import {
+  IconBrandTwitter,
   IconBrandFacebook,
-  IconBrandGithub,
   IconBrandInstagram,
   IconBrandLinkedin,
-  IconBrandTwitter,
-  IconWorld,
-} from '@tabler/icons-react';
-
-import './FooterNav.css';
-
-const ICON_SIZE = 18;
-
-const ACTION_ICON_PROPS: ActionIconProps = {
-  size: 'lg',
-  color: 'primary.3',
-  variant: 'transparent',
-};
-
+} from "@tabler/icons-react";
 const FooterNav = () => {
+  const theme = useMantineTheme();
   return (
-    <footer className="footer">
-      <Container fluid mb="xl">
-        <Stack gap="lg">
-          <Title ta="center" order={2}>
-            Start automating your Amazon invoices with InvoiceGenie
-          </Title>
-          <Text ta="center">
-            <strong>InvoiceGenie</strong> is your one-stop platform to create, manage, and upload compliant Amazon invoices with speed, automation, and ease. Whether you're VAT registered or not, we’ve got tailored invoice templates to suit your needs — fully aligned with Amazon policies and VAT compliance.
-          </Text>
-          <Group justify="center">
-            <Text ta="center">
-              ⭐ Help us grow — star the project or share it with your network!
+    <footer
+      className={`text-white pt-10`}
+      style={{ backgroundColor: theme.colors.blue[4] }}
+    >
+      <Container>
+        <Grid gutter={'xl'}>
+          <Grid.Col span={{ base: 12, sm: 6, md: 3 }}>
+            <Text className='font-semibold text-lg mb-2'>About InvoiceApp</Text>
+            <Text className='text-sm leading-relaxed mb-2'>
+              Go Paperless! Get Paid Faster!! Simple And Easy-to-use Online
+              Invoicing Software for Small Business Owners & Freelancers.
             </Text>
-          </Group>
-        </Stack>
+            <Anchor
+              href='#'
+              className='text-blue-400 text-sm'
+            >
+              Tweet
+            </Anchor>
+          </Grid.Col>
 
-        <Divider mt="xl" mb="md" />
+          <Grid.Col span={{ base: 6, sm: 3, md: 3 }}>
+            <Text className='font-semibold text-lg mb-2'>Links</Text>
+            <ul className='space-y-1 text-sm'>
+              <li>
+                <Anchor
+                  className='text-blue-500 text-sm'
+                  href='#'
+                >
+                  Pricing
+                </Anchor>
+              </li>
+              <li>
+                <Anchor
+                  className='text-blue-500 text-sm'
+                  href='#'
+                >
+                  Features
+                </Anchor>
+              </li>
+              <li>
+                <Anchor
+                  className='text-blue-500 text-sm'
+                  href='#'
+                >
+                  API Docs
+                </Anchor>
+              </li>
+              <li>
+                <Anchor
+                  className='text-blue-500 text-sm'
+                  href='#'
+                >
+                  Invoice Blog
+                </Anchor>
+              </li>
+            </ul>
+          </Grid.Col>
 
-        <Flex
-          direction={{ base: 'column', sm: 'row' }}
-          gap={{ base: 'sm', sm: 'lg' }}
-          justify={{ base: 'center', sm: 'space-between' }}
-          align={{ base: 'center' }}
-        >
-          {/* Footer Social Icons */}
-          <Group gap="xs" align="center" wrap="nowrap">
-            <ActionIcon
-              component="a"
-              href="https://glamourpie.vercel.app/"
-              target="_blank"
-              {...ACTION_ICON_PROPS}
+          <Grid.Col span={{ base: 6, sm: 3, md: 3 }}>
+            <Text className='font-semibold text-lg mb-2'>Products</Text>
+            <ul className='space-y-1 text-sm'>
+              <li>
+                <Anchor
+                  className='text-blue-500 text-sm'
+                  href='#'
+                >
+                  Free Templates
+                </Anchor>
+              </li>
+              <li>
+                <Anchor
+                  className='text-blue-500 text-sm'
+                  href='#'
+                >
+                  Accountants
+                </Anchor>
+              </li>
+              {/* <li><Anchor href="#">Freelancers</Anchor></li>
+              <li><Anchor href="#">Integrations</Anchor></li> */}
+            </ul>
+          </Grid.Col>
+
+          <Grid.Col span={{ base: 12, sm: 6, md: 3 }}>
+            <Text className='font-semibold text-lg mb-2'>Support</Text>
+            <ul className='space-y-1 text-sm'>
+              <li>
+                <Anchor
+                  className='text-blue-500 text-sm'
+                  href='#'
+                >
+                  Help center
+                </Anchor>
+              </li>
+              <li>
+                <Anchor
+                  className='text-blue-500 text-sm'
+                  href='#'
+                >
+                  Terms
+                </Anchor>
+              </li>
+              <li>
+                <Anchor
+                  className='text-blue-500 text-sm'
+                  href='#'
+                >
+                  FAQs
+                </Anchor>
+              </li>
+              <li>
+                <Anchor
+                  className='text-blue-500 text-sm'
+                  href='#'
+                >
+                  Demo
+                </Anchor>
+              </li>
+            </ul>
+          </Grid.Col>
+        </Grid>
+
+        <Divider
+          my='md'
+          className='border-gray-700'
+        />
+
+        <div className='flex flex-col sm:flex-row justify-between items-center py-4 text-sm text-gray-300'>
+          <Text>
+            &copy; 2025 <span className='font-semibold'>InvoiceApp Inc.</span> - All
+            Rights Reserved&reg;.
+          </Text>
+          <Group className='mt-2 sm:mt-0'>
+            <Anchor
+              href='#'
+              className='text-gray-300 hover:text-white'
             >
-              <IconWorld size={ICON_SIZE} />
-            </ActionIcon>
-            <ActionIcon
-              component="a"
-              href=""
-              target="_blank"
-              {...ACTION_ICON_PROPS}
+              <IconBrandInstagram size={18} />
+            </Anchor>
+            <Anchor
+              href='#'
+              className='text-gray-300 hover:text-white'
             >
-              <IconBrandGithub size={ICON_SIZE} />
-            </ActionIcon>
-            <ActionIcon
-              component="a"
-              href=""
-              target="_blank"
-              {...ACTION_ICON_PROPS}
+              <IconBrandFacebook size={18} />
+            </Anchor>
+            <Anchor
+              href='#'
+              className='text-gray-300 hover:text-white'
             >
-              <IconBrandTwitter size={ICON_SIZE} />
-            </ActionIcon>
-            <ActionIcon
-              component="a"
-              href=""
-              target="_blank"
-              {...ACTION_ICON_PROPS}
+              <IconBrandTwitter size={18} />
+            </Anchor>
+            <Anchor
+              href='#'
+              className='text-gray-300 hover:text-white'
             >
-              <IconBrandLinkedin size={ICON_SIZE} />
-            </ActionIcon>
-            <ActionIcon
-              component="a"
-              href=""
-              target="_blank"
-              {...ACTION_ICON_PROPS}
-            >
-              <IconBrandFacebook size={ICON_SIZE} />
-            </ActionIcon>
-            <ActionIcon
-              component="a"
-              href="https://www.instagram.com/kelvink_96/"
-              target="_blank"
-              {...ACTION_ICON_PROPS}
-            >
-              <IconBrandInstagram size={ICON_SIZE} />
-            </ActionIcon>
+              <IconBrandLinkedin size={18} />
+            </Anchor>
           </Group>
-        </Flex>
+        </div>
       </Container>
     </footer>
   );

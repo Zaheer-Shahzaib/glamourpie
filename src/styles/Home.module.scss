@@ -50,6 +50,23 @@
 .contactPaper {
   background-color: transparent;
   text-align: center;
+
+  .contactBtn {
+    background-color: var(--mantine-color-blue-4);
+    color: var(--mantine-color-white);
+    padding: 10px 20px;
+    border-radius: var(--mantine-radius-md);
+    font-weight: 600;
+    font-size: var(--mantine-font-size-sm);
+    text-transform: capitalize;
+    transition: all ease 200ms;
+
+    &:hover {
+      background-color: var(--mantine-color-blue-5);
+      color: var(--mantine-color-white);
+      transform: scale(1.02);
+    }
+  }
 }
 
 .paperImage {
@@ -58,8 +75,10 @@
   transition: all ease 200ms;
   .paperTitle {
     font-weight: 600;
-    color: var(--mantine-color-black);
-  }
+    color: light-dark(var(--mantine-color-black), var(--mantine-color-white));
+    font-size: var(--mantine-font-size-lg);
+    margin-bottom: var(--mantine-spacing-xs);
+    }
   .paperText {
     color: var(--mantine-color-gray-6);
   }

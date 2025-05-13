@@ -7,6 +7,8 @@ import "@mantine/core/styles.css";
 import { AuthProvider } from "./Context/useAuth";
 import { ScrollProvider } from "./Context/scrollContext";
 import {   BrowserRouter as Router } from "react-router-dom";
+import './styles/index.css'
+import "./styles/globals.scss";
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
 );

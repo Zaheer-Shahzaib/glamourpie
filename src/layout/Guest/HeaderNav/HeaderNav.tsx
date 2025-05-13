@@ -5,58 +5,67 @@ import {
   Container,
   Drawer,
   Group,
+  Menu,
   rem,
   ScrollArea,
+  Tooltip,
+  useMantineColorScheme,
   useMantineTheme,
 } from "@mantine/core";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
-import { IconLogin2, IconUserCircle } from "@tabler/icons-react";
+import {
+  IconCircleHalf2,
+  IconLogin2,
+  IconMoonStars,
+  IconSunHigh,
+  IconUserCircle,
+} from "@tabler/icons-react";
 
 import classes from "./HeaderNav.module.scss";
 import { Link } from "react-router-dom";
 import { PATH_AUTH, PATH_PAGES } from "../../../routes";
 import { useScroll } from "../../../Context/scrollContext";
 
-
-
 const HeaderNav = () => {
   const { navigateToSection } = useScroll();
   const MOCK_DATA = [
     {
       link: PATH_PAGES.root,
-      label: "Home",  
+      label: "Home",
     },
     {
       label: "Services",
       link: PATH_PAGES.services,
       onclick: () => {
-        navigateToSection("services", '/');
-      }
+        navigateToSection("services", "/");
+      },
     },
     {
       link: PATH_PAGES.about,
       label: "Pricing",
       onclick: () => {
-        navigateToSection("pricing", '/');
-      }
+        navigateToSection("pricing", "/");
+      },
     },
-  
+
     {
       link: PATH_PAGES.support,
       label: "Support",
-       onclick: () => {
-        navigateToSection("support", '/');
-      }
+      onclick: () => {
+        navigateToSection("support", "/");
+      },
     },
     {
       link: PATH_PAGES.contact,
       label: "Contact Us",
     },
   ];
- 
+  const ICON_SIZE = 20;
   const theme = useMantineTheme();
   const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] =
     useDisclosure(false);
+  const { setColorScheme, colorScheme } = useMantineColorScheme();
+
   const tablet_match = useMediaQuery("(max-width: 768px)");
 
   const items = MOCK_DATA.map((link) => {
@@ -113,6 +122,45 @@ const HeaderNav = () => {
             >
               Sign Up
             </Button>
+            <Menu
+              shadow='lg'
+              width={200}
+            >
+              <Menu.Target>
+                <Tooltip label='Switch color modes'>
+                  <Button variant='dark'>
+                    {colorScheme === "auto" ? (
+                      <IconCircleHalf2 size={ICON_SIZE} />
+                    ) : colorScheme === "dark" ? (
+                      <IconMoonStars size={ICON_SIZE} />
+                    ) : (
+                      <IconSunHigh size={ICON_SIZE} />
+                    )}
+                  </Button>
+                </Tooltip>
+              </Menu.Target>
+              <Menu.Dropdown>
+                <Menu.Label
+                  tt='uppercase'
+                  ta='center'
+                  fw={600}
+                >
+                  Select color modes
+                </Menu.Label>
+                <Menu.Item
+                  leftSection={<IconSunHigh size={16} />}
+                  onClick={() => setColorScheme("light")}
+                >
+                  Light
+                </Menu.Item>
+                <Menu.Item
+                  leftSection={<IconMoonStars size={16} />}
+                  onClick={() => setColorScheme("dark")}
+                >
+                  Dark
+                </Menu.Item>
+              </Menu.Dropdown>
+            </Menu>
           </Group>
           <Burger
             opened={drawerOpened}
@@ -143,7 +191,7 @@ const HeaderNav = () => {
             display={{ base: "flex" }}
             className={classes.links}
             style={{ flexDirection: "column" }}
-            align="start"
+            align='start'
           >
             {items}
           </Group>

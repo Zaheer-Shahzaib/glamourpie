@@ -15,11 +15,7 @@ import {
   rem,
 } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
-import {
-  IconArrowRight,
-  IconPlayerPlay,
-  IconStarFilled,
-} from "@tabler/icons-react";
+import { IconArrowRight, IconPlayerPlay } from "@tabler/icons-react";
 // import Link from 'next/link';
 // import { PATH_APPS, PATH_AUTH, PATH_DASHBOARD, PATH_GITHUB } from '@/routes';
 import GuestLayout from "../layout/Guest";
@@ -29,6 +25,7 @@ import Pricing from "./price";
 import classes from "../styles/Home.module.scss";
 import Faqs from "../Components/Faqs/Faqs";
 import Services from "../Components/services";
+import { PATH_AUTH } from "../routes";
 const DASHBOARDS = [
   {
     icon: "/showcase/dashboard-default.png",
@@ -99,7 +96,7 @@ export default function Home() {
           <Grid
             align='center'
             justify='center'
-            gutter={{ base: 5, xs: 'md', md: 'xl', xl: 50 }}
+            gutter={{ base: 5, xs: "md", md: "xl", xl: 50 }}
           >
             <Grid.Col
               span={{ base: 12, md: 6 }}
@@ -108,13 +105,13 @@ export default function Home() {
               <Stack>
                 <Text>Build like a Pro</Text>
                 <Title className={classes.title}>
-                  Automate Your  
+                  Automate Your
                   <Text
                     component='span'
                     inherit
                     className={classes.highlight}
                   >
-                    Amazon   
+                    &nbsp; Amazon &nbsp;
                   </Text>
                   Invoices – Fast, Easy & Accurate
                 </Title>
@@ -123,7 +120,7 @@ export default function Home() {
                   directly to Amazon in just a few clicks.
                 </Text>
                 <Group my='lg'>
-                  <Link to={""}>
+                  <Link to={PATH_AUTH.signin}>
                     <Button
                       size='md'
                       leftSection={<IconPlayerPlay size={18} />}
@@ -131,16 +128,6 @@ export default function Home() {
                       Start for Free
                     </Button>
                   </Link>
-                  <Button
-                    size='md'
-                    component='a'
-                    href=''
-                    target='_blank'
-                    variant='white'
-                    leftSection={<IconStarFilled size={18} />}
-                  >
-                    Give us a star
-                  </Button>
                 </Group>
               </Stack>
             </Grid.Col>
@@ -150,7 +137,7 @@ export default function Home() {
               style={{ justifyItems: "center" }}
             >
               <Image
-                src="/assets/upload-invoice.jpeg"
+                src='/assets/upload-invoice.jpeg'
                 alt='image'
                 radius='md'
                 h={tablet_match ? rem(300) : rem(500)}
@@ -253,6 +240,7 @@ export default function Home() {
               component='a'
               href='/contact-us'
               rightSection={<IconArrowRight size={16} />}
+              className={classes.contactBtn}
             >
               Contact Us
             </Button>
