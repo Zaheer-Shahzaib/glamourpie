@@ -16,7 +16,7 @@ import classes from "./page.module.scss";
 import Surface from "../../Surface/Surface";
 import SignUpLayout from "./layout";
 import { Link } from "react-router-dom";
-import { PATH_AUTH } from "../../../routes";
+import { PATH_AUTH, PATH_DASHBOARD } from "../../../routes";
 
 function SignupPage() {
   const LINK_PROPS: TextProps = {
@@ -78,7 +78,7 @@ function SignupPage() {
             fullWidth
             mt='xl'
             component={Link}
-            to={"PATH_DASHBOARD.default"}
+           to={PATH_DASHBOARD.default}
           >
             Create account
           </Button>
