@@ -15,7 +15,6 @@ import ResetPassword from "./Components/authentication/password-reset/page";
 
 import ErrorPage from "./pages/notFound";
 import { ContactUs } from "./pages/contact-us";
-import { useAuth } from "./Context/useAuth";
 import ProtectedRoute from "./hooks/protectedRoute";
 
 // --- Auth Simulation ---
@@ -37,7 +36,6 @@ import ProtectedRoute from "./hooks/protectedRoute";
 // }
 // --- Main App ---
 export default function App() {
-  const { isAuthenticated } = useAuth();
 const location = useLocation();
   const navigate = useNavigate();
 
@@ -81,7 +79,7 @@ const location = useLocation();
       {/* Protected Routes */}
       <Route
         path={PATH_DASHBOARD.root}
-        element={<ProtectedRoute isAuthenticated={isAuthenticated} />}
+        element={<ProtectedRoute />}
       >
         <Route
           path={PATH_DASHBOARD.default}

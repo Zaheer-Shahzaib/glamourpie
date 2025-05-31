@@ -18,13 +18,13 @@ function PasswordLayout({ children }: AuthProps) {
     >
       <Stack>
         <Center>
-          <Image
+          {/* <Image
             src='https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/images/bg-7.png'
             alt='DesignSparx logo'
-            width={96}
-            height={96}
-            style={{ objectFit: "contain" }}
-          />
+            width={24}
+            height={24}
+            
+          /> */}
         </Center>
         {children}
       </Stack>

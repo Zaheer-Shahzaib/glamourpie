@@ -18,13 +18,13 @@ function SignUpLayout({ children }: AuthProps) {
     >
       <Stack>
         <Center>
-          <Image
+          {/* <Image
             src='/logo-no-background.png'
             alt='DesignSparx logo'
             width={96}
             height={96}
             style={{ objectFit: "contain" }}
-          />
+          /> */}
         </Center>
         {children}
       </Stack>

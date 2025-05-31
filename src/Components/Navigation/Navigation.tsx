@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import { ActionIcon, Box, Flex, Group, ScrollArea, Text } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
@@ -22,12 +22,13 @@ import {
   IconX,
 } from "@tabler/icons-react";
 import classes from "./Navigation.module.scss";
-import { SidebarState } from "../../types/index";
+import { SidebarState, User } from "../../types/index";
 import { LinksGroup } from "./Links/Links";
 import UserProfileButton from "../UserButton";
-import userProfileData from "../../constant/userProfileData.json";
 import { useNavigate } from "react-router-dom";
 import { PATH_DASHBOARD } from "../../routes";
+import { useAuth } from "../../Context/useAuth";
+import { fetchUserProfile } from "../../Services/user-services";
 const mockdata = [
   {
     title: "Dashboard",
@@ -36,7 +37,7 @@ const mockdata = [
       {
         label: "Analytics",
         icon: IconChartInfographic,
-        link: '',
+        link: "",
       },
       // { label: "SaaS", icon: IconChartArcs3, link: PATH_DASHBOARD.saas },
     ],
@@ -101,6 +102,24 @@ const Navigation = ({
 }: NavigationProps) => {
   const tablet_match = useMediaQuery("(max-width: 768px)");
   const navigate = useNavigate();
+  const { token } = useAuth();
+  const [profile, setProfile] = useState<User>();
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (token) {
+      fetchUserProfile(token)
+        .then((data) => setProfile(data))
+        .catch((err) => console.error(err))
+        .finally(() => setLoading(false));
+    }
+  }, [token]);
+
+   useEffect(() => {
+    if (tablet_match) {
+      onSidebarStateChange("full");
+    }
+  }, [onSidebarStateChange, tablet_match]);
 
   const links = mockdata.map((m) => (
     <Box
@@ -130,20 +149,13 @@ const Navigation = ({
             setTimeout(() => {
               onClose();
             }, 250);
-
           }}
-          
         />
       ))}
     </Box>
   ));
 
-  useEffect(() => {
-    if (tablet_match) {
-      onSidebarStateChange("full");
-    }
-  }, [onSidebarStateChange, tablet_match]);
-
+ 
   return (
     <div
       className={classes.navbar}
@@ -182,12 +194,14 @@ const Navigation = ({
       </ScrollArea>
 
       <div className={classes.footer}>
+       {profile && 
         <UserProfileButton
-          email={userProfileData.email}
-          image={userProfileData.avatar}
-          name={userProfileData.name}
+          email={profile.email}
+          image={profile?.avatar ?? ""}
+          name={profile?.username}
           showText={sidebarState !== "mini"}
         />
+        }
       </div>
     </div>
   );

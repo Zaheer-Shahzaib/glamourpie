@@ -1,21 +1,36 @@
-import { useState, createContext, useContext } from "react";
-
+import { useState, createContext, useContext, useEffect } from "react";
+import Cookies from "js-cookie";
 type AuthContextType = {
   isAuthenticated: boolean;
-  login: () => void;
+  token: string | null;
+  login: (token: string) => void;
   logout: () => void;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [isAuthenticated, setAuth] = useState(true);
+  const [token, setToken] = useState<string | null>(() => Cookies.get("token") || null);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(!!token);
 
-  const login = () => setAuth(true);
-  const logout = () => setAuth(false);
+  useEffect(() => {
+    setIsAuthenticated(!!token);
+  }, [token]);
+
+  const login = (newToken: string) => {
+    Cookies.set("token", newToken, { expires: 7 }); 
+    setToken(newToken);
+    setIsAuthenticated(true);
+  };
+
+  const logout = () => {
+    Cookies.remove("token");
+    setToken(null);
+    setIsAuthenticated(false);
+  };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, login, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, token, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

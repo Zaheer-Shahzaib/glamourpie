@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { detailedStatsMockData } from '../constant/mock-data';
 const mock ={
   "data": [
     {
@@ -35,10 +36,10 @@ const useFetchData = () => {
   const [data, setData] = useState<any>([]);
   const [error, setError] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-
+console.log(data)
   const fetchData = useCallback(async () => {
     try {
-      setData(mock);
+      setData(detailedStatsMockData.data);
     } catch (error) {
       setError(error);
     } finally {
@@ -50,7 +51,7 @@ const useFetchData = () => {
    setTimeout(() => {
     fetchData();
    }, 3000);
-  }, [mock]);
+  }, [detailedStatsMockData.data]);
 
   return { data, error, loading };
 };

@@ -17,6 +17,13 @@ import MainLayout from "../layout/Main";
 import StatsGrid from "../Components/StatsGrid/StatsGrid";
 import useFetchData from "../hooks/userFetchData";
 import RevenueChart from "../Components/RevenueChart/RevenueChart";
+import { useAuth } from "../Context/useAuth";
+import { useEffect, useState } from "react";
+import { fetchUserProfile } from "../Services/user-services";
+import DetailedStatsCard from "../Components/StatsGrid/detailsStatsGrid";
+import DetailedStatsGrid from "../Components/StatsGrid/detailsStatsGrid";
+import InvoiceDetailsTable from "../Components/InvoiceDetails/InvoiceDetailsTable";
+import { mockItems } from "../constant/mock-data";
 
 const PAPER_PROPS: PaperProps = {
   p: "md",
@@ -45,25 +52,35 @@ function DashBoard() {
         <Container fluid>
           <Stack gap='lg'>
             {/* <PageHeader title="Default dashboard" withActions={true} /> */}
-          <StatsGrid
-            data={statsData.data}
-            loading={statsLoading}
-            error={statsError}
-            paperProps={PAPER_PROPS}
-          />
+            <StatsGrid
+              data={statsData}
+              loading={statsLoading}
+              error={statsError}
+              paperProps={PAPER_PROPS}
+            />
+            <InvoiceDetailsTable
+              data={{
+                products: mockItems,
+                orders: mockItems,
+              }}
+            />
+
+            {/* <DetailedStatsGrid/> */}
+            {/* Render profile info if available */}
+
             {/* <Grid gutter={{ base: 5, xs: "md", md: "xl", xl: 50 }}>
               <Grid.Col span={8}>
                 <RevenueChart {...PAPER_PROPS} />
               </Grid.Col>
-              <Grid.Col span={4}> */}
-                {/* <SalesChart {...PAPER_PROPS} /> */}
-              {/* </Grid.Col>
-              <Grid.Col span={4}> */}
-                {/* <MobileDesktopChart {...PAPER_PROPS} /> */}
-              {/* </Grid.Col>
-              <Grid.Col span={8}> */}
-                {/* <Paper {...PAPER_PROPS}> */}
-                  {/* <Group
+              <Grid.Col span={4}> 
+                 <SalesChart {...PAPER_PROPS} />
+               </Grid.Col>
+              <Grid.Col span={4}> 
+               <MobileDesktopChart {...PAPER_PROPS} /> 
+              </Grid.Col>
+              <Grid.Col span={8}> 
+               <Paper {...PAPER_PROPS}> 
+                <Group
                     justify='space-between'
                     mb='md'
                   >
@@ -81,15 +98,15 @@ function DashBoard() {
                     >
                       View all
                     </Button>
-                  </Group> */}
-                  {/* <ProjectsTable
+                  </Group> 
+                 <ProjectsTable
                   data={projectsData.slice(0, 6)}
                   error={projectsError}
                   loading={projectsLoading}
-                /> */}
-                {/* </Paper> */}
-              {/* </Grid.Col>
-            </Grid> */}
+                />
+                </Paper>  */}
+            {/* </Grid.Col> */}
+            {/* </Grid> */}
           </Stack>
         </Container>
       </MainLayout>

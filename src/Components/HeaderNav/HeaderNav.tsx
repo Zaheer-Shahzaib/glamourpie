@@ -27,6 +27,7 @@ import {
   IconSearch,
   IconSunHigh,
 } from '@tabler/icons-react';
+import { useAuth } from '../../Context/useAuth';
 
 
 const ICON_SIZE = 20;
@@ -133,6 +134,8 @@ type HeaderNavProps = {
 };
 
 const HeaderNav = (props: HeaderNavProps) => {
+  const { logout } = useAuth();
+
   const { toggleMobile, mobileOpened, onSidebarStateChange } = props;
   const theme = useMantineTheme();
   const { setColorScheme, colorScheme } = useMantineColorScheme();
@@ -263,7 +266,7 @@ const HeaderNav = (props: HeaderNavProps) => {
           </Menu.Dropdown>
         </Menu>
         <Tooltip label="Logout">
-          <ActionIcon>
+          <ActionIcon onClick={logout}>
             <IconPower size={ICON_SIZE} />
           </ActionIcon>
         </Tooltip>

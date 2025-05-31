@@ -11,6 +11,7 @@ import {
   TextInput,
   TextProps,
   Title,
+  useMantineTheme,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import classes from "./page.module.scss";
@@ -18,6 +19,10 @@ import Surface from "../../Surface/Surface";
 import { Link, useNavigate } from "react-router-dom";
 import SignInLayout from "./layout";
 import { PATH_AUTH, PATH_DASHBOARD } from "../../../routes";
+import { api } from "../../../Services/api";
+import { notifications } from "@mantine/notifications";
+import { useAuth } from "../../../Context/useAuth";
+
 
 const LINK_PROPS: TextProps = {
   className: classes.link,
@@ -25,18 +30,44 @@ const LINK_PROPS: TextProps = {
 
 function LoginPage() {
   const navigate = useNavigate();
-  const form = useForm({
-    initialValues: { email: "demo@email.com", password: "Demo@123" },
+  const theme = useMantineTheme();
+  const { login } = useAuth();
 
-    // functions will be used to validate values at corresponding key
+  const form = useForm({
+    initialValues: { username: "", password: "" },
     validate: {
-      email: (value: any) => (/^\S+@\S+$/.test(value) ? null : "Invalid email"),
+      username: (value: string) =>
+        String(value).trim().length === 0 ? "user name is required" : null,
       password: (value: any) =>
         value && value?.length < 6
           ? "Password must include at least 6 characters"
           : null,
     },
   });
+  const handleSubmit = async (values: typeof form.values) => {
+    try {
+      const resp = await api.post("/api/signin", { ...values });
+      console.log(resp);
+      if (resp.status === 200) {
+        login(resp.data.token);
+        notifications.show({
+          title: "Success",
+          message: "Login successfully!",
+          color: theme.colors.green[4],
+          position: "top-right",
+        });
+      }
+      navigate(PATH_DASHBOARD.default);
+    } catch (error: any) {
+      const message = error.response?.data?.message;
+      notifications.show({
+        title: "Error",
+        message: message,
+        color: theme.colors.red[4],
+        position: "top-right",
+      });
+    }
+  };
 
   return (
     <>
@@ -55,17 +86,13 @@ function LoginPage() {
           component={Paper}
           className={classes.card}
         >
-          <form
-            onSubmit={form.onSubmit(() => {
-              navigate({ pathname: PATH_DASHBOARD.default });
-            })}
-          >
+          <form onSubmit={form.onSubmit(handleSubmit)}>
             <TextInput
-              label='Email'
+              label='Username'
               placeholder='you@mantine.dev'
               required
               classNames={{ label: classes.label }}
-              {...form.getInputProps("email")}
+              {...form.getInputProps("username")}
             />
             <PasswordInput
               label='Password'

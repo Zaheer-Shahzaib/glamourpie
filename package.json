@@ -3,9 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@mantine/core": "^7.17.4",
+    "@mantine/core": "^8.0.1",
     "@mantine/form": "^7.17.4",
-    "@mantine/hooks": "^7.17.4",
+    "@mantine/hooks": "^8.0.1",
+    "@mantine/notifications": "^8.0.1",
     "@tabler/icons-react": "^3.31.0",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
@@ -16,6 +17,8 @@
     "@types/react": "^19.1.0",
     "@types/react-dom": "^19.1.2",
     "apexcharts": "^4.6.0",
+    "axios": "^1.9.0",
+    "js-cookie": "^3.0.5",
     "lodash": "^4.17.21",
     "npm": "^11.3.0",
     "postcss-cli": "^11.0.1",
@@ -56,6 +59,7 @@
   },
   "devDependencies": {
     "@storybook/react": "^8.6.12",
+    "@types/js-cookie": "^3.0.6",
     "@types/lodash": "^4.17.16",
     "sass": "^1.86.3"
   }

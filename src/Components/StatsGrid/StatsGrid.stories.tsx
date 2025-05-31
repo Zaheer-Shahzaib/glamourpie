@@ -1,4 +1,5 @@
-import Mock from '../../hooks/userFetchData'
+import {detailedStatsMockData}  from '../../constant/mock-data';
+// import Mock from '../../hooks/userFetchData'
 
 import StatsGrid from './StatsGrid';
 
@@ -22,6 +23,6 @@ type Story = StoryObj<typeof StatsGrid>;
 // More on writing stories with args: https://storybook.js.org/docs/react/writing-stories/args
 export const Default: Story = {
   args: {
-    data: Mock().data,
+    data: detailedStatsMockData.data
   },
 };

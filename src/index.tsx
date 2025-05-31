@@ -3,7 +3,9 @@ import ReactDOM from "react-dom/client";
 import App from "./App";
 import { MantineProvider } from "@mantine/core";
 import { theme } from "./theme/theme";
+import '@mantine/notifications/styles.css';
 import "@mantine/core/styles.css";
+import { Notifications } from '@mantine/notifications';
 import { AuthProvider } from "./Context/useAuth";
 import { ScrollProvider } from "./Context/scrollContext";
 import {   BrowserRouter as Router } from "react-router-dom";
@@ -20,6 +22,7 @@ root.render(
       theme={theme}
       defaultColorScheme='light'
     >
+        <Notifications />
       <AuthProvider>
         <Router>
           <ScrollProvider>

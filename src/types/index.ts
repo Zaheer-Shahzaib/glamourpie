@@ -5,6 +5,14 @@ export type KanbanColumn = {
   title: string;
 };
 
+export interface User{
+  id: Id;
+  username: string;
+  email: string;
+  avatar?: string;
+  phone?: string;
+  status?: 'active' | 'inactive' | 'banned' | 'pending' | string;
+}
 export type KanbanTask = {
   id: Id;
   columnId: Id;
@@ -50,3 +58,23 @@ export type Invoices = {
   client_name: string;
   client_company: string;
 };
+
+///
+export interface InvoiceItem {
+  sku: string;
+  image?: string;
+  title: string;
+  price: string;
+  cost: string;
+  fbaStock?: number;
+  fbmStock?: number;
+  unitsSold: number;
+  refunds: number;
+  sales: string;
+  ads: string;
+  sellableReturns?: string;
+  grossProfit: string;
+  netProfit: string;
+  margin: string;
+  roi: string;
+}

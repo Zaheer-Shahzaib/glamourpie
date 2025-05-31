@@ -4,32 +4,80 @@ import {
   Button,
   Center,
   Flex,
+  NumberInput,
   Paper,
   PasswordInput,
   Text,
   TextInput,
-  TextProps,
   Title,
+  useMantineTheme,
 } from "@mantine/core";
-
+import { notifications } from "@mantine/notifications";
+import { useForm } from "@mantine/form";
+import { Link, useNavigate } from "react-router-dom";
+import { PATH_AUTH } from "../../../routes";
 import classes from "./page.module.scss";
 import Surface from "../../Surface/Surface";
 import SignUpLayout from "./layout";
-import { Link } from "react-router-dom";
-import { PATH_AUTH, PATH_DASHBOARD } from "../../../routes";
+import { api } from "../../../Services/api";
 
 function SignupPage() {
-  const LINK_PROPS: TextProps = {
-    className: classes.link,
+  const theme = useMantineTheme();
+  const navigate = useNavigate();
+  const form = useForm({
+    initialValues: {
+      username: "",
+      email: "",
+      phone: "",
+      password: "",
+    },
+
+    validate: {
+      username: (value: string) =>
+        String(value).trim().length === 0 ? "user name is required" : null,
+      email: (value: string) =>
+        /^\S+@\S+$/.test(value) ? null : "Invalid email",
+      phone: (value: string | number) =>
+        String(value).trim().length < 10 ? "Invalid phone number" : null,
+      password: (value: string) =>
+        value.length < 6 ? "Password must be at least 6 characters" : null,
+    },
+  });
+
+  const handleSubmit = async (values: typeof form.values) => {
+    try {
+      // call your API using axios or your baseAPI instance
+      const resp = await api.post("/api/signup", { ...values });
+      console.log(resp.status);
+      if (resp.status === 201) {
+        notifications.show({
+          title: "Success",
+          message: "Account created successfully!",
+          color: theme.colors.green[4],
+          position: "top-right",
+        });
+      }
+      navigate(PATH_AUTH.signin);
+      console.log("Form submitted:", values);
+    } catch (err: any) {
+      const message =
+        err.response?.data?.message || "Signup failed. Please try again.";
+      notifications.show({
+        title: "Error",
+        message,
+        color: theme.colors.error[4],
+        position: "top-right",
+      });
+    }
   };
 
   return (
     <>
       <>
-        <title>Sign up | DesignSparx</title>
+        <title>Sign up</title>
         <meta
           name='description'
-          content='Explore our versatile dashboard website template featuring a stunning array of themes and meticulously crafted components. Elevate your web project with seamless integration, customizable themes, and a rich variety of components for a dynamic user experience. Effortlessly bring your data to life with our intuitive dashboard template, designed to streamline development and captivate users. Discover endless possibilities in design and functionality today!'
+          content='Explore our versatile dashboard website template featuring a stunning array of themes and meticulously crafted components...'
         />
       </>
       <SignUpLayout>
@@ -40,48 +88,50 @@ function SignupPage() {
           component={Paper}
           classNames={{ root: classes.card }}
         >
-          <Flex
-            direction={{ base: "column", sm: "row" }}
-            gap={{ base: "md" }}
-          >
-            <TextInput
-              label='First name'
-              placeholder='John'
+          <form onSubmit={form.onSubmit(handleSubmit)}>
+            <Flex
+              direction={{ base: "column", sm: "row" }}
+              gap={{ base: "md" }}
+            >
+              <TextInput
+                label='Username'
+                placeholder='John'
+                {...form.getInputProps("username")}
+                required
+              />
+              <TextInput
+                label='Email'
+                placeholder='john@example.com'
+                {...form.getInputProps("email")}
+                required
+              />
+            </Flex>
+
+            <NumberInput
+              label='Phone Number'
+              placeholder='+921234567890'
+              mt='md'
+              hideControls
+              {...form.getInputProps("phone")}
+            />
+
+            <PasswordInput
+              label='Password'
+              placeholder='Your password'
+              mt='md'
+              {...form.getInputProps("password")}
               required
             />
-            <TextInput
-              label='Last name'
-              placeholder='Doe'
-              required
-            />
-          </Flex>
-          <TextInput
-            label='Email'
-            placeholder='you@mantine.dev'
-            required
-            mt='md'
-          />
-          <PasswordInput
-            label='Password'
-            placeholder='Your password'
-            required
-            mt='md'
-          />
-          <PasswordInput
-            label='Confirm Password'
-            placeholder='Confirm password'
-            required
-            mt='md'
-            classNames={{ label: classes.label }}
-          />
-          <Button
-            fullWidth
-            mt='xl'
-            component={Link}
-           to={PATH_DASHBOARD.default}
-          >
-            Create account
-          </Button>
+
+            <Button
+              fullWidth
+              mt='xl'
+              type='submit'
+            >
+              Create account
+            </Button>
+          </form>
+
           <Center mt='md'>
             <Text
               size='sm'
