@@ -16,6 +16,8 @@ import {
 } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
 import { IconArrowRight, IconPlayerPlay } from "@tabler/icons-react";
+import PrivacyPolicy from "../Components/PrivacyPolicy/PrivacyPolicy";
+
 // import Link from 'next/link';
 // import { PATH_APPS, PATH_AUTH, PATH_DASHBOARD, PATH_GITHUB } from '@/routes';
 import GuestLayout from "../layout/Guest";
@@ -31,7 +33,7 @@ const DASHBOARDS = [
     icon: "/showcase/dashboard-default.png",
     title: "Automatic Invoice Uploading",
     desp: "Generate and upload invoices seamlessly through API integration – no manual effort required.",
-  },
+   },
   {
     icon: "/showcase/dashboard-analytics.png",
     title: "Smart Invoice Templates",
@@ -236,14 +238,25 @@ export default function Home() {
               For any queries?
             </Title>
             <Button
-              variant='subtle'
-              component='a'
-              href='/contact-us'
-              rightSection={<IconArrowRight size={16} />}
-              className={classes.contactBtn}
-            >
-              Contact Us
-            </Button>
+    variant='subtle'
+    component='a'
+    href='/contact-us'
+    rightSection={<IconArrowRight size={16} />}
+    className={classes.contactBtn}
+  >
+    Contact Us
+  </Button>
+<div className="my-3"></div>
+  <Button
+    variant='subtle'
+    component='a'
+    href='/privacy-policy'
+    rightSection={<IconArrowRight size={16} />}
+    className={classes.contactBtn}
+  >
+    Privacy Policy
+  </Button>
+
           </Paper>
         </Box>
       </GuestLayout>

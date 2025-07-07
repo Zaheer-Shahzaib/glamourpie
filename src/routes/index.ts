@@ -41,6 +41,8 @@ export const PATH_APPS = {
     root: path(ROOT_APPS, "/file-manager"),
   },
 };
+// routes/index.ts
+
 
 export const PATH_PAGES = {
   root: ROOTS_PAGES,
@@ -48,7 +50,9 @@ export const PATH_PAGES = {
   contact: path(ROOTS_PAGES, "contact-us"),
   services: path(ROOTS_PAGES, "services"),
   support: path(ROOTS_PAGES, "support"),
+  privacy: path(ROOTS_PAGES, "privacy-policy"), // ✅ FIXED
 };
+
 
 export const PATH_PROJECTS = {
   root: ROOTS_PROJECTS,
@@ -84,6 +88,7 @@ export const PATH_AUTH = {
   clerk: path(ROOTS_AUTH, "/clerk"),
   auth0: path(ROOTS_AUTH, "/auth0"),
 };
+
 
 export const PATH_START = {
   root: "https://mantine-analytics-dashboard-docs.netlify.app/getting-started",
