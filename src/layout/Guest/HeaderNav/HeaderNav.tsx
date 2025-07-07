@@ -47,6 +47,7 @@ const HeaderNav = () => {
         navigateToSection("pricing", "/");
       },
     },
+    
 
     {
       link: PATH_PAGES.support,
@@ -59,6 +60,10 @@ const HeaderNav = () => {
       link: PATH_PAGES.contact,
       label: "Contact Us",
     },
+    {
+      link: PATH_PAGES.privacy,
+      label: "Privacy Policy",
+    }
   ];
   const ICON_SIZE = 20;
   const theme = useMantineTheme();
