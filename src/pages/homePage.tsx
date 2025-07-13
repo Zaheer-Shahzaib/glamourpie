@@ -207,12 +207,27 @@ export default function Home() {
           </SimpleGrid>
         </Container>
         <Container
-          id='pricing'
-          fluid
-          {...BOX_PROPS}
-        >
-          <Pricing />
-        </Container>
+  // id='pricing'
+  fluid
+  {...BOX_PROPS}
+  style={{ position: 'relative' }}
+>
+  <Pricing />
+  <button 
+    onClick={() => window.location.href = '/contact-us'} // or use `navigate`
+    style={{
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      width: '100%',
+      height: '100%',
+      opacity: 0, // Makes it invisible
+      cursor: 'pointer',
+      border: 'none',
+      background: 'transparent',
+    }}
+  />
+</Container>
         <Container
           id='services'
           fluid
