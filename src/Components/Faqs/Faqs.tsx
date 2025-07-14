@@ -3,7 +3,25 @@ import { Accordion, Box, BoxProps, Title } from "@mantine/core";
 import classes from "./Faqs.module.scss";
 
 const placeholder =
-  "It can’t help but hear a pin drop from over half a mile away, so it lives deep in the mountains where there aren’t many people or Pokémon.It was born from sludge on the ocean floor. In a sterile environment, the germs within its body can’t multiply, and it dies.It has no eyeballs, so it can’t see. It checks its surroundings via the ultrasonic waves it emits from its mouth.";
+  "RunAnalytic is a cloud-based SaaS platform that connects with Amazon Seller accounts to automatically generate tax-compliant invoices and deliver them to customers via the Amazon API.";
+  const placeholder1 =
+  "Amazon sellers in the UAE (and other supported regions) who are required to provide invoices for every order will benefit from RunAnalytic’s automation and compliance features.";
+  const placeholder2 =
+  "Yes, we follow Amazon’s Selling Partner API (SP-API) guidelines and data protection policies strictly, including encryption, access controls, and minimal data retention.";
+  const placeholder3 =
+  "We access only the data required to generate invoices, including order ID, buyer name, shipping address, and order details, in compliance with Amazon’s PII handling policies.";
+  const placeholder4 =
+  "Yes. All data is encrypted in transit (TLS 1.2+) and at rest (AES-256). We use AWS for secure cloud hosting and apply strict role-based access control (RBAC) and multi-factor authentication (MFA).";
+  const placeholder5 =
+  "PII is retained for no longer than 30 days after order shipment unless a longer period is required by law.";
+  const placeholder6 =
+  "Currently, RunAnalytic is optimized for Amazon UAE and MENA region sellers. We plan to expand to more marketplaces in the future.";
+  const placeholder7 =
+  "You can contact our support team at support@runanalytic.com. We typically respond within 24 hours.";
+  const placeholder8 =
+  "You can follow the instructions in the app or system settings to disable battery optimization so RunAnalytic can process background invoice generation tasks reliably.";
+  const placeholder9 =
+  "Yes! We offer a limited-time free trial so you can experience the full features of our platform before committing.";
 
 type FaqsProps = BoxProps;
 
@@ -28,36 +46,71 @@ const Faqs = ({ ...others }: FaqsProps) => {
         }}
       >
         <Accordion.Item value='reset-password'>
-          <Accordion.Control>How can I reset my password?</Accordion.Control>
+          <Accordion.Control>What is RunAnalytic?</Accordion.Control>
           <Accordion.Panel>{placeholder}</Accordion.Panel>
         </Accordion.Item>
 
         <Accordion.Item value='another-account'>
           <Accordion.Control>
-            Can I create more that one account?
+          Who should use RunAnalytic?
           </Accordion.Control>
-          <Accordion.Panel>{placeholder}</Accordion.Panel>
+          <Accordion.Panel>{placeholder1}</Accordion.Panel>
         </Accordion.Item>
 
         <Accordion.Item value='newsletter'>
           <Accordion.Control>
-            How can I subscribe to monthly newsletter?
+          Is RunAnalytic approved by Amazon?
           </Accordion.Control>
-          <Accordion.Panel>{placeholder}</Accordion.Panel>
+          <Accordion.Panel>{placeholder2}</Accordion.Panel>
         </Accordion.Item>
 
         <Accordion.Item value='credit-card'>
           <Accordion.Control>
-            Do you store credit card information securely?
+          What kind of data does RunAnalytic access?
           </Accordion.Control>
-          <Accordion.Panel>{placeholder}</Accordion.Panel>
+          <Accordion.Panel>{placeholder3}</Accordion.Panel>
         </Accordion.Item>
 
-        <Accordion.Item value='payment'>
+        <Accordion.Item value='data'>
           <Accordion.Control>
-            What payment systems to you work with?
+          Is my data secure?
           </Accordion.Control>
-          <Accordion.Panel>{placeholder}</Accordion.Panel>
+          <Accordion.Panel>{placeholder4}</Accordion.Panel>
+        </Accordion.Item>
+
+        <Accordion.Item value='PII'>
+          <Accordion.Control>
+          How long is Personally Identifiable Information (PII) stored?
+          </Accordion.Control>
+          <Accordion.Panel>{placeholder5}</Accordion.Panel>
+        </Accordion.Item>
+
+        <Accordion.Item value='marketplaces'>
+          <Accordion.Control>
+          Can I use RunAnalytic for other marketplaces?
+          </Accordion.Control>
+          <Accordion.Panel>{placeholder6}</Accordion.Panel>
+        </Accordion.Item>
+
+        <Accordion.Item value='support'>
+          <Accordion.Control>
+          How do I get support?
+          </Accordion.Control>
+          <Accordion.Panel>{placeholder7}</Accordion.Panel>
+        </Accordion.Item>
+
+        <Accordion.Item value='tasks'>
+          <Accordion.Control>
+          How do I disable battery optimization to ensure background tasks work?
+          </Accordion.Control>
+          <Accordion.Panel>{placeholder8}</Accordion.Panel>
+        </Accordion.Item>
+
+        <Accordion.Item value='trials'>
+          <Accordion.Control>
+          Is there a free trial?
+          </Accordion.Control>
+          <Accordion.Panel>{placeholder9}</Accordion.Panel>
         </Accordion.Item>
       </Accordion>
     </Box>

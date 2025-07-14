@@ -22,12 +22,14 @@ import {
 } from "@tabler/icons-react";
 
 import classes from "./HeaderNav.module.scss";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { PATH_AUTH, PATH_PAGES } from "../../../routes";
 import { useScroll } from "../../../Context/scrollContext";
 
+
 const HeaderNav = () => {
   const { navigateToSection } = useScroll();
+  const navigate = useNavigate();
   const MOCK_DATA = [
     {
       link: PATH_PAGES.root,
@@ -41,11 +43,9 @@ const HeaderNav = () => {
       },
     },
     {
-      link: PATH_PAGES.about,
+      link: PATH_PAGES.contact,
       label: "Pricing",
-      onclick: () => {
-        navigateToSection("pricing", "/");
-      },
+      onClick: () => navigate("/contact-us"),
     },
     
 
