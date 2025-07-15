@@ -16,14 +16,10 @@ import { PATH_TASKS } from "../routes";
 import MainLayout from "../layout/Main";
 import StatsGrid from "../Components/StatsGrid/StatsGrid";
 import useFetchData from "../hooks/userFetchData";
-import RevenueChart from "../Components/RevenueChart/RevenueChart";
-import { useAuth } from "../Context/useAuth";
-import { useEffect, useState } from "react";
-import { fetchUserProfile } from "../Services/user-services";
-import DetailedStatsCard from "../Components/StatsGrid/detailsStatsGrid";
-import DetailedStatsGrid from "../Components/StatsGrid/detailsStatsGrid";
+
 import InvoiceDetailsTable from "../Components/InvoiceDetails/InvoiceDetailsTable";
-import { mockItems } from "../constant/mock-data";
+//import { mockItems,tableTitles,tableTitles2 } from "../constant/mock-data";
+import { dynamicTabsMock } from "../constant/mock-data";
 
 const PAPER_PROPS: PaperProps = {
   p: "md",
@@ -58,12 +54,17 @@ function DashBoard() {
               error={statsError}
               paperProps={PAPER_PROPS}
             />
-            <InvoiceDetailsTable
+            {/* <InvoiceDetailsTable
               data={{
                 products: mockItems,
                 orders: mockItems,
+               
               }}
-            />
+              titles={tableTitles}
+              titles2={tableTitles2}
+            /> */}
+            
+          <InvoiceDetailsTable tabsData={dynamicTabsMock} />
 
             {/* <DetailedStatsGrid/> */}
             {/* Render profile info if available */}
