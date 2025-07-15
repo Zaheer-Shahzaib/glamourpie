@@ -1,5 +1,6 @@
 .footer {
   color: var(--mantine-color-white);
-  padding: calc(var(--mantine-spacing-xl) * 2)
-    calc(var(--mantine-spacing-xl) * 4);
+  padding: calc(var(--mantine-spacing-xl) * 2) calc(var(--mantine-spacing-xl) * 4);
+  background-color: var(--mantine-color-blue-7);
+  font-family: 'Inter', sans-serif;
 }

@@ -79,7 +79,7 @@ export default function Home() {
   return (
     <>
       <>
-        <title>DesignSparx | Website UI Kit</title>
+        <title>Amazon Management</title>
         <meta
           name='description'
           content='Explore our versatile dashboard website template featuring a stunning array of themes and meticulously crafted components. Elevate your web project with seamless integration, customizable themes, and a rich variety of components for a dynamic user experience. Effortlessly bring your data to life with our intuitive dashboard template, designed to streamline development and captivate users. Discover endless possibilities in design and functionality today!'
@@ -207,12 +207,27 @@ export default function Home() {
           </SimpleGrid>
         </Container>
         <Container
-          id='pricing'
-          fluid
-          {...BOX_PROPS}
-        >
-          <Pricing />
-        </Container>
+  // id='pricing'
+  fluid
+  {...BOX_PROPS}
+  style={{ position: 'relative' }}
+>
+  <Pricing />
+  <button 
+    onClick={() => window.location.href = '/contact-us'} // or use `navigate`
+    style={{
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      width: '100%',
+      height: '100%',
+      opacity: 0, // Makes it invisible
+      cursor: 'pointer',
+      border: 'none',
+      background: 'transparent',
+    }}
+  />
+</Container>
         <Container
           id='services'
           fluid
