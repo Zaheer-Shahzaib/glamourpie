@@ -57,7 +57,7 @@ function LoginPage() {
           position: "top-right",
         });
       }
-      navigate(PATH_DASHBOARD.default);
+      navigate("/");
     } catch (error: any) {
       const message = error.response?.data?.message;
       notifications.show({
@@ -72,7 +72,7 @@ function LoginPage() {
   return (
     <>
       <>
-        <title>Sign in | DesignSparx</title>
+        <title>Sign in | Amazon Management</title>
         <meta
           name='description'
           content='Explore our versatile dashboard website template featuring a stunning array of themes and meticulously crafted components. Elevate your web project with seamless integration, customizable themes, and a rich variety of components for a dynamic user experience. Effortlessly bring your data to life with our intuitive dashboard template, designed to streamline development and captivate users. Discover endless possibilities in design and functionality today!'

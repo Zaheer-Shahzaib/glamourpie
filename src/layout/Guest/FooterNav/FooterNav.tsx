@@ -13,166 +13,74 @@ import {
   IconBrandInstagram,
   IconBrandLinkedin,
 } from "@tabler/icons-react";
+
 const FooterNav = () => {
   const theme = useMantineTheme();
+
   return (
     <footer
-      className={`text-white pt-10`}
+      className="text-white pt-10"
       style={{ backgroundColor: theme.colors.blue[4] }}
     >
       <Container>
-        <Grid gutter={'xl'}>
-          <Grid.Col span={{ base: 12, sm: 6, md: 3 }}>
-            <Text className='font-semibold text-lg mb-2'>About InvoiceApp</Text>
-            <Text className='text-sm leading-relaxed mb-2'>
-              Go Paperless! Get Paid Faster!! Simple And Easy-to-use Online
-              Invoicing Software for Small Business Owners & Freelancers.
+        <Grid gutter="xl">
+          <Grid.Col span={{ base: 12, sm: 6, md: 6 }}>
+            <Text className="font-semibold text-lg mb-2">About RunAnalytic Technology</Text>
+            <Text className="text-sm leading-relaxed mb-2">
+              RunAnalytic Technology is a trusted technology provider serving businesses across UAE & KSA. Our team is dedicated to providing data-driven insights and enterprise solutions.
             </Text>
-            <Anchor
-              href='#'
-              className='text-blue-400 text-sm'
-            >
-              Tweet
+            <Anchor href="#" className="text-blue-200 text-sm">
+              Learn more
             </Anchor>
           </Grid.Col>
 
-          <Grid.Col span={{ base: 6, sm: 3, md: 3 }}>
-            <Text className='font-semibold text-lg mb-2'>Links</Text>
-            <ul className='space-y-1 text-sm'>
-              <li>
-                <Anchor
-                  className='text-blue-500 text-sm'
-                  href='#'
-                >
-                  Pricing
-                </Anchor>
-              </li>
-              <li>
-                <Anchor
-                  className='text-blue-500 text-sm'
-                  href='#'
-                >
-                  Features
-                </Anchor>
-              </li>
-              <li>
-                <Anchor
-                  className='text-blue-500 text-sm'
-                  href='#'
-                >
-                  API Docs
-                </Anchor>
-              </li>
-              <li>
-                <Anchor
-                  className='text-blue-500 text-sm'
-                  href='#'
-                >
-                  Invoice Blog
-                </Anchor>
-              </li>
-            </ul>
-          </Grid.Col>
+          <Grid.Col span={{ base: 12, sm: 6, md: 6 }} className="pl-12">
+  <Text className="font-semibold text-lg mb-4 text-white">Contact</Text>
+  <ul className="space-y-3 text-sm text-gray-300">
+    <li>
+      <Text className="text-sm">
+        <span className="block font-medium text-gray-400">Address</span>
+        UAE, KSA
+      </Text>
+    </li>
+    <li>
+      <Text className="text-sm">
+        <span className="block font-medium text-gray-400">Phone</span>
+        +971 54 385 8251
+      </Text>
+    </li>
+    <li>
+      <Text className="text-sm">
+        <span className="block font-medium text-gray-400">Email</span>
+        support@runanalytic.com
+      </Text>
+    </li>
+    
+  </ul>
+</Grid.Col>
 
-          <Grid.Col span={{ base: 6, sm: 3, md: 3 }}>
-            <Text className='font-semibold text-lg mb-2'>Products</Text>
-            <ul className='space-y-1 text-sm'>
-              <li>
-                <Anchor
-                  className='text-blue-500 text-sm'
-                  href='#'
-                >
-                  Free Templates
-                </Anchor>
-              </li>
-              <li>
-                <Anchor
-                  className='text-blue-500 text-sm'
-                  href='#'
-                >
-                  Accountants
-                </Anchor>
-              </li>
-              {/* <li><Anchor href="#">Freelancers</Anchor></li>
-              <li><Anchor href="#">Integrations</Anchor></li> */}
-            </ul>
-          </Grid.Col>
-
-          <Grid.Col span={{ base: 12, sm: 6, md: 3 }}>
-            <Text className='font-semibold text-lg mb-2'>Support</Text>
-            <ul className='space-y-1 text-sm'>
-              <li>
-                <Anchor
-                  className='text-blue-500 text-sm'
-                  href='#'
-                >
-                  Help center
-                </Anchor>
-              </li>
-              <li>
-                <Anchor
-                  className='text-blue-500 text-sm'
-                  href='#'
-                >
-                  Terms
-                </Anchor>
-              </li>
-              <li>
-                <Anchor
-                  className='text-blue-500 text-sm'
-                  href='#'
-                >
-                  FAQs
-                </Anchor>
-              </li>
-              <li>
-                <Anchor
-                  className='text-blue-500 text-sm'
-                  href='#'
-                >
-                  Demo
-                </Anchor>
-              </li>
-            </ul>
-          </Grid.Col>
         </Grid>
 
-        <Divider
-          my='md'
-          className='border-gray-700'
-        />
+        <Divider my="md" className="border-gray-700" />
 
-        <div className='flex flex-col sm:flex-row justify-between items-center py-4 text-sm text-gray-300'>
+        <div className="flex flex-col sm:flex-row justify-between items-center py-4 text-sm text-gray-300">
           <Text>
-            &copy; 2025 <span className='font-semibold'>InvoiceApp Inc.</span> - All
-            Rights Reserved&reg;.
+            &copy; 2025 <span className="font-semibold">RunAnalytic Technology</span> - All Rights Reserved&reg;.
           </Text>
-          <Group className='mt-2 sm:mt-0'>
-            <Anchor
-              href='#'
-              className='text-gray-300 hover:text-white'
-            >
+          {/* <Group className="mt-2 sm:mt-0">
+            <Anchor href="#" className="text-gray-300 hover:text-white">
               <IconBrandInstagram size={18} />
             </Anchor>
-            <Anchor
-              href='#'
-              className='text-gray-300 hover:text-white'
-            >
+            <Anchor href="#" className="text-gray-300 hover:text-white">
               <IconBrandFacebook size={18} />
             </Anchor>
-            <Anchor
-              href='#'
-              className='text-gray-300 hover:text-white'
-            >
+            <Anchor href="#" className="text-gray-300 hover:text-white">
               <IconBrandTwitter size={18} />
             </Anchor>
-            <Anchor
-              href='#'
-              className='text-gray-300 hover:text-white'
-            >
+            <Anchor href="#" className="text-gray-300 hover:text-white">
               <IconBrandLinkedin size={18} />
             </Anchor>
-          </Group>
+          </Group> */}
         </div>
       </Container>
     </footer>

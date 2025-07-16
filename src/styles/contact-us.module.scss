@@ -1,60 +1,66 @@
 .wrapper {
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    overflow-x: auto;
-    background-color: light-dark(var(--mantine-color-blue-3), var(--mantine-color-dark-8));
-    padding: calc(var(--mantine-spacing-xl) * 2.5);
-  
-    @media (max-width: 768px) {
-      padding: calc(var(--mantine-spacing-xl) * 1.5);
-    }
-  
-    .title {
-      font-family: Greycliff CF, var(--mantine-font-family);
-      color: var(--mantine-color-white);
-      line-height: 1;
-    }
-  
-    .description {
-      color: var(--mantine-color-blue-0);
-      max-width: 300px;
-  
-      @media (max-width: 768px) {
-        max-width: 100%;
-      }
-    }
-  
-    .form {
-      background-color: var(--mantine-color-white);
-      padding: var(--mantine-spacing-xl);
-      border-radius: var(--mantine-radius-md);
-      box-shadow: var(--mantine-shadow-lg);
-  
-      .input {
-        background-color: var(--mantine-color-white);
-        border-color: var(--mantine-color-gray-4);
-        color: var(--mantine-color-black);
-  
-        &::placeholder {
-          color: var(--mantine-color-gray-5);
-        }
-      }
-  
-      .inputLabel {
-        color: var(--mantine-color-black);
-      }
-  
-      .control {
-        background-color: var(--mantine-color-blue-6);
-      }
-    }
-  
-    .social {
-      color: var(--mantine-color-white);
-  
-      &:hover {
-        color: var(--mantine-color-blue-1);
-      }
-    }
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  padding: 6rem 1rem;
+  background-color: light-dark(#f8f9fa, var(--mantine-color-dark-8));
+}
+
+.title {
+  font-size: 2.15rem;
+  font-weight: 700;
+  color: light-dark(#1a1b1e, var(--mantine-color-white));
+  font-family: 'Greycliff CF', var(--mantine-font-family);
+  line-height: 1.2;
+}
+
+.subtitle {
+  font-size: 1.125rem;
+  line-height: 1.7;
+  color: light-dark(#232427, var(--mantine-color-gray-4));
+  max-width: 460px;
+}
+
+.infoSection {
+  padding-right: 3rem;
+
+  @media (max-width: 768px) {
+    padding-right: 0;
+    margin-bottom: 2.5rem;
   }
+}
+
+.formCard {
+  background-color: light-dark(#ffffff, var(--mantine-color-dark-6));
+  border: 1px solid light-dark(#e9ecef, var(--mantine-color-dark-5));
+}
+
+.input {
+  background-color: light-dark(#f8f9fa, var(--mantine-color-dark-5));
+  border: 1px solid light-dark(#ced4da, var(--mantine-color-dark-4));
+  color: light-dark(#212529, var(--mantine-color-white));
+  padding: 0.9rem 1rem;
+  font-size: 1rem;
+
+  &::placeholder {
+    color: light-dark(#adb5bd, var(--mantine-color-gray-4));
+  }
+}
+
+.label {
+  color: light-dark(#212529, var(--mantine-color-gray-2));
+  font-weight: 600;
+  font-size: 0.95rem;
+  margin-bottom: 0.25rem;
+}
+
+.submitButton {
+  background-color: var(--mantine-color-blue-6);
+  height: 50px;
+  font-size: 1rem;
+  font-weight: 600;
+
+  &:hover {
+    background-color: var(--mantine-color-blue-7);
+  }
+}
