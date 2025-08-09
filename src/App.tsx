@@ -13,7 +13,7 @@ import LoginPage from "./Components/authentication/login/page";
 import { PATH_AUTH, PATH_DASHBOARD, PATH_PAGES } from "./routes/index"; // Import external routes
 import ResetPassword from "./Components/authentication/password-reset/page";
 import PrivacyPolicy from "./Components/PrivacyPolicy/PrivacyPolicy"; // ✅ Import the new page
-
+import About from "./Components/About/about";
 import ErrorPage from "./pages/notFound";
 import { ContactUs } from "./pages/contact-us";
 import ProtectedRoute from "./hooks/protectedRoute";
@@ -64,7 +64,8 @@ const location = useLocation();
         element={<ContactUs />}
       />
       <Route path={PATH_PAGES.privacy} element={<PrivacyPolicy />} />
-
+      <Route path={PATH_PAGES.privacy} element={<PrivacyPolicy />} />
+      <Route path={PATH_PAGES.about} element={<About />} />
       <Route path={PATH_AUTH.root}>
         <Route
           path={PATH_AUTH.signin}
