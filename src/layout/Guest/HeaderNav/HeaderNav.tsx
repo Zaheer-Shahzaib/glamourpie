@@ -93,24 +93,24 @@ const HeaderNav = () => {
   return (
     <Box>
       <header className={classes.header}>
-        <Container classNames={{ root: classes.inner }} fluid>
-          <Group gap="md" align="center" wrap="nowrap">
-            {/* Compact Logo with Left Margin */}
-            <Link to="/" className={classes.logoLink} style={{ marginLeft: '20px' }}>
-              <Image
-                src={logo}
-                height={30}
-                width={90}
-                fit="contain"
-                alt="Company Logo"
-                className={classes.logo}
+        <Container
+          classNames={{ root: classes.inner }}
+          fluid
+        >
+          <Group
+            gap='xs'
+            display={{ base: "none", sm: "flex" }}
+            className={classes.links}
+          >
+            <Link to={PATH_PAGES.root}>
+              <img
+                className="logo"
+                src={`${process.env.PUBLIC_URL}/bgremove-background.png`}
+                alt="logo"
+                style={{ height: 100 }}
               />
             </Link>
-
-            {/* Navigation Links */}
-            <Group gap="xs" display={{ base: "none", sm: "flex" }} className={classes.links}>
-              {items}
-            </Group>
+            {items}
           </Group>
 
           {/* Right-aligned buttons */}
