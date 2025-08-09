@@ -16,7 +16,7 @@
     display: flex;
     align-items: center;
     text-decoration: none;
-    
+
     .logo {
       object-fit: contain;
       object-position: left center;
@@ -42,7 +42,7 @@
     font-weight: 500;
     height: 38px;
     text-transform: capitalize;
-  
+
     @media (max-width: 640px) {
       color: var(--mantine-color-black);
     }
@@ -70,4 +70,11 @@
   @media (min-width: 640px) {
     display: none;
   }
+}
+
+.lgoo {
+  display: flex;
+  justify-content: right;
+  height: 70px;
+  width: 200px;
 }
