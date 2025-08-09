@@ -272,6 +272,8 @@ export default function Home() {
     Privacy Policy
   </Button>
 
+  
+
           </Paper>
         </Box>
       </GuestLayout>

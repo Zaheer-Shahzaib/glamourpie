@@ -1,19 +1,28 @@
-
 .header {
   height: 60px;
 
   .inner {
     background-color: var(--mantine-color-black);
-    padding: 0 calc(var(--mantine-spacing-xl) * 2);
+    padding: 0 var(--mantine-spacing-xl);
     color: var(--mantine-color-white);
     height: 60px;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: var(--mantine-spacing-md);
   }
-  
-}
 
+  .logoLink {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    
+    .logo {
+      object-fit: contain;
+      object-position: left center;
+    }
+  }
+}
 
 .links {
   text-transform: capitalize;
@@ -21,6 +30,7 @@
   @media (max-width: 640px) {
     display: none;
   }
+
   .link {
     display: flex;
     align-items: center;
@@ -36,15 +46,16 @@
     @media (max-width: 640px) {
       color: var(--mantine-color-black);
     }
-  }
-}
- .link:hover {
+
+    &:hover {
       transition: all ease 150ms;
       background-color: var(--mantine-color-dark-5) !important;
     }
+  }
+}
 
 .burger {
-  @media (min-width: 1024px  ) {
+  @media (min-width: 1024px) {
     display: none;
   }
 }
