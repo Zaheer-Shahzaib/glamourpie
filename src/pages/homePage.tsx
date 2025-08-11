@@ -115,7 +115,7 @@ export default function Home() {
                   >
                     &nbsp; Amazon &nbsp;
                   </Text>
-                  Invoices – Fast, Easy & Accurate
+                  Invoices with RunAnalytic Fast, Easy & Accurate
                 </Title>
                 <Text>
                   Say goodbye to manual billing! Generate & upload invoices
