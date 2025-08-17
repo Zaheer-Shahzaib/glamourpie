@@ -103,9 +103,9 @@ const HeaderNav = () => {
             className={classes.links}
           >
             <Link to={PATH_PAGES.root}>
-              <img
+              <Image
                 className="logo"
-                src={`${process.env.PUBLIC_URL}/bgremove-background.png`}
+                src={`${process.env.PUBLIC_URL}/run-analytics.png`}
                 alt="logo"
                 style={{ height: 100 }}
               />
@@ -125,13 +125,13 @@ const HeaderNav = () => {
             >
               Sign In
             </Button>
-            <Button
+            {/* <Button
               component={Link}
               to={PATH_AUTH.signup}
               leftSection={<IconUserCircle size={20} />}
             >
               Sign Up
-            </Button>
+            </Button> */}
             <Menu shadow="lg" width={200}>
               <Menu.Target>
                 <Tooltip label="Switch color modes">

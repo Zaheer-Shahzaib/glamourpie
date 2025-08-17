@@ -105,7 +105,7 @@ export default function Home() {
               order={{ base: 2, md: 1 }}
             >
               <Stack>
-                <Text>Build like a Pro</Text>
+                {/* <Text>Build like a Pro</Text> */}
                 <Title className={classes.title}>
                   Automate Your
                   <Text
@@ -122,9 +122,11 @@ export default function Home() {
                   directly to Amazon in just a few clicks.
                 </Text>
                 <Group my='lg'>
-                  <Link to={PATH_AUTH.signin}>
+                  <Link to={PATH_AUTH.signin}  className={classes.btn}>
                     <Button
                       size='md'
+                      radius={"md"}
+                      className={classes.btn}
                       leftSection={<IconPlayerPlay size={18} />}
                     >
                       Start for Free

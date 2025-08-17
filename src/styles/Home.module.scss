@@ -43,7 +43,15 @@
     }
   }
   .highlight {
-    color: var(--mantine-primary-color-filled);
+    color: var(--mantine-color-yellow-9);
+  }
+
+  .btn{
+    background-color: var(--mantine-color-yellow-9);
+    border-radius: 30px;
+    :hover {
+      background-color: var(--mantine-color-yellow-9);
+    }
   }
 }
 
