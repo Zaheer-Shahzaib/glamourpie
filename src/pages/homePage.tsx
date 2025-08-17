@@ -79,7 +79,7 @@ export default function Home() {
   return (
     <>
       <>
-        <title>Amazon Management</title>
+        <title>Runanalytic Invoice</title>
         <meta
           name='description'
           content='Explore our versatile dashboard website template featuring a stunning array of themes and meticulously crafted components. Elevate your web project with seamless integration, customizable themes, and a rich variety of components for a dynamic user experience. Effortlessly bring your data to life with our intuitive dashboard template, designed to streamline development and captivate users. Discover endless possibilities in design and functionality today!'
@@ -90,7 +90,7 @@ export default function Home() {
         />
         <link
           rel='icon'
-          href='/favicon.ico'
+          href='/logo (2).jpg'
         />
       </>
       <GuestLayout>
@@ -139,11 +139,11 @@ export default function Home() {
               style={{ justifyItems: "center" }}
             >
               <Image
-                src='/assets/upload-invoice.jpeg'
+                src='/assets/img4.jpg'
                 alt='image'
                 radius='md'
-                h={tablet_match ? rem(300) : rem(500)}
-                w={tablet_match ? rem(300) : rem(500)}
+                h={tablet_match ? rem(200) : rem(400)}
+                w={tablet_match ? rem(300) : rem(600)}
               />
             </Grid.Col>
           </Grid>
