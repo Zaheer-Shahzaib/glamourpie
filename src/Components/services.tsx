@@ -55,7 +55,7 @@ export const serviceCards = [
     badge: "Available",
     description:
       "Eliminate manual work with instant invoice capture, auto-categorization, and seamless accounting integration. Saves hours weekly while reducing errors.",
-    image: "/assets/upload-invoice.jpeg",
+    image: "/assets/image2.png",
   },
   // {
   //   title: "Automatic Review Request",

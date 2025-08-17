@@ -64,8 +64,8 @@ const HeaderNav = () => {
       label: "Privacy Policy",
     },
     {
-      link: PATH_PAGES.about, // Make sure to import this path or use the correct path
-      label: "About Us", // Change this to whatever label you want
+      link: PATH_PAGES.about, 
+      label: "About Us", 
     }
   ];
 
