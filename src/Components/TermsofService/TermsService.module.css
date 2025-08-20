@@ -1,0 +1,38 @@
+.wrapper {
+    padding-top: calc(var(--mantine-spacing-xl) * 2);
+    padding-bottom: calc(var(--mantine-spacing-xl) * 2);
+  }
+  
+  .header {
+    text-align: center;
+    margin-bottom: var(--mantine-spacing-xl);
+  }
+  
+  .title {
+    font-family: Greycliff CF, var(--mantine-font-family);
+    font-weight: 900;
+    line-height: 1.1;
+    font-size: rem(38px);
+    margin-bottom: var(--mantine-spacing-md);
+  }
+  
+  .section {
+    margin-bottom: var(--mantine-spacing-md);
+  }
+  
+  .sectionTitle {
+    font-family: Greycliff CF, var(--mantine-font-family);
+    font-weight: 800;
+    margin-bottom: var(--mantine-spacing-sm);
+    color: var(--mantine-color-blue-6);
+  }
+  
+  @media (max-width: 768px) {
+    .title {
+      font-size: rem(28px);
+    }
+    
+    .sectionTitle {
+      font-size: rem(18px);
+    }
+  }

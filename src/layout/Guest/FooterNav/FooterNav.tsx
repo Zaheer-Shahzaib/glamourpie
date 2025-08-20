@@ -7,6 +7,7 @@ import {
   Group,
   useMantineTheme,
   Button,
+  Flex,
 } from "@mantine/core";
 import {
   IconBrandTwitter,
@@ -21,66 +22,96 @@ import { PATH_PAGES } from "../../../routes/index";
 const FooterNav = () => {
   const theme = useMantineTheme();
 
+  const handleClick = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   return (
     <footer
       className="text-white pt-10"
       style={{ backgroundColor: theme.colors.blue[4] }}
     >
-      <Container>
-        <Grid gutter="xl">
-          {/* About Section */}
-          <Grid.Col span={{ base: 12, sm: 6, md: 6 }}>
-            <Text className="font-semibold text-lg mb-2">
-              RunAnalytic Technology
-            </Text>
-            <Text className="text-sm leading-relaxed mb-2">
-              RunAnalytic Technology is a trusted technology provider serving
-              businesses across UAE & KSA. Our team is dedicated to providing
-              data-driven insights and enterprise solutions.
-            </Text>
+      <Container >
+        <Container >
+          <Grid gutter="xl">
+            {/* About Section */}
+            <Grid.Col span={{ base: 12, sm: 4, md: 4 }} >
+              <Text className="font-semibold text-lg mb-2">
+                RunAnalytic Technology
+              </Text>
+              <Text className="text-sm leading-relaxed mb-2">
+                RunAnalytic Technology is a trusted technology provider serving
+                businesses across UAE & KSA. Our team is dedicated to providing
+                data-driven insights and enterprise solutions.
+              </Text>
 
-            {/* Learn More Button */}
-            {/* About Us Button */}
-            <Button
-              variant="subtle"
-              component={Link}
-              to={PATH_PAGES.about}
-              rightSection={<IconArrowRight size={16} />}
-              className="mt-4 bg-blue-900 hover:bg-blue-700 text-white hover:text-white px-4 py-2 rounded-lg text-sm font-medium shadow-md transition"
-            >
-              About Us
-            </Button>
-          </Grid.Col>
+              <Button
+                variant="subtle"
+                component={Link}
+                to={PATH_PAGES.about}
+                rightSection={<IconArrowRight size={16} />}
+                className="mt-4 bg-blue-900 hover:bg-blue-700 text-white hover:text-white px-4 py-2 rounded-lg text-sm font-medium shadow-md transition"
+              >
+                About Us
+              </Button>
+            </Grid.Col>
 
-          {/* Contact Section */}
-          <Grid.Col span={{ base: 12, sm: 6, md: 6 }} className="pl-12">
-            <Text className="font-semibold text-lg mb-4 text-white">
-              Contact
-            </Text>
-            <ul className="space-y-3 text-sm text-gray-300">
-              <li>
-                <Text className="text-sm">
-                  <span className="block font-medium text-gray-400">Address</span>
-                  UAE, KSA
-                </Text>
-              </li>
-              <li>
-                <Text className="text-sm">
-                  <span className="block font-medium text-gray-400">Phone</span>
-                  +971 54 385 8251
-                </Text>
-              </li>
-              <li>
-                <Text className="text-sm">
-                  <span className="block font-medium text-gray-400">Email</span>
-                  support@runanalytic.com
-                </Text>
-              </li>
-            </ul>
+            {/* Contact Section */}
+            <Grid.Col span={{ base: 12, sm: 4, md: 4 }}   >
+              <Text className="font-semibold text-lg mb-4 text-white">
+                Contact
+              </Text>
+              <ul className="space-y-3 text-sm text-gray-300">
+                <li>
+                  <Text className="text-sm">
+                    <span className="block font-medium text-gray-400">Address</span>
+                    UAE, KSA
+                  </Text>
+                </li>
+                <li>
+                  <Text className="text-sm">
+                    <span className="block font-medium text-gray-400">Phone</span>
+                    +971 54 385 8251
+                  </Text>
+                </li>
+                <li>
+                  <Text className="text-sm">
+                    <span className="block font-medium text-gray-400">Email</span>
+                    support@runanalytic.com
+                  </Text>
+                </li>
+              </ul>
+            </Grid.Col>
 
-            
-          </Grid.Col>
-        </Grid>
+            {/* More Section */}
+            <Grid.Col span={{ base: 12, sm: 4, md: 4 }}>
+              <Text className="font-semibold text-lg mb-4 text-white">
+                More
+              </Text>
+              <ul className="space-y-3 text-sm text-gray-300">
+                <li>
+                  
+                <Link to={PATH_PAGES.privacy} onClick={handleClick}>
+                    <Text className="text-sm hover:underline hover:font-semibold">Privacy Policy</Text>
+                  </Link>
+
+                </li>
+                <li>
+                  <Link to={PATH_PAGES.terms} onClick={handleClick}>
+                    <Text className="text-sm hover:underline hover:font-semibold">Term Of Service</Text>
+                  </Link>
+                </li>
+                <li>
+                  <Link to={PATH_PAGES.about} onClick={handleClick}>
+                    <Text className="text-sm hover:underline hover:font-semibold">About Us</Text>
+                  </Link>
+                </li>
+              </ul>
+            </Grid.Col>
+          </Grid>
+        </Container>
+
+
 
         <Divider my="md" className="border-gray-700" />
 

@@ -64,8 +64,12 @@ const HeaderNav = () => {
       label: "Privacy Policy",
     },
     {
-      link: PATH_PAGES.about, 
-      label: "About Us", 
+      link: PATH_PAGES.terms,
+      label: "Terms of Service",
+    },
+    {
+      link: PATH_PAGES.about,
+      label: "About Us",
     }
   ];
 
