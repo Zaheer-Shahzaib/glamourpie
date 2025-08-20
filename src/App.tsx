@@ -12,8 +12,8 @@ import SignupPage from "./Components/authentication/signup/page";
 import LoginPage from "./Components/authentication/login/page";
 import { PATH_AUTH, PATH_DASHBOARD, PATH_PAGES } from "./routes/index"; // Import external routes
 import ResetPassword from "./Components/authentication/password-reset/page";
-import PrivacyPolicy from "./Components/PrivacyPolicy/PrivacyPolicy"; // ✅ Import the new page
-import TermsService from "./Components/TermsofService/TermsService";  // import termserivce page
+import PrivacyPolicy from "./pages/PrivacyPolicy/PrivacyPolicy"; // ✅ Import the new page
+import TermsService from "./pages/TermsofService/TermsService";  // import termserivce page
 import About from "./Components/About/about";
 import ErrorPage from "./pages/notFound";
 import { ContactUs } from "./pages/contact-us";

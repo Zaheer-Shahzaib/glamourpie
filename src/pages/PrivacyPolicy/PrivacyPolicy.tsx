@@ -31,7 +31,7 @@ export default function PrivacyPolicy() {
             </Title>
           </Group>
           <Text w="100%" ta="left" size="xl" fw={700}>Effective Date: 01-Aug-2025</Text>
-          <Text size="xl" color="dimmed" align-item="center" maw={1200} mt={16}>
+          <Text size="xl" align-item="center" maw={1200} mt={16}>
             <strong>RunAnalytic Technology</strong> (“we,” “our,” “us”) respects your privacy and is committed to protecting the information you share with us. This Privacy Policy describes how we collect, use, store, and protect data, including Personally Identifiable Information (PII), obtained from Amazon’s Selling Partner API (SP-API) and other sources.
           </Text>
 
@@ -50,12 +50,12 @@ export default function PrivacyPolicy() {
                 Information We Collect
               </Title>
             </Group>
-            <Text size="md" color="dimmed">
+            <Text size="md" fw={500}>
               When authorized by you, we collect data from Amazon SP-API, including:
             </Text>
             {/* <Space h={8} /> */}
             {/* <Title order={3} size="md" fw={600}>Amazon Information (via Amazon Selling Partner API)</Title> */}
-            <List size="md" spacing={12} withPadding listStyleType="disc">
+            <List size="md" spacing={12} withPadding listStyleType="disc" fw={500}>
               {/* <List.Item>Order IDs</List.Item> */}
               <List.Item>Customer Names</List.Item>
               <List.Item>Shipping/Billing Addresses</List.Item>
@@ -67,20 +67,20 @@ export default function PrivacyPolicy() {
 
 
             <Title order={3} size="md" fw={600}>Account Information</Title>
-            <List size="md" spacing={12} withPadding listStyleType="disc">
+            <List size="md" spacing={12} withPadding listStyleType="disc" fw={500}>
               <List.Item>Seller Account IDs</List.Item>
               <List.Item>Company Name as per Seller account</List.Item>
               <List.Item>Contact Information</List.Item>
             </List>
 
             <Title order={3} size="md" fw={600}>Technical Information</Title>
-            <List size="md" spacing={12} withPadding listStyleType="disc">
+            <List size="md" spacing={12} withPadding listStyleType="disc" fw={500}>
               {/* <List.Item>IP address</List.Item> */}
               <List.Item>Device information</List.Item>
               <List.Item>Browser information</List.Item>
               <List.Item>Log data</List.Item>
             </List>
-            <Text pt="sm">We do not collect any information beyond what is necessary to perform the agreed services.</Text>
+            <Text pt="sm" fw={500}>We do not collect any information beyond what is necessary to perform the agreed services.</Text>
           </Stack>
 
           {/* purpose of data collection */}
@@ -92,11 +92,11 @@ export default function PrivacyPolicy() {
               </Title>
             </Group>
 
-            <Text size="md">
+            <Text size="md" fw={500}>
               We collect and process this data to:
             </Text>
 
-            <List size="md" spacing={12} withPadding listStyleType="disc">
+            <List size="md" spacing={12} withPadding listStyleType="disc" fw={500}>
               <List.Item>Generate UAE VAT-compliant tax invoices for VAT register sellers and commercial invoice for non VAT register sellers,  for Amazon orders.</List.Item>
               <List.Item>Deliver invoices to Amazon systems as required by UAE Federal Tax Authority regulations.</List.Item>
               <List.Item>Maintain accurate VAT records for compliance purposes.</List.Item>
@@ -112,11 +112,11 @@ export default function PrivacyPolicy() {
               </Title>
             </Group>
 
-            <Text size="md">
+            <Text size="md" fw={500}>
               Our processing is based on:
             </Text>
 
-            <List size="md" spacing={12} withPadding listStyleType="disc">
+            <List size="md" spacing={12} withPadding listStyleType="disc" fw={500}  >
               <List.Item>Your explicit consent when authorizing our application via Amazon SP-API.</List.Item>
               <List.Item><strong>Legal obligations</strong> under UAE VAT laws and <Anchor href="https://www.tax.gov.ae/" target="_blank" fw={600} >Federal Tax Authority (FTA)</Anchor> requirements.</List.Item>
             </List>
@@ -131,7 +131,7 @@ export default function PrivacyPolicy() {
               </Title>
             </Group>
 
-            <Text size="md">
+            <Text size="md" fw={500}>
               We retain PII for no longer than 30 days after the order shipment date, unless a longer period is required by applicable law. After the retention period, data is securely deleted using industry-standard deletion methods.
             </Text>
 
@@ -187,7 +187,7 @@ export default function PrivacyPolicy() {
 
 
 
-            <Text size="md">
+            <Text size="md" fw={500}>
               We apply industry best practices to protect your data, including:
             </Text>
 

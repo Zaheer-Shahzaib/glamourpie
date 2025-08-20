@@ -32,11 +32,11 @@ export default function TermsService() {
                         </Title>
                     </Group>
                     <Text w="100%" ta="left" size="xl" fw={700}>Effective Date: 01-Aug-2025</Text>
-                    <Text size="xl" color="dimmed" align-item="center" maw={1200} mt={16}>
+                    <Text size="xl" align-item="center" maw={1200} mt={16}>
                         Welcome to <strong>RunAnalytic Technology</strong> (“we,” “our,” “us”). By accessing  our services, including our Amazon SP-API integrated invoicing application (“Service”), you agree to be bound by these Terms of Service.
                     </Text>
 
-                    <Text w="100%" ta="left" size="l" align-item="center" mt={10}>If you do not agree to these Terms, please do not use our Service.</Text>
+                    <Text w="100%" ta="left" size="l" align-item="center" fw={500} mt={10}>If you do not agree to these Terms, please do not use our Service.</Text>
 
                 </Stack>
 
@@ -123,11 +123,11 @@ export default function TermsService() {
                     <Stack gap={24}>
                         <Group gap={16}>
                             <Title order={2} c={headingColor} style={{ color: 'black', fontWeight: 600 }}>
-                            Intellectual Property
+                                Intellectual Property
                             </Title>
                         </Group>
                         <Text size="md">
-                        All content, code, design, and branding on our website and within our Service are the property of <strong>RunAnalytic Technology</strong>. You may not copy, modify, or redistribute our intellectual property without prior written consent.
+                            All content, code, design, and branding on our website and within our Service are the property of <strong>RunAnalytic Technology</strong>. You may not copy, modify, or redistribute our intellectual property without prior written consent.
                         </Text>
                     </Stack>
 
@@ -136,11 +136,11 @@ export default function TermsService() {
                         <Group gap={16} align="center">
 
                             <Title order={2} c={headingColor} style={{ color: 'black', fontWeight: 600 }}>
-                            Service Availability
+                                Service Availability
                             </Title>
                         </Group>
                         <Text size="md">
-                        We strive to provide reliable, uninterrupted access, but we do not guarantee:
+                            We strive to provide reliable, uninterrupted access, but we do not guarantee:
                         </Text>
                         <List size="md" spacing={12} withPadding listStyleType="disc">
                             <List.Item>Continuous availability of the Service.</List.Item>
@@ -155,12 +155,12 @@ export default function TermsService() {
                     <Stack gap={24}>
                         <Group gap={16} align="center">
                             <Title order={2} c={headingColor} style={{ color: 'black', fontWeight: 600 }}>
-                            Limitation of Liability
+                                Limitation of Liability
                             </Title>
                         </Group>
 
                         <Text size="md">
-                        To the maximum extent permitted by law, <strong>RunAnalytic Technology</strong> is not liable for:
+                            To the maximum extent permitted by law, <strong>RunAnalytic Technology</strong> is not liable for:
                         </Text>
                         <List size="md" spacing={12} withPadding listStyleType="disc">
                             <List.Item>Any indirect, incidental, or consequential damages.</List.Item>
@@ -174,11 +174,11 @@ export default function TermsService() {
                         <Group gap={16}>
 
                             <Title order={2} c={headingColor} style={{ color: 'black', fontWeight: 600 }}>
-                            Termination
+                                Termination
                             </Title>
                         </Group>
                         <Text size="md">
-                        We may suspend or terminate your access to the Service if you:
+                            We may suspend or terminate your access to the Service if you:
                         </Text>
                         <List size="md" spacing={12} withPadding listStyleType="disc">
                             <List.Item>Breach these Terms.</List.Item>
@@ -186,18 +186,18 @@ export default function TermsService() {
                             <List.Item>Engage in fraudulent, abusive, or unlawful activity.</List.Item>
                         </List>
                         <Text>You may stop using the Service at any time by revoking SP-API authorization in Amazon Seller Central.</Text>
-                       
+
                     </Stack>
 
                     {/* Governing Law*/}
                     <Stack gap={24}>
                         <Group gap={16}>
                             <Title order={2} c={headingColor} style={{ color: 'black', fontWeight: 600 }}>
-                            Governing Law
+                                Governing Law
                             </Title>
                         </Group>
                         <Text size="md">
-                        These Terms are governed by the laws of the United Arab Emirates. Any disputes will be resolved in the courts of the UAE.
+                            These Terms are governed by the laws of the United Arab Emirates. Any disputes will be resolved in the courts of the UAE.
                         </Text>
                     </Stack>
 
