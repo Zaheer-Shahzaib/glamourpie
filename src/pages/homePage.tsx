@@ -79,7 +79,7 @@ export default function Home() {
   return (
     <>
       <>
-        <title>Amazon Management</title>
+        <title>Runanalytic Invoice</title>
         <meta
           name='description'
           content='Explore our versatile dashboard website template featuring a stunning array of themes and meticulously crafted components. Elevate your web project with seamless integration, customizable themes, and a rich variety of components for a dynamic user experience. Effortlessly bring your data to life with our intuitive dashboard template, designed to streamline development and captivate users. Discover endless possibilities in design and functionality today!'
@@ -90,7 +90,7 @@ export default function Home() {
         />
         <link
           rel='icon'
-          href='/favicon.ico'
+          href='/logo (2).jpg'
         />
       </>
       <GuestLayout>
@@ -105,7 +105,7 @@ export default function Home() {
               order={{ base: 2, md: 1 }}
             >
               <Stack>
-                <Text>Build like a Pro</Text>
+                {/* <Text>Build like a Pro</Text> */}
                 <Title className={classes.title}>
                   Automate Your
                   <Text
@@ -115,16 +115,18 @@ export default function Home() {
                   >
                     &nbsp; Amazon &nbsp;
                   </Text>
-                  Invoices – Fast, Easy & Accurate
+                  Invoices with RunAnalytic Fast, Easy & Accurate
                 </Title>
                 <Text>
                   Say goodbye to manual billing! Generate & upload invoices
                   directly to Amazon in just a few clicks.
                 </Text>
                 <Group my='lg'>
-                  <Link to={PATH_AUTH.signin}>
+                  <Link to={PATH_AUTH.signin}  className={classes.btn}>
                     <Button
                       size='md'
+                      radius={"md"}
+                      className={classes.btn}
                       leftSection={<IconPlayerPlay size={18} />}
                     >
                       Start for Free
@@ -139,11 +141,11 @@ export default function Home() {
               style={{ justifyItems: "center" }}
             >
               <Image
-                src='/assets/upload-invoice.jpeg'
+                src='/assets/img4.jpg'
                 alt='image'
                 radius='md'
-                h={tablet_match ? rem(300) : rem(500)}
-                w={tablet_match ? rem(300) : rem(500)}
+                h={tablet_match ? rem(200) : rem(400)}
+                w={tablet_match ? rem(300) : rem(600)}
               />
             </Grid.Col>
           </Grid>

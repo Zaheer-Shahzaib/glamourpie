@@ -91,7 +91,7 @@ const FooterNav = () => {
             <span className="font-semibold">RunAnalytic Technology</span> - All
             Rights Reserved&reg;.
           </Text>
-          <Group className="mt-2 sm:mt-0">
+          {/* <Group className="mt-2 sm:mt-0">
             <Anchor href="#" className="text-gray-300 hover:text-white">
               <IconBrandInstagram size={18} />
             </Anchor>
@@ -104,7 +104,7 @@ const FooterNav = () => {
             <Anchor href="#" className="text-gray-300 hover:text-white">
               <IconBrandLinkedin size={18} />
             </Anchor>
-          </Group>
+          </Group> */}
         </div>
       </Container>
     </footer>
