@@ -26,7 +26,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { PATH_AUTH, PATH_PAGES } from "../../../routes";
 import { useScroll } from "../../../Context/scrollContext";
 
-const logo = '/assets/logo (2).jpg';
+const logo = '/run-analytics.png';
 
 const HeaderNav = () => {
   const { navigateToSection } = useScroll();
@@ -38,7 +38,7 @@ const HeaderNav = () => {
     { link: PATH_PAGES.contact, label: "Pricing", onClick: () => navigate("/contact-us") },
     { link: PATH_PAGES.privacy, label: "Privacy Policy" },
     { link: PATH_PAGES.terms, label: "Terms of Service" },
-    
+
     { link: PATH_PAGES.contact, label: "Contact Us" },
   ];
 
@@ -77,8 +77,17 @@ const HeaderNav = () => {
             </Link>
             {items}
           </Group>
-
+          <Burger
+            opened={drawerOpened}
+            onClick={toggleDrawer}
+            color="white"
+            size="sm"
+            className={classes.hiddenDesktop}
+          />
           <Group gap="sm" style={{ marginLeft: 'auto' }}>
+
+
+
             <Button
               component={Link}
               to={PATH_AUTH.signin}
@@ -104,15 +113,24 @@ const HeaderNav = () => {
               src={logo}
               height={15}
               width={60}
-              fit="contain"
+              // fit="contain"
               alt="Company Logo"
-              className={classes.logo}
+              // className={classes.logo}
+              style={{
+                width: 100,
+                height: 24
+              }}
             />
           </Link>
         }
         className={classes.hiddenDesktop}
-        zIndex={1000000}
+        zIndex={1000}
         transitionProps={{ transition: tablet_match ? "slide-up" : "slide-left" }}
+        classNames={{
+          content: classes.drawerContent,
+          header: classes.drawerHeader,
+          body: classes.drawerBody,
+        }}
       >
         <ScrollArea h={`calc(100vh - ${rem(60)})`} mx="-md" scrollbarSize={0}>
           <Group display={{ base: "flex" }} className={classes.links} style={{ flexDirection: "column" }} align="start">
