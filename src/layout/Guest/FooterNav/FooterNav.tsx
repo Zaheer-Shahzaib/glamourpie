@@ -35,7 +35,7 @@ const FooterNav = () => {
             </Text>
             <Text className="text-sm leading-relaxed mb-2">
               RunAnalytic Technology is a trusted technology provider serving
-              businesses across UAE & KSA. Our team is dedicated to providing
+              businesses across UAE. Our team is dedicated to providing
               data-driven insights and enterprise solutions.
             </Text>
 
@@ -61,7 +61,7 @@ const FooterNav = () => {
               <li>
                 <Text className="text-sm">
                   <span className="block font-medium text-gray-400">Address</span>
-                  UAE, KSA
+                  UAE
                 </Text>
               </li>
               <li>
@@ -71,10 +71,19 @@ const FooterNav = () => {
                 </Text>
               </li>
               <li>
-                <Text className="text-sm">
-                  <span className="block font-medium text-gray-400">Email</span>
-                  support@runanalytic.com
-                </Text>
+              <Text className="text-sm">
+  <span className="block font-medium text-gray-400">Email</span>
+  <a 
+    href="https://mail.google.com/mail/?view=cm&to=support@runanalytic.com" 
+    target="_blank" 
+    rel="noopener noreferrer"
+    className="hover:underline"
+  >
+    support@runanalytic.com
+  </a>
+</Text>
+
+
               </li>
             </ul>
 

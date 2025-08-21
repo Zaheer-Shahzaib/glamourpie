@@ -48,17 +48,14 @@ const HeaderNav = () => {
       label: "Pricing",
       onClick: () => navigate("/contact-us"),
     },
-    {
-      link: PATH_PAGES.support,
-      label: "Support",
-      onclick: () => {
-        navigateToSection("support", "/");
-      },
-    },
-    {
-      link: PATH_PAGES.contact,
-      label: "Contact Us",
-    },
+    // {
+    //   link: PATH_PAGES.support,
+    //   label: "Support",
+    //   onclick: () => {
+    //     navigateToSection("support", "/");
+    //   },
+    // },
+    
     {
       link: PATH_PAGES.privacy,
       label: "Privacy Policy",
@@ -66,6 +63,9 @@ const HeaderNav = () => {
     {
       link: PATH_PAGES.about, 
       label: "About Us", 
+    },{
+      link: PATH_PAGES.contact,
+      label: "Contact Us",
     }
   ];
 
@@ -132,7 +132,7 @@ const HeaderNav = () => {
             >
               Sign Up
             </Button> */}
-            <Menu shadow="lg" width={200}>
+            {/* <Menu shadow="lg" width={200}>
               <Menu.Target>
                 <Tooltip label="Switch color modes">
                   <Button variant="dark">
@@ -157,7 +157,7 @@ const HeaderNav = () => {
                   Dark
                 </Menu.Item>
               </Menu.Dropdown>
-            </Menu>
+            </Menu> */}
           </Group>
         </Container>
       </header>
