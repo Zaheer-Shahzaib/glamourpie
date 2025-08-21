@@ -32,58 +32,29 @@ const HeaderNav = () => {
   const { navigateToSection } = useScroll();
   const navigate = useNavigate();
   const MOCK_DATA = [
-    {
-      link: PATH_PAGES.root,
-      label: "Home",
-    },
-    {
-      label: "Services",
-      link: PATH_PAGES.services,
-      onclick: () => {
-        navigateToSection("services", "/");
-      },
-    },
-    {
-      link: PATH_PAGES.contact,
-      label: "Pricing",
-      onClick: () => navigate("/contact-us"),
-    },
-    // {
-    //   link: PATH_PAGES.support,
-    //   label: "Support",
-    //   onclick: () => {
-    //     navigateToSection("support", "/");
-    //   },
-    // },
-    
-    {
-      link: PATH_PAGES.privacy,
-      label: "Privacy Policy",
-    },
-    {
-      link: PATH_PAGES.about, 
-      label: "About Us", 
-    },{
-      link: PATH_PAGES.contact,
-      label: "Contact Us",
-    }
+    { link: PATH_PAGES.root, label: "Home" },
+    { label: "Services", link: PATH_PAGES.services, onClick: () => navigateToSection("services", "/") },
+    { link: PATH_PAGES.contact, label: "Pricing", onClick: () => navigate("/contact-us") },
+    { link: PATH_PAGES.privacy, label: "Privacy Policy" },
+    { link: PATH_PAGES.terms, label: "Terms of Service" },
+    { link: PATH_PAGES.about, label: "About Us" },
+    { link: PATH_PAGES.contact, label: "Contact Us" },
   ];
 
   const ICON_SIZE = 20;
   const theme = useMantineTheme();
-  const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] =
-    useDisclosure(false);
+  const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] = useDisclosure(false);
   const { setColorScheme, colorScheme } = useMantineColorScheme();
   const tablet_match = useMediaQuery("(max-width: 768px)");
 
-  const items = MOCK_DATA.map((link) => (
+  const items = MOCK_DATA.map((link, index) => (
     <a
-      key={link.label}
+      key={`${link.label}-${index}`}
       href={link.link || "#"}
       className={classes.link}
       onClick={(e) => {
         e.preventDefault();
-        link.onclick ? link.onclick() : (window.location.href = link.link);
+        link.onClick ? link.onClick() : (window.location.href = link.link);
       }}
     >
       {link.label}
@@ -93,15 +64,8 @@ const HeaderNav = () => {
   return (
     <Box>
       <header className={classes.header}>
-        <Container
-          classNames={{ root: classes.inner }}
-          fluid
-        >
-          <Group
-            gap='xs'
-            display={{ base: "none", sm: "flex" }}
-            className={classes.links}
-          >
+        <Container classNames={{ root: classes.inner }} fluid>
+          <Group gap='xs' display={{ base: "none", sm: "flex" }} className={classes.links}>
             <Link to={PATH_PAGES.root}>
               <Image
                 className="logo"
@@ -113,7 +77,6 @@ const HeaderNav = () => {
             {items}
           </Group>
 
-          {/* Right-aligned buttons */}
           <Group gap="sm" style={{ marginLeft: 'auto' }}>
             <Button
               component={Link}
@@ -125,39 +88,6 @@ const HeaderNav = () => {
             >
               Sign In
             </Button>
-            {/* <Button
-              component={Link}
-              to={PATH_AUTH.signup}
-              leftSection={<IconUserCircle size={20} />}
-            >
-              Sign Up
-            </Button> */}
-            {/* <Menu shadow="lg" width={200}>
-              <Menu.Target>
-                <Tooltip label="Switch color modes">
-                  <Button variant="dark">
-                    {colorScheme === "auto" ? (
-                      <IconCircleHalf2 size={ICON_SIZE} />
-                    ) : colorScheme === "dark" ? (
-                      <IconMoonStars size={ICON_SIZE} />
-                    ) : (
-                      <IconSunHigh size={ICON_SIZE} />
-                    )}
-                  </Button>
-                </Tooltip>
-              </Menu.Target>
-              <Menu.Dropdown>
-                <Menu.Label tt="uppercase" ta="center" fw={600}>
-                  Select color modes
-                </Menu.Label>
-                <Menu.Item leftSection={<IconSunHigh size={16} />} onClick={() => setColorScheme("light")}>
-                  Light
-                </Menu.Item>
-                <Menu.Item leftSection={<IconMoonStars size={16} />} onClick={() => setColorScheme("dark")}>
-                  Dark
-                </Menu.Item>
-              </Menu.Dropdown>
-            </Menu> */}
           </Group>
         </Container>
       </header>
@@ -181,9 +111,7 @@ const HeaderNav = () => {
         }
         className={classes.hiddenDesktop}
         zIndex={1000000}
-        transitionProps={{
-          transition: tablet_match ? "slide-up" : "slide-left",
-        }}
+        transitionProps={{ transition: tablet_match ? "slide-up" : "slide-left" }}
       >
         <ScrollArea h={`calc(100vh - ${rem(60)})`} mx="-md" scrollbarSize={0}>
           <Group display={{ base: "flex" }} className={classes.links} style={{ flexDirection: "column" }} align="start">

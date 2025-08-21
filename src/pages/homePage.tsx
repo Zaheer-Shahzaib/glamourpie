@@ -16,7 +16,7 @@ import {
 } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
 import { IconArrowRight, IconPlayerPlay } from "@tabler/icons-react";
-import PrivacyPolicy from "../Components/PrivacyPolicy/PrivacyPolicy";
+import PrivacyPolicy from "./PrivacyPolicy/PrivacyPolicy";
 
 // import Link from 'next/link';
 // import { PATH_APPS, PATH_AUTH, PATH_DASHBOARD, PATH_GITHUB } from '@/routes';
@@ -33,7 +33,7 @@ const DASHBOARDS = [
     icon: "/showcase/dashboard-default.png",
     title: "Automatic Invoice Uploading",
     desp: "Generate and upload invoices seamlessly through API integration – no manual effort required.",
-   },
+  },
   {
     icon: "/showcase/dashboard-analytics.png",
     title: "Smart Invoice Templates",
@@ -122,7 +122,7 @@ export default function Home() {
                   directly to Amazon in just a few clicks.
                 </Text>
                 <Group my='lg'>
-                  <Link to={PATH_AUTH.signin}  className={classes.btn}>
+                  <Link to={PATH_AUTH.signin} className={classes.btn}>
                     <Button
                       size='md'
                       radius={"md"}
@@ -209,27 +209,27 @@ export default function Home() {
           </SimpleGrid>
         </Container>
         <Container
-  // id='pricing'
-  fluid
-  {...BOX_PROPS}
-  style={{ position: 'relative' }}
->
-  <Pricing />
-  <button 
-    onClick={() => window.location.href = '/contact-us'} // or use `navigate`
-    style={{
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      width: '100%',
-      height: '100%',
-      opacity: 0, // Makes it invisible
-      cursor: 'pointer',
-      border: 'none',
-      background: 'transparent',
-    }}
-  />
-</Container>
+          // id='pricing'
+          fluid
+          {...BOX_PROPS}
+          style={{ position: 'relative' }}
+        >
+          <Pricing />
+          <button
+            onClick={() => window.location.href = '/contact-us'} // or use `navigate`
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              opacity: 0, // Makes it invisible
+              cursor: 'pointer',
+              border: 'none',
+              background: 'transparent',
+            }}
+          />
+        </Container>
         <Container
           id='services'
           fluid
@@ -255,26 +255,26 @@ export default function Home() {
               For any queries?
             </Title>
             <Button
-    variant='subtle'
-    component='a'
-    href='/contact-us'
-    rightSection={<IconArrowRight size={16} />}
-    className={classes.contactBtn}
-  >
-    Contact Us
-  </Button>
-<div className="my-3"></div>
-  <Button
-    variant='subtle'
-    component='a'
-    href='/privacy-policy'
-    rightSection={<IconArrowRight size={16} />}
-    className={classes.contactBtn}
-  >
-    Privacy Policy
-  </Button>
+              variant='subtle'
+              component='a'
+              href='/contact-us'
+              rightSection={<IconArrowRight size={16} />}
+              className={classes.contactBtn}
+            >
+              Contact Us
+            </Button>
+            <div className="my-3"></div>
+            <Button
+              variant='subtle'
+              component='a'
+              href='/privacy-policy'
+              rightSection={<IconArrowRight size={16} />}
+              className={classes.contactBtn}
+            >
+              Privacy Policy
+            </Button>
 
-  
+
 
           </Paper>
         </Box>

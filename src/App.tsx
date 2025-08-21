@@ -12,7 +12,8 @@ import SignupPage from "./Components/authentication/signup/page";
 import LoginPage from "./Components/authentication/login/page";
 import { PATH_AUTH, PATH_DASHBOARD, PATH_PAGES } from "./routes/index"; // Import external routes
 import ResetPassword from "./Components/authentication/password-reset/page";
-import PrivacyPolicy from "./Components/PrivacyPolicy/PrivacyPolicy"; // ✅ Import the new page
+import PrivacyPolicy from "./pages/PrivacyPolicy/PrivacyPolicy"; // ✅ Import the new page
+import TermsService from "./pages/TermsofService/TermsService";  // import termserivce page
 import About from "./Components/About/about";
 import ErrorPage from "./pages/notFound";
 import { ContactUs } from "./pages/contact-us";
@@ -37,7 +38,7 @@ import ProtectedRoute from "./hooks/protectedRoute";
 // }
 // --- Main App ---
 export default function App() {
-const location = useLocation();
+  const location = useLocation();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -49,7 +50,7 @@ const location = useLocation();
         console.log("Scrolling to section after navigation:", state.scrollToId);
         section.scrollIntoView({ behavior: "smooth", block: "start" });
       }
-    
+
       navigate(location.pathname, { replace: true, state: {} });
     }
   }, [location, navigate]);
@@ -64,7 +65,7 @@ const location = useLocation();
         element={<ContactUs />}
       />
       <Route path={PATH_PAGES.privacy} element={<PrivacyPolicy />} />
-      <Route path={PATH_PAGES.privacy} element={<PrivacyPolicy />} />
+      <Route path={PATH_PAGES.terms} element={<TermsService />} />
       <Route path={PATH_PAGES.about} element={<About />} />
       <Route path={PATH_AUTH.root}>
         <Route
@@ -79,7 +80,7 @@ const location = useLocation();
           path={PATH_AUTH.passwordReset}
           element={<ResetPassword />}
         />
-    
+
 
       </Route>
       {/* Protected Routes */}

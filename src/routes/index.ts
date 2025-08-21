@@ -49,6 +49,7 @@ export const PATH_PAGES = {
   about: path(ROOTS_PAGES, "about"),
   contact: path(ROOTS_PAGES, "contact-us"),
   services: path(ROOTS_PAGES, "services"),
+  terms: path(ROOTS_PAGES, "terms-service"),
   support: path(ROOTS_PAGES, "support"),
   privacy: path(ROOTS_PAGES, "privacy-policy"), // ✅ FIXED
 };

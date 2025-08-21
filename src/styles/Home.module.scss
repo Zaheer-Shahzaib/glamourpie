@@ -48,9 +48,10 @@
 
   .btn{
     background-color: var(--mantine-color-yellow-9);
-    border-radius: 30px;
+    border-radius: var(--mantine-radius-xl);
+    border: noen;   
     :hover {
-      background-color: var(--mantine-color-yellow-9);
+      background-color: var(--mantine-color-yellow-8);
     }
   }
 }
