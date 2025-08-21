@@ -33,11 +33,12 @@ const HeaderNav = () => {
   const navigate = useNavigate();
   const MOCK_DATA = [
     { link: PATH_PAGES.root, label: "Home" },
+    { link: PATH_PAGES.about, label: "About Us" },
     { label: "Services", link: PATH_PAGES.services, onClick: () => navigateToSection("services", "/") },
     { link: PATH_PAGES.contact, label: "Pricing", onClick: () => navigate("/contact-us") },
     { link: PATH_PAGES.privacy, label: "Privacy Policy" },
     { link: PATH_PAGES.terms, label: "Terms of Service" },
-    { link: PATH_PAGES.about, label: "About Us" },
+    
     { link: PATH_PAGES.contact, label: "Contact Us" },
   ];
 
