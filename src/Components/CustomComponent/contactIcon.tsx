@@ -26,9 +26,23 @@ function ContactIcon({ icon: Icon, title, description, ...others }: ContactIconP
 }
 
 const MOCKDATA = [
-  { title: 'Email', description: 'support@runanalytic.com', icon: IconAt },
+  {
+    title: 'Email',
+    description: (
+      <a 
+        href="https://mail.google.com/mail/?view=cm&fs=1&to=support@runanalytic.com" 
+        target="_blank" 
+        rel="noopener noreferrer"
+        className="hover:underline"
+      >
+        support@runanalytic.com
+      </a>
+    ),
+    icon: IconAt
+  }
+  ,
   { title: 'Phone', description: ' +971 54 385 8251', icon: IconPhone },
-  { title: 'Address', description: ' UAE, KSA', icon: IconMapPin }
+  { title: 'Address', description: ' UAE', icon: IconMapPin }
 ];
 
 export function ContactIconsList() {

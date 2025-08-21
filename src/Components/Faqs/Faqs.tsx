@@ -16,10 +16,21 @@ const placeholder =
   "PII is retained for no longer than 30 days after order shipment unless a longer period is required by law.";
   const placeholder6 =
   "Currently, RunAnalytic is optimized for Amazon UAE and MENA region sellers. We plan to expand to more marketplaces in the future.";
-  const placeholder7 =
-  "You can contact our support team at support@runanalytic.com. We typically respond within 24 hours.";
-  const placeholder8 =
-  "You can follow the instructions in the app or system settings to disable battery optimization so RunAnalytic can process background invoice generation tasks reliably.";
+  const placeholder7 = (
+    <span>
+      You can contact our support team at{" "}
+      <a
+        href="https://mail.google.com/mail/?view=cm&fs=1&to=support@runanalytic.com"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="hover:underline"
+      >
+        support@runanalytic.com
+      </a>
+      . We typically respond within 24 hours.
+    </span>
+  );
+  
   const placeholder9 =
   "Yes! We offer a limited-time free trial so you can experience the full features of our platform before committing.";
 
@@ -99,12 +110,7 @@ const Faqs = ({ ...others }: FaqsProps) => {
           <Accordion.Panel>{placeholder7}</Accordion.Panel>
         </Accordion.Item>
 
-        <Accordion.Item value='tasks'>
-          <Accordion.Control>
-          How do I disable battery optimization to ensure background tasks work?
-          </Accordion.Control>
-          <Accordion.Panel>{placeholder8}</Accordion.Panel>
-        </Accordion.Item>
+        
 
         <Accordion.Item value='trials'>
           <Accordion.Control>
