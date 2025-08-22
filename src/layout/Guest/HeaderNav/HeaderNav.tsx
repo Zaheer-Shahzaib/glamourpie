@@ -7,7 +7,6 @@ import {
   Group,
   rem,
   ScrollArea,
-  useMantineColorScheme,
   useMantineTheme,
   Image,
 } from "@mantine/core";
@@ -18,11 +17,15 @@ import { Link, useNavigate } from "react-router-dom";
 import { PATH_AUTH, PATH_PAGES } from "../../../routes";
 import { useScroll } from "../../../Context/scrollContext";
 
-const logo = "/assets/logo (2).jpg";
+const logo = "/run-analytics.png"; // final unified logo path
 
 const HeaderNav = () => {
   const { navigateToSection } = useScroll();
   const navigate = useNavigate();
+  const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] = useDisclosure(false);
+  const theme = useMantineTheme();
+  const tablet_match = useMediaQuery("(max-width: 768px)");
+
   const MOCK_DATA = [
     { link: PATH_PAGES.root, label: "Home" },
     { link: PATH_PAGES.about, label: "About Us" },
@@ -32,10 +35,6 @@ const HeaderNav = () => {
     { link: PATH_PAGES.terms, label: "Terms of Service" },
     { link: PATH_PAGES.contact, label: "Contact Us" },
   ];
-
-  const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] = useDisclosure(false);
-  const theme = useMantineTheme();
-  const tablet_match = useMediaQuery("(max-width: 768px)");
 
   const items = MOCK_DATA.map((link, index) => (
     <a
@@ -71,7 +70,7 @@ const HeaderNav = () => {
             {items}
           </Group>
 
-          {/* Right Buttons & Burger */}
+          {/* Right Buttons & Mobile Burger */}
           <Group gap="sm" style={{ marginLeft: "auto" }}>
             <Button
               component={Link}
@@ -84,8 +83,14 @@ const HeaderNav = () => {
               Sign In
             </Button>
 
-            {/* Burger for Mobile */}
-            {tablet_match && <Burger opened={drawerOpened} onClick={toggleDrawer} size="sm" color="white" />}
+            {tablet_match && (
+              <Burger
+                opened={drawerOpened}
+                onClick={toggleDrawer}
+                size="sm"
+                color="white"
+              />
+            )}
           </Group>
         </Container>
       </header>
@@ -98,15 +103,32 @@ const HeaderNav = () => {
         padding="md"
         title={
           <Link to="/" className={classes.logoLink} style={{ marginLeft: "30px" }}>
-            <Image src={logo} height={30} width={100} fit="contain" alt="Company Logo" className={classes.logo} />
+            <Image
+              src={logo}
+              height={30}
+              width={100}
+              fit="contain"
+              alt="Company Logo"
+              className={classes.logo}
+            />
           </Link>
         }
         className={classes.hiddenDesktop}
-        zIndex={1000000}
+        zIndex={1000}
         transitionProps={{ transition: tablet_match ? "slide-up" : "slide-left" }}
+        classNames={{
+          content: classes.drawerContent,
+          header: classes.drawerHeader,
+          body: classes.drawerBody,
+        }}
       >
         <ScrollArea h={`calc(100vh - ${rem(60)})`} mx="-md" scrollbarSize={0}>
-          <Group display={{ base: "flex" }} className={classes.links} style={{ flexDirection: "column" }} align="start">
+          <Group
+            display={{ base: "flex" }}
+            className={classes.links}
+            style={{ flexDirection: "column" }}
+            align="start"
+          >
             {items}
           </Group>
         </ScrollArea>
