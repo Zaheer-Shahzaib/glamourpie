@@ -7,7 +7,6 @@ import {
   Group,
   rem,
   ScrollArea,
-  useMantineColorScheme,
   useMantineTheme,
   Image,
 } from "@mantine/core";
@@ -45,7 +44,7 @@ const HeaderNav = () => {
       onClick={(e) => {
         e.preventDefault();
         link.onClick ? link.onClick() : (window.location.href = link.link);
-        closeDrawer(); // close drawer after click
+        closeDrawer();
       }}
     >
       {link.label}
@@ -54,9 +53,19 @@ const HeaderNav = () => {
 
   return (
     <Box>
-      <header className={classes.header}>
+      <header
+        className={classes.header}
+        style={{
+          backgroundColor: "#000", // Keep header black
+          color: "#fff",
+          position: "fixed", // Keep it fixed on top
+          top: 0,
+          left: 0,
+          width: "100%",
+          zIndex: 2000, // Ensure it stays above drawer
+        }}
+      >
         <Container className={classes.inner} fluid>
-          {/* Logo */}
           <Link to={PATH_PAGES.root}>
             <Image
               className="logo"
@@ -66,12 +75,10 @@ const HeaderNav = () => {
             />
           </Link>
 
-          {/* Desktop Links */}
           <Group gap="xs" display={{ base: "none", sm: "flex" }} className={classes.links}>
             {items}
           </Group>
 
-          {/* Right Buttons & Burger */}
           <Group gap="sm" style={{ marginLeft: "auto" }}>
             <Button
               component={Link}
@@ -84,8 +91,9 @@ const HeaderNav = () => {
               Sign In
             </Button>
 
-            {/* Burger for Mobile */}
-            {tablet_match && <Burger opened={drawerOpened} onClick={toggleDrawer} size="sm" color="white" />}
+            {tablet_match && (
+              <Burger opened={drawerOpened} onClick={toggleDrawer} size="sm" color="white" />
+            )}
           </Group>
         </Container>
       </header>
@@ -96,17 +104,22 @@ const HeaderNav = () => {
         onClose={closeDrawer}
         size="100%"
         padding="md"
-        title={
-          <Link to="/" className={classes.logoLink} style={{ marginLeft: "30px" }}>
-            <Image src={logo} height={30} width={100} fit="contain" alt="Company Logo" className={classes.logo} />
-          </Link>
-        }
-        className={classes.hiddenDesktop}
-        zIndex={1000000}
+        withOverlay={false} // No overlay to hide header
+        styles={{
+          content: {
+            backgroundColor: "#fff", // Keep list area white
+            marginTop: "60px", // Start below header height
+          },
+        }}
         transitionProps={{ transition: tablet_match ? "slide-up" : "slide-left" }}
       >
         <ScrollArea h={`calc(100vh - ${rem(60)})`} mx="-md" scrollbarSize={0}>
-          <Group display={{ base: "flex" }} className={classes.links} style={{ flexDirection: "column" }} align="start">
+          <Group
+            display={{ base: "flex" }}
+            className={classes.links}
+            style={{ flexDirection: "column" }}
+            align="start"
+          >
             {items}
           </Group>
         </ScrollArea>
@@ -116,3 +129,4 @@ const HeaderNav = () => {
 };
 
 export default HeaderNav;
+  

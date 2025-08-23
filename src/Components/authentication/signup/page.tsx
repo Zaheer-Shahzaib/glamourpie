@@ -40,7 +40,7 @@ function SignupPage() {
       phone: (value: string | number) =>
         String(value).trim().length < 10 ? "Invalid phone number" : null,
       password: (value: string) =>
-        value.length < 6 ? "Password must be at least 6 characters" : null,
+      value.length < 13 ? "Password must be at least 13 characters" : null,
     },
   });
 
