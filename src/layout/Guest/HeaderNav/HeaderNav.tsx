@@ -17,11 +17,15 @@ import { Link, useNavigate } from "react-router-dom";
 import { PATH_AUTH, PATH_PAGES } from "../../../routes";
 import { useScroll } from "../../../Context/scrollContext";
 
-const logo = "/assets/logo (2).jpg";
+const logo = "/run-analytics.png"; // Final unified logo path
 
 const HeaderNav = () => {
   const { navigateToSection } = useScroll();
   const navigate = useNavigate();
+  const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] = useDisclosure(false);
+  const theme = useMantineTheme();
+  const tablet_match = useMediaQuery("(max-width: 768px)");
+
   const MOCK_DATA = [
     { link: PATH_PAGES.root, label: "Home" },
     { link: PATH_PAGES.about, label: "About Us" },
@@ -32,10 +36,6 @@ const HeaderNav = () => {
     { link: PATH_PAGES.contact, label: "Contact Us" },
   ];
 
-  const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] = useDisclosure(false);
-  const theme = useMantineTheme();
-  const tablet_match = useMediaQuery("(max-width: 768px)");
-
   const items = MOCK_DATA.map((link, index) => (
     <a
       key={`${link.label}-${index}`}
@@ -44,7 +44,7 @@ const HeaderNav = () => {
       onClick={(e) => {
         e.preventDefault();
         link.onClick ? link.onClick() : (window.location.href = link.link);
-        closeDrawer();
+        closeDrawer(); // Close drawer on mobile after click
       }}
     >
       {link.label}
@@ -56,16 +56,17 @@ const HeaderNav = () => {
       <header
         className={classes.header}
         style={{
-          backgroundColor: "#000", // Keep header black
+          backgroundColor: "#000", // Fixed black header
           color: "#fff",
-          position: "fixed", // Keep it fixed on top
+          position: "fixed", // Always fixed on top
           top: 0,
           left: 0,
           width: "100%",
-          zIndex: 2000, // Ensure it stays above drawer
+          zIndex: 2000, // Ensure it stays above everything
         }}
       >
         <Container className={classes.inner} fluid>
+          {/* Logo */}
           <Link to={PATH_PAGES.root}>
             <Image
               className="logo"
@@ -75,10 +76,12 @@ const HeaderNav = () => {
             />
           </Link>
 
+          {/* Desktop Links */}
           <Group gap="xs" display={{ base: "none", sm: "flex" }} className={classes.links}>
             {items}
           </Group>
 
+          {/* Right Buttons & Mobile Burger */}
           <Group gap="sm" style={{ marginLeft: "auto" }}>
             <Button
               component={Link}
@@ -92,7 +95,12 @@ const HeaderNav = () => {
             </Button>
 
             {tablet_match && (
-              <Burger opened={drawerOpened} onClick={toggleDrawer} size="sm" color="white" />
+              <Burger
+                opened={drawerOpened}
+                onClick={toggleDrawer}
+                size="sm"
+                color="white"
+              />
             )}
           </Group>
         </Container>
@@ -104,14 +112,19 @@ const HeaderNav = () => {
         onClose={closeDrawer}
         size="100%"
         padding="md"
-        withOverlay={false} // No overlay to hide header
+        withOverlay={false} // Keeps header visible
         styles={{
           content: {
-            backgroundColor: "#fff", // Keep list area white
-            marginTop: "60px", // Start below header height
+            backgroundColor: "#fff", // White drawer
+            marginTop: "60px", // Start below header
           },
         }}
         transitionProps={{ transition: tablet_match ? "slide-up" : "slide-left" }}
+        classNames={{
+          content: classes.drawerContent,
+          header: classes.drawerHeader,
+          body: classes.drawerBody,
+        }}
       >
         <ScrollArea h={`calc(100vh - ${rem(60)})`} mx="-md" scrollbarSize={0}>
           <Group
@@ -129,4 +142,3 @@ const HeaderNav = () => {
 };
 
 export default HeaderNav;
-  
