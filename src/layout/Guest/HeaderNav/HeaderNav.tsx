@@ -12,6 +12,7 @@ import {
   useMantineColorScheme,
   useMantineTheme,
   Image,
+  Text,
 } from "@mantine/core";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import {
@@ -25,8 +26,9 @@ import classes from "./HeaderNav.module.scss";
 import { Link, useNavigate } from "react-router-dom";
 import { PATH_AUTH, PATH_PAGES } from "../../../routes";
 import { useScroll } from "../../../Context/scrollContext";
+import { useAuth } from "../../../Context/useAuth";
 
-const logo = '/run-analytics.png';
+const logo = "/run-analytics.png";
 
 const HeaderNav = () => {
   const { navigateToSection } = useScroll();
@@ -34,8 +36,16 @@ const HeaderNav = () => {
   const MOCK_DATA = [
     { link: PATH_PAGES.root, label: "Home" },
     { link: PATH_PAGES.about, label: "About Us" },
-    { label: "Services", link: PATH_PAGES.services, onClick: () => navigateToSection("services", "/") },
-    { link: PATH_PAGES.contact, label: "Pricing", onClick: () => navigate("/contact-us") },
+    {
+      label: "Services",
+      link: PATH_PAGES.services,
+      onClick: () => navigateToSection("services", "/"),
+    },
+    {
+      link: PATH_PAGES.contact,
+      label: "Pricing",
+      onClick: () => navigate("/contact-us"),
+    },
     { link: PATH_PAGES.privacy, label: "Privacy Policy" },
     { link: PATH_PAGES.terms, label: "Terms of Service" },
 
@@ -44,10 +54,11 @@ const HeaderNav = () => {
 
   const ICON_SIZE = 20;
   const theme = useMantineTheme();
-  const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] = useDisclosure(false);
+  const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] =
+    useDisclosure(false);
   const { setColorScheme, colorScheme } = useMantineColorScheme();
   const tablet_match = useMediaQuery("(max-width: 768px)");
-
+  const { isAuthenticated, profile, loading } = useAuth();
   const items = MOCK_DATA.map((link, index) => (
     <a
       key={`${link.label}-${index}`}
@@ -65,13 +76,20 @@ const HeaderNav = () => {
   return (
     <Box>
       <header className={classes.header}>
-        <Container classNames={{ root: classes.inner }} fluid>
-          <Group gap='xs' display={{ base: "none", sm: "flex" }} className={classes.links}>
+        <Container
+          classNames={{ root: classes.inner }}
+          fluid
+        >
+          <Group
+            gap='xs'
+            display={{ base: "none", sm: "flex" }}
+            className={classes.links}
+          >
             <Link to={PATH_PAGES.root}>
               <Image
-                className="logo"
+                className='logo'
                 src={`${process.env.PUBLIC_URL}/run-analytics.png`}
-                alt="logo"
+                alt='logo'
                 style={{ height: 100 }}
               />
             </Link>
@@ -80,24 +98,33 @@ const HeaderNav = () => {
           <Burger
             opened={drawerOpened}
             onClick={toggleDrawer}
-            color="white"
-            size="sm"
+            color='white'
+            size='sm'
             className={classes.hiddenDesktop}
           />
-          <Group gap="sm" style={{ marginLeft: 'auto' }}>
-
-
-
-            <Button
-              component={Link}
-              to={PATH_AUTH.signin}
-              variant="transparent"
-              c="white"
-              leftSection={<IconLogin2 size={20} />}
-              className={classes.link}
-            >
-              Sign In
-            </Button>
+          <Group
+            gap='sm'
+            style={{ marginLeft: "auto" }}
+          >
+            {!isAuthenticated && (
+              <Button
+                component={Link}
+                to={PATH_AUTH.signin}
+                variant='transparent'
+                c='white'
+                leftSection={<IconLogin2 size={20} />}
+                className={classes.link}
+              >
+                Sign In
+              </Button>
+            ) 
+            // : loading ? (
+            //   <Text c='white'>Loading...</Text>
+            // ) : (
+            //   <Text c='white'>Hello, {profile?.username}</Text>
+            // )
+            }
+          
           </Group>
         </Container>
       </header>
@@ -105,35 +132,50 @@ const HeaderNav = () => {
       <Drawer
         opened={drawerOpened}
         onClose={closeDrawer}
-        size="100%"
-        padding="md"
+        size='100%'
+        padding='md'
         title={
-          <Link to="/" className={classes.logoLink} style={{ marginLeft: '30px' }}>
+          <Link
+            to='/'
+            className={classes.logoLink}
+            style={{ marginLeft: "30px" }}
+          >
             <Image
               src={logo}
               height={15}
               width={60}
               // fit="contain"
-              alt="Company Logo"
+              alt='Company Logo'
               // className={classes.logo}
               style={{
                 width: 100,
-                height: 24
+                height: 24,
               }}
             />
           </Link>
         }
         className={classes.hiddenDesktop}
         zIndex={1000}
-        transitionProps={{ transition: tablet_match ? "slide-up" : "slide-left" }}
+        transitionProps={{
+          transition: tablet_match ? "slide-up" : "slide-left",
+        }}
         classNames={{
           content: classes.drawerContent,
           header: classes.drawerHeader,
           body: classes.drawerBody,
         }}
       >
-        <ScrollArea h={`calc(100vh - ${rem(60)})`} mx="-md" scrollbarSize={0}>
-          <Group display={{ base: "flex" }} className={classes.links} style={{ flexDirection: "column" }} align="start">
+        <ScrollArea
+          h={`calc(100vh - ${rem(60)})`}
+          mx='-md'
+          scrollbarSize={0}
+        >
+          <Group
+            display={{ base: "flex" }}
+            className={classes.links}
+            style={{ flexDirection: "column" }}
+            align='start'
+          >
             {items}
           </Group>
         </ScrollArea>

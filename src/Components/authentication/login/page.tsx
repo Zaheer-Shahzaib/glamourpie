@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  Alert,
   Button,
   Center,
   Checkbox,
@@ -22,7 +23,8 @@ import { PATH_AUTH, PATH_DASHBOARD } from "../../../routes";
 import { api } from "../../../Services/api";
 import { notifications } from "@mantine/notifications";
 import { useAuth } from "../../../Context/useAuth";
-
+import { useState } from "react";
+import { IconInfoCircle } from "@tabler/icons-react";
 
 const LINK_PROPS: TextProps = {
   className: classes.link,
@@ -31,21 +33,29 @@ const LINK_PROPS: TextProps = {
 function LoginPage() {
   const navigate = useNavigate();
   const theme = useMantineTheme();
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [rememberMe, setRememberMe] = useState(false);
+
   const { login } = useAuth();
 
   const form = useForm({
-    initialValues: { username: "", password: "" },
+    initialValues: { email: "", password: "" },
     validate: {
-      username: (value: string) =>
-        String(value).trim().length === 0 ? "user name is required" : null,
+      email: (value: string) =>
+        /^\S+@\S+\.\S+$/.test(value)
+          ? null
+          : "Please enter a valid email address",
       password: (value: any) =>
-        value && value?.length < 6
-          ? "Password must include at least 6 characters"
+        value && value?.length < 12
+          ? "Password must include at least 12 characters"
           : null,
+      // rememberMe: (value: boolean) => setRememberMe(value),
     },
   });
   const handleSubmit = async (values: typeof form.values) => {
+    console.log("Submitting form with values:", values);
     try {
+      console.log("Form values:", values, "Remember Me:", rememberMe);
       const resp = await api.post("/api/signin", { ...values });
       console.log(resp);
       if (resp.status === 200) {
@@ -60,12 +70,7 @@ function LoginPage() {
       navigate("/");
     } catch (error: any) {
       const message = error.response?.data?.message;
-      notifications.show({
-        title: "Error",
-        message: message,
-        color: theme.colors.red[4],
-        position: "top-right",
-      });
+      setErrorMessage(message || "An error occurred during login.");
     }
   };
 
@@ -86,13 +91,24 @@ function LoginPage() {
           component={Paper}
           className={classes.card}
         >
+          {errorMessage && (
+            <Alert
+              variant='light'
+              c={theme.colors.red[8]}
+              radius='lg'
+              title=''
+              icon={<IconInfoCircle />}
+            >
+              {errorMessage}
+            </Alert>
+          )}
           <form onSubmit={form.onSubmit(handleSubmit)}>
             <TextInput
-              label='Username'
-              placeholder='you@mantine.dev'
+              label='Email'
+              placeholder='example@domain.com'
               required
               classNames={{ label: classes.label }}
-              {...form.getInputProps("username")}
+              {...form.getInputProps("email")}
             />
             <PasswordInput
               label='Password'
@@ -109,6 +125,8 @@ function LoginPage() {
               <Checkbox
                 label='Remember me'
                 classNames={{ label: classes.label }}
+                checked={rememberMe}
+                onChange={(event) => setRememberMe(event.currentTarget.checked)}
               />
               <Text
                 component={Link}

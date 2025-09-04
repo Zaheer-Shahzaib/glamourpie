@@ -18,6 +18,7 @@ import About from "./Components/About/about";
 import ErrorPage from "./pages/notFound";
 import { ContactUs } from "./pages/contact-us";
 import ProtectedRoute from "./hooks/protectedRoute";
+import OTPVerify from "./Components/authentication/otpVerify/page";
 
 // --- Auth Simulation ---
 // export const useAuth = () => {
@@ -80,8 +81,10 @@ export default function App() {
           path={PATH_AUTH.passwordReset}
           element={<ResetPassword />}
         />
-
-
+        <Route
+          path={PATH_AUTH.otpVerify}
+          element={<OTPVerify />}
+        />
       </Route>
       {/* Protected Routes */}
       <Route

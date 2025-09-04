@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  Alert,
   Button,
   Center,
   Flex,
@@ -20,10 +21,14 @@ import classes from "./page.module.scss";
 import Surface from "../../Surface/Surface";
 import SignUpLayout from "./layout";
 import { api } from "../../../Services/api";
+import { useState } from "react";
+import { IconInfoCircle } from "@tabler/icons-react";
 
 function SignupPage() {
   const theme = useMantineTheme();
   const navigate = useNavigate();
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const [submitting, setSubmitting] = useState<boolean>(false); 
   const form = useForm({
     initialValues: {
       username: "",
@@ -40,34 +45,30 @@ function SignupPage() {
       phone: (value: string | number) =>
         String(value).trim().length < 10 ? "Invalid phone number" : null,
       password: (value: string) =>
-        value.length < 6 ? "Password must be at least 6 characters" : null,
+        value.length < 12 ? "Password must be at least 12 characters" : null,
     },
   });
 
-  const handleSubmit = async (values: typeof form.values) => {
+const handleSubmit = async (values: typeof form.values) => {
+    setSubmitting(true); 
     try {
-      // call your API using axios or your baseAPI instance
       const resp = await api.post("/api/signup", { ...values });
-      console.log(resp.status);
-      if (resp.status === 201) {
+      console.log(resp);
+      if (resp.data.otpSent === true) {
         notifications.show({
           title: "Success",
-          message: "Account created successfully!",
+          message: "OTP sent to your provided Email Address!",
           color: theme.colors.green[4],
           position: "top-right",
         });
       }
-      navigate(PATH_AUTH.signin);
-      console.log("Form submitted:", values);
+      navigate(PATH_AUTH.otpVerify);
     } catch (err: any) {
       const message =
         err.response?.data?.message || "Signup failed. Please try again.";
-      notifications.show({
-        title: "Error",
-        message,
-        color: theme.colors.error[4],
-        position: "top-right",
-      });
+      setErrorMessage(message);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -82,12 +83,16 @@ function SignupPage() {
       </>
       <SignUpLayout>
         <Title ta='center'>Welcome!</Title>
-        <Text ta='center'>Create your account to continue</Text>
-
+        <Text ta='center'>Create your account to continue</Text>        
         <Surface
           component={Paper}
           classNames={{ root: classes.card }}
         >
+           {errorMessage && (
+                <Alert variant="light" c={theme.colors.red[8]} radius="lg" title="" icon={<IconInfoCircle/>}>
+                  {errorMessage}
+                </Alert>
+              )}
           <form onSubmit={form.onSubmit(handleSubmit)}>
             <Flex
               direction={{ base: "column", sm: "row" }}
@@ -127,6 +132,7 @@ function SignupPage() {
               fullWidth
               mt='xl'
               type='submit'
+              loading={submitting}
             >
               Create account
             </Button>
