@@ -23,12 +23,15 @@ import SignUpLayout from "./layout";
 import { api } from "../../../Services/api";
 import { useState } from "react";
 import { IconInfoCircle } from "@tabler/icons-react";
+import { useAuth } from "../../../Context/useAuth";
 
 function SignupPage() {
   const theme = useMantineTheme();
   const navigate = useNavigate();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-    const [submitting, setSubmitting] = useState<boolean>(false); 
+  const [submitting, setSubmitting] = useState<boolean>(false);
+  const { login } = useAuth();
+  const OTP_EXPIRY_SECONDS = 120;
   const form = useForm({
     initialValues: {
       username: "",
@@ -49,12 +52,15 @@ function SignupPage() {
     },
   });
 
-const handleSubmit = async (values: typeof form.values) => {
-    setSubmitting(true); 
+  const handleSubmit = async (values: typeof form.values) => {
+    setSubmitting(true);
     try {
       const resp = await api.post("/api/signup", { ...values });
       console.log(resp);
       if (resp.data.otpSent === true) {
+        const newExpiry = Date.now() + OTP_EXPIRY_SECONDS * 1000;
+        localStorage.setItem("otp_expiry", String(newExpiry));
+        login(resp.data.token);
         notifications.show({
           title: "Success",
           message: "OTP sent to your provided Email Address!",
@@ -62,6 +68,7 @@ const handleSubmit = async (values: typeof form.values) => {
           position: "top-right",
         });
       }
+
       navigate(PATH_AUTH.otpVerify);
     } catch (err: any) {
       const message =
@@ -83,16 +90,22 @@ const handleSubmit = async (values: typeof form.values) => {
       </>
       <SignUpLayout>
         <Title ta='center'>Welcome!</Title>
-        <Text ta='center'>Create your account to continue</Text>        
+        <Text ta='center'>Create your account to continue</Text>
         <Surface
           component={Paper}
           classNames={{ root: classes.card }}
         >
-           {errorMessage && (
-                <Alert variant="light" c={theme.colors.red[8]} radius="lg" title="" icon={<IconInfoCircle/>}>
-                  {errorMessage}
-                </Alert>
-              )}
+          {errorMessage && (
+            <Alert
+              variant='light'
+              c={theme.colors.red[8]}
+              radius='lg'
+              title=''
+              icon={<IconInfoCircle />}
+            >
+              {errorMessage}
+            </Alert>
+          )}
           <form onSubmit={form.onSubmit(handleSubmit)}>
             <Flex
               direction={{ base: "column", sm: "row" }}
