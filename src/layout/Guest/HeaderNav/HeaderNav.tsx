@@ -58,7 +58,7 @@ const HeaderNav = () => {
     useDisclosure(false);
   const { setColorScheme, colorScheme } = useMantineColorScheme();
   const tablet_match = useMediaQuery("(max-width: 768px)");
-  const { isAuthenticated, profile, loading } = useAuth();
+  const { isAuthenticated, logout } = useAuth();
   const items = MOCK_DATA.map((link, index) => (
     <a
       key={`${link.label}-${index}`}
@@ -73,6 +73,10 @@ const HeaderNav = () => {
     </a>
   ));
 
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+  };
   return (
     <Box>
       <header className={classes.header}>
@@ -106,25 +110,37 @@ const HeaderNav = () => {
             gap='sm'
             style={{ marginLeft: "auto" }}
           >
-            {!isAuthenticated && (
+            {
+              !isAuthenticated && (
+                <Button
+                  component={Link}
+                  to={PATH_AUTH.signin}
+                  variant='transparent'
+                  c='white'
+                  leftSection={<IconLogin2 size={20} />}
+                  className={classes.link}
+                >
+                  Sign In
+                </Button>
+              )
+              // : loading ? (
+              //   <Text c='white'>Loading...</Text>
+              // ) : (
+              //   <Text c='white'>Hello, {profile?.username}</Text>
+              // )
+            }
+
+            {isAuthenticated && (
               <Button
-                component={Link}
-                to={PATH_AUTH.signin}
+                onClick={handleLogout}
                 variant='transparent'
                 c='white'
                 leftSection={<IconLogin2 size={20} />}
                 className={classes.link}
               >
-                Sign In
+                Logout
               </Button>
-            ) 
-            // : loading ? (
-            //   <Text c='white'>Loading...</Text>
-            // ) : (
-            //   <Text c='white'>Hello, {profile?.username}</Text>
-            // )
-            }
-          
+            )}
           </Group>
         </Container>
       </header>
