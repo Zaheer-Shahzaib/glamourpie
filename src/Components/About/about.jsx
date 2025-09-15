@@ -21,36 +21,37 @@ export default function About() {
     <GuestLayout>
       <Container size="lg" py={48}>
         {/* Hero Section */}
-        <Stack align="center" mb={56} gap={8}>
+        <Stack align="center" mb={64} gap={8}>
           <Group gap={16}>
-            <Title
-              order={1}
-              c={headingColor}
-              style={{ color: "black", fontWeight: 550 }}
-            >
-              About Us
+
+            <Title className="text-5xl text-[#424242] pb-12 font-bold">
+              <strong>About Us</strong>
             </Title>
           </Group>
-
-          <Text w="100%" ta="left" size="xl" >Who We Are</Text>
-          <Text
-            size="xl" align-item="center" maw="100%" mt={8}>
+          <Text className="w-full text-center text-lg text-[#636363] font-semibold">Who We Are</Text>
+          <div className="w-24 h-1 bg-blue-500 mx-auto my-4"></div>
+          <Text className="text-lg text-[#424242]" style={{ lineHeight: '2' }}>
             <strong>RunAnalytic Technology</strong> is a UAE-based technology company specializing in e-commerce automation solutions for Amazon sellers. Our mission is to help online merchants simplify compliance, save time, and grow their business with secure, efficient tools.
           </Text>
+
+          <Text className="pt-4 text-md text-[#636363]">We are committed to providing innovative solutions that make e-commerce compliance simple and efficient.</Text>
+
         </Stack>
 
-          {/* WHat we do */}
-          <Stack gap={24} >
+        {/* Main Content */}
+        <Stack gap={48}>
+          {/* What we do */}
+          <Stack gap={24}>
             <Group gap={16}>
-              <Title order={2} c={headingColor} style={{color: 'black', fontWeight: 600}}>
-              What We Do
+              <Title className="text-3xl text-[#424242] font-bold">
+                1. What We Do
               </Title>
             </Group>
-            <Text size="md">
-            We are the creators of a cloud-based SaaS platform that integrates directly with <strong>Amazon’s Selling Partner API (SP-API)</strong>. Our solution automatically generates <strong>UAE VAT-compliant invoices</strong> for every Amazon order, ensuring sellers meet <Anchor href="https://tax.gov.ae/en/default.aspx" target="_blank" fw={600}>Federal Tax Authority (FTA) </Anchor> regulations without manual effort. After uploading the generated invoice via SP-API to comply with amazon invoice uploaded policy.
+            <Text className="text-md text-[#636363]" style={{ lineHeight: '1.9' }}>
+              We are the creators of a cloud-based SaaS platform that integrates directly with <strong>Amazon's Selling Partner API (SP-API)</strong>. Our solution automatically generates <strong>UAE VAT-compliant invoices</strong> for every Amazon order, ensuring sellers meet <Anchor href="https://tax.gov.ae/en/default.aspx" target="_blank" fw={600}>Federal Tax Authority (FTA) </Anchor> regulations without manual effort. After uploading the generated invoice via SP-API to comply with amazon invoice uploaded policy.
             </Text>
-            <Text>With RunAnalytic, Amazon sellers benefit from:</Text>
-            <List size="md" spacing={12} withPadding listStyleType="disc">
+            <Text className="text-md text-[#636363]">With RunAnalytic, Amazon sellers benefit from:</Text>
+            <List spacing={10} withPadding listStyleType="disc" className="text-md text-[#636363] font-weight-500">
               <List.Item>Automated invoice creation and delivery</List.Item>
               <List.Item>Real-time order synchronization</List.Item>
               <List.Item>Reduced errors and administrative workload</List.Item>
@@ -59,14 +60,14 @@ export default function About() {
             </List>
           </Stack>
 
-          {/* our values */}
-          <Stack gap={24} mt={20}>
+          {/* Our values */}
+          <Stack gap={24}>
             <Group gap={16}>
-              <Title order={2} c={headingColor} style={{color: 'black', fontWeight: 600}}>
-              Our Values
+              <Title className="text-3xl text-[#424242] font-bold">
+                2. Our Values
               </Title>
             </Group>
-            <List size="md" spacing={12} withPadding listStyleType="disc">
+            <List spacing={10} withPadding listStyleType="disc" className="text-md text-[#636363] font-weight-500">
               <List.Item>Security First: We apply enterprise-grade security practices including encryption, access control, and incident response procedures</List.Item>
               <List.Item>Compliance by Design: Our systems are built around UAE Federal Tax Authority requirements to keep sellers compliant.</List.Item>
               <List.Item>Seller Success: We focus on eliminating manual tasks so sellers can spend more time growing their business.</List.Item>
@@ -75,13 +76,13 @@ export default function About() {
           </Stack>
 
           {/* Why Choose RunAnalytic */}
-          <Stack gap={24} mt={20}>
+          <Stack gap={24}>
             <Group gap={16}>
-              <Title order={2} c={headingColor} style={{color: 'black', fontWeight: 600}}>
-              Why Choose RunAnalytic
+              <Title className="text-3xl text-[#424242] font-bold">
+                3. Why Choose RunAnalytic
               </Title>
             </Group>
-            <List size="md" spacing={12} withPadding listStyleType="disc">
+            <List spacing={10} withPadding listStyleType="disc" className="text-md text-[#636363] font-weight-500">
               <List.Item>Localized for <strong>UAE VAT compliance</strong></List.Item>
               <List.Item>Backed by a dedicated team of engineers and compliance specialists</List.Item>
               <List.Item>Secure, reliable, and trusted automation for Amazon sellers</List.Item>
@@ -90,17 +91,17 @@ export default function About() {
           </Stack>
 
           {/* Contact */}
-          <Stack gap={24} mt={20}>
+          <Stack gap={24}>
             <Group gap={16}>
 
-              <Title order={2} c={headingColor} style={{ color: 'black', fontWeight: 600 }}>
-                Contact Us
+              <Title className="text-3xl text-[#424242] font-bold">
+                4. Contact Us
               </Title>
             </Group>
-            <Text size="md">
+            <Text className="text-md text-[#636363]">
               If you have any questions, please contact:
             </Text>
-            <List size="md" spacing={12}>
+            <List spacing={10} withPadding listStyleType="disc" className="text-md text-[#636363] font-weight-500">
               <List.Item>
                 Email: <Anchor href="mailto:support@runanalytic.com" fw={600}>support@runanalytic.com</Anchor>
               </List.Item>
@@ -109,8 +110,9 @@ export default function About() {
               </List.Item>
             </List>
           </Stack>
+        </Stack>
 
-          <Space h={64} />
+        <Space h={64} />
       </Container>
     </GuestLayout>
   );
