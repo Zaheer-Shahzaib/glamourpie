@@ -27,16 +27,17 @@ export default function TermsService() {
                 <Stack align="center" mb={64} gap={8}>
                     <Group gap={16}>
 
-                        <Title order={1} c={headingColor} style={{ color: 'black', fontWeight: 600 }}>
-                            Terms of Service
+                        <Title className="text-5xl text-[#424242] pb-12 font-bold" >
+                            <strong>Terms of Service</strong>
                         </Title>
                     </Group>
-                    <Text w="100%" ta="left" size="xl" fw={700}>Effective Date: 01-Aug-2025</Text>
-                    <Text size="xl" align-item="center" maw={1200} mt={16}>
+                    <Text className="w-full text-center text-m text-[#636363] font-semibold">Effective Date: 01-Aug-2025</Text>
+                    <div className="w-24 h-1 bg-blue-500 mx-auto my-4"></div>
+                    <Text className="text-lg text-[#424242]" style={{ lineHeight: '2' }}>
                         Welcome to <strong>RunAnalytic Technology</strong> (“we,” “our,” “us”). By accessing  our services, including our Amazon SP-API integrated invoicing application (“Service”), you agree to be bound by these Terms of Service.
                     </Text>
 
-                    <Text w="100%" ta="left" size="l" align-item="center" fw={500} mt={10}>If you do not agree to these Terms, please do not use our Service.</Text>
+                    <Text className="pt-4 text-md text-[#636363]">If you do not agree to these Terms, please do not use our Service.</Text>
 
                 </Stack>
 
@@ -46,14 +47,14 @@ export default function TermsService() {
                     <Stack gap={24}>
                         <Group gap={16}>
 
-                            <Title order={2} c={headingColor} style={{ color: 'black', fontWeight: 600 }}>
-                                Eligibility
+                            <Title className="text-3xl text-[#424242] font-bold">
+                                1. Eligibility
                             </Title>
                         </Group>
-                        <Text size="md" >
+                        <Text className="text-md text-[#636363]">
                             You must:
                         </Text>
-                        <List size="md" spacing={12} withPadding listStyleType="disc">
+                        <List spacing={10} withPadding listStyleType="disc" className="text-md text-[#636363] font-weight-500">
                             <List.Item>Be at least 18 years old.</List.Item>
                             <List.Item>Have an active Amazon Seller Central account.</List.Item>
                             <List.Item>Be legally authorized to use Amazon’s invoice Selling Partner API (<Anchor href="https://developer-docs.amazon.com/sp-api/docs/invoices-api" target="_blank" fw={600}>SP-API</Anchor>).</List.Item>
@@ -64,37 +65,37 @@ export default function TermsService() {
                     <Stack gap={24}>
                         <Group gap={16} align="center">
 
-                            <Title order={2} c={headingColor} style={{ color: 'black', fontWeight: 600 }}>
-                                Our Services
+                            <Title className="text-3xl text-[#424242] font-bold">
+                                2. Our Services
                             </Title>
                         </Group>
 
-                        <Text size="md">
+                        <Text className="text-md text-[#636363]">
                             We provide a SaaS platform that:
                         </Text>
 
-                        <List size="md" spacing={12} withPadding listStyleType="disc">
+                        <List spacing={10} withPadding listStyleType="disc" className="text-md text-[#636363] font-weight-500">
                             <List.Item>Automates <strong>UAE VAT-compliant invoice generation</strong> for Amazon orders.</List.Item>
                             <List.Item>Retrieves order and customer data (<strong>PII</strong>) from <Anchor href="https://developer-docs.amazon.com/sp-api/docs/invoices-api" fw={600} target="_blank">Amazon SP-API</Anchor>.</List.Item>
                             <List.Item>Generates and securely delivers invoices to Amazon or to customers.</List.Item>
                         </List>
-                        <Text>We may enhance, update, or discontinue features of our Service at any time, with or without notice.</Text>
+                        <Text className="text-md text-[#636363]">We may enhance, update, or discontinue features of our Service at any time, with or without notice.</Text>
                     </Stack>
 
                     {/* User Responsibilities */}
                     <Stack gap={24}>
                         <Group gap={16} align="center">
 
-                            <Title order={2} c={headingColor} style={{ color: 'black', fontWeight: 600 }}>
-                                User Responsibilities
+                            <Title className="text-3xl text-[#424242] font-bold">
+                                3. User Responsibilities
                             </Title>
                         </Group>
 
-                        <Text size="md">
+                        <Text className="text-md text-[#636363]">
                             When using our Service, you agree to:
                         </Text>
 
-                        <List size="md" spacing={12} withPadding listStyleType="disc">
+                        <List spacing={10} withPadding listStyleType="disc" className="text-md text-[#636363] font-weight-500">
                             <List.Item>Provide accurate and lawful information.</List.Item>
                             <List.Item>Use the Service only for your authorized Amazon Seller account.</List.Item>
                             <List.Item>Comply with all applicable laws, including <Anchor href="https://tax.gov.ae/en/taxes/Vat.aspx" target="_blank" fw={600} >UAE VAT regulations</Anchor>.</List.Item>
@@ -106,11 +107,11 @@ export default function TermsService() {
                     <Stack gap={24}>
                         <Group gap={16} align="center">
 
-                            <Title order={2} c={headingColor} style={{ color: 'black', fontWeight: 600 }}>
-                                Data Privacy & Security
+                            <Title className="text-3xl text-[#424242] font-bold">
+                                4. Data Privacy & Security
                             </Title>
                         </Group>
-                        <List size="md" spacing={12} withPadding listStyleType="disc">
+                        <List spacing={10} withPadding listStyleType="disc" className="text-md text-[#636363] font-weight-500">
                             <List.Item>We collect and process Amazon Information only as necessary to provide the Service.</List.Item>
                             <List.Item>Data is encrypted in transit (TLS 1.2+) and at rest (AES-256).</List.Item>
                             <List.Item>PII is retained for no longer than 30 days after shipment, unless longer retention is required by law.</List.Item>
@@ -122,11 +123,11 @@ export default function TermsService() {
                     {/* Intellectual Property */}
                     <Stack gap={24}>
                         <Group gap={16}>
-                            <Title order={2} c={headingColor} style={{ color: 'black', fontWeight: 600 }}>
-                                Intellectual Property
+                            <Title className="text-3xl text-[#424242] font-bold">
+                                5. Intellectual Property
                             </Title>
                         </Group>
-                        <Text size="md">
+                        <Text className="text-md text-[#636363]">
                             All content, code, design, and branding on our website and within our Service are the property of <strong>RunAnalytic Technology</strong>. You may not copy, modify, or redistribute our intellectual property without prior written consent.
                         </Text>
                     </Stack>
@@ -135,18 +136,18 @@ export default function TermsService() {
                     <Stack gap={24}>
                         <Group gap={16} align="center">
 
-                            <Title order={2} c={headingColor} style={{ color: 'black', fontWeight: 600 }}>
-                                Service Availability
+                            <Title className="text-3xl text-[#424242] font-bold">
+                                6. Service Availability
                             </Title>
                         </Group>
-                        <Text size="md">
+                        <Text className="text-md text-[#636363]">
                             We strive to provide reliable, uninterrupted access, but we do not guarantee:
                         </Text>
-                        <List size="md" spacing={12} withPadding listStyleType="disc">
+                        <List spacing={10} withPadding listStyleType="disc" className="text-md text-[#636363] font-weight-500">
                             <List.Item>Continuous availability of the Service.</List.Item>
                             <List.Item>That the Service will be error-free or free of vulnerabilities.</List.Item>
                         </List>
-                        <Text size="md">We may suspend access temporarily for maintenance, upgrades, or security reasons.</Text>
+                        <Text className="text-md text-[#636363]">We may suspend access temporarily for maintenance, upgrades, or security reasons.</Text>
                     </Stack>
 
 
@@ -154,15 +155,15 @@ export default function TermsService() {
                     {/* Limitation of Liability */}
                     <Stack gap={24}>
                         <Group gap={16} align="center">
-                            <Title order={2} c={headingColor} style={{ color: 'black', fontWeight: 600 }}>
-                                Limitation of Liability
+                            <Title className="text-3xl text-[#424242] font-bold">
+                                7. Limitation of Liability
                             </Title>
                         </Group>
 
-                        <Text size="md">
+                        <Text className="text-md text-[#636363]">
                             To the maximum extent permitted by law, <strong>RunAnalytic Technology</strong> is not liable for:
                         </Text>
-                        <List size="md" spacing={12} withPadding listStyleType="disc">
+                        <List spacing={10} withPadding listStyleType="disc" className="text-md text-[#636363] font-weight-500">
                             <List.Item>Any indirect, incidental, or consequential damages.</List.Item>
                             <List.Item>Loss of data, profits, or business opportunities resulting from Service use.</List.Item>
                             <List.Item>Issues caused by Amazon SP-API downtime, errors, or policy changes.</List.Item>
@@ -173,30 +174,32 @@ export default function TermsService() {
                     <Stack gap={24}>
                         <Group gap={16}>
 
-                            <Title order={2} c={headingColor} style={{ color: 'black', fontWeight: 600 }}>
-                                Termination
+                            <Title className="text-3xl text-[#424242] font-bold">
+                                8. Termination
                             </Title>
                         </Group>
-                        <Text size="md">
+                        <Text className="text-md text-[#636363]">
                             We may suspend or terminate your access to the Service if you:
                         </Text>
-                        <List size="md" spacing={12} withPadding listStyleType="disc">
+                        <List spacing={10} withPadding listStyleType="disc" className="text-md text-[#636363] font-weight-500">
                             <List.Item>Breach these Terms.</List.Item>
                             <List.Item>Misuse Amazon SP-API or violate Amazon’s Developer Agreement.</List.Item>
                             <List.Item>Engage in fraudulent, abusive, or unlawful activity.</List.Item>
                         </List>
-                        <Text>You may stop using the Service at any time by revoking SP-API authorization in Amazon Seller Central.</Text>
+                        <Text className="text-md text-[#636363]">You may stop using the Service at any time by revoking SP-API authorization in Amazon Seller Central.</Text>
 
                     </Stack>
+
+
 
                     {/* Governing Law*/}
                     <Stack gap={24}>
                         <Group gap={16}>
-                            <Title order={2} c={headingColor} style={{ color: 'black', fontWeight: 600 }}>
-                                Governing Law
+                            <Title className="text-3xl text-[#424242] font-bold">
+                                9. Governing Law
                             </Title>
                         </Group>
-                        <Text size="md">
+                        <Text className="text-md text-[#636363]">
                             These Terms are governed by the laws of the United Arab Emirates. Any disputes will be resolved in the courts of the UAE.
                         </Text>
                     </Stack>
@@ -205,14 +208,14 @@ export default function TermsService() {
                     <Stack gap={24}>
                         <Group gap={16}>
 
-                            <Title order={2} c={headingColor} style={{ color: 'black', fontWeight: 600 }}>
-                                Contact Us
+                            <Title className="text-3xl text-[#424242] font-bold">
+                                10. Contact Us
                             </Title>
                         </Group>
-                        <Text size="md">
+                        <Text className="text-md text-[#636363]">
                             If you have any questions, please contact:
                         </Text>
-                        <List size="md" spacing={12}>
+                        <List spacing={10} withPadding listStyleType="disc" className="text-md text-[#636363] font-weight-500">
                             <List.Item>
                                 Email: <Anchor href="mailto:support@runanalytic.com" fw={600}>support@runanalytic.com</Anchor>
                             </List.Item>
