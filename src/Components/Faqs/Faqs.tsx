@@ -154,10 +154,10 @@ const Faqs = ({ ...others }: FaqsProps) => {
           chevron: classes.chevron,
         }}
       >
-        <Accordion.Item value='reset-password'>
+        {/* <Accordion.Item value='reset-password'>
           <Accordion.Control>What is RunAnalytic?</Accordion.Control>
           <Accordion.Panel>{placeholder}</Accordion.Panel>
-        </Accordion.Item>
+        </Accordion.Item> */}
 
         <Accordion.Item value='policies'>
           <Accordion.Control>What does RunAnalytic do and how does it comply with Amazon’s SP-API policies?</Accordion.Control>
@@ -176,19 +176,19 @@ const Faqs = ({ ...others }: FaqsProps) => {
 
 
 
-        <Accordion.Item value='another-account'>
+        {/* <Accordion.Item value='another-account'>
           <Accordion.Control>
             Who should use RunAnalytic?
           </Accordion.Control>
           <Accordion.Panel>{placeholder1}</Accordion.Panel>
-        </Accordion.Item>
+        </Accordion.Item> */}
 
-        <Accordion.Item value='newsletter'>
+        {/* <Accordion.Item value='newsletter'>
           <Accordion.Control>
             Is RunAnalytic approved by Amazon?
           </Accordion.Control>
           <Accordion.Panel>{placeholder2}</Accordion.Panel>
-        </Accordion.Item>
+        </Accordion.Item> */}
 
         <Accordion.Item value='credit-card'>
           <Accordion.Control>

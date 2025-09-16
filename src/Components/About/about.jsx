@@ -34,8 +34,6 @@ export default function About() {
             <strong>RunAnalytic Technology</strong> is a UAE-based technology company specializing in e-commerce automation solutions for Amazon sellers. Our mission is to help online merchants simplify compliance, save time, and grow their business with secure, efficient tools.
           </Text>
 
-          <Text className="pt-4 text-md text-[#636363]">We are committed to providing innovative solutions that make e-commerce compliance simple and efficient.</Text>
-
         </Stack>
 
         {/* Main Content */}
@@ -55,8 +53,8 @@ export default function About() {
               <List.Item>Automated invoice creation and delivery</List.Item>
               <List.Item>Real-time order synchronization</List.Item>
               <List.Item>Reduced errors and administrative workload</List.Item>
-              <List.Item>Secure handling of customer data (<strong>PII</strong>)</List.Item>
-              <List.Item>Full compliance with <strong>UAE VAT</strong> laws</List.Item>
+              <List.Item>Secure handling of customer data (PII)</List.Item>
+              <List.Item>Full compliance with UAE VAT laws</List.Item>
             </List>
           </Stack>
 
@@ -68,10 +66,12 @@ export default function About() {
               </Title>
             </Group>
             <List spacing={10} withPadding listStyleType="disc" className="text-md text-[#636363] font-weight-500">
-              <List.Item>Security First: We apply enterprise-grade security practices including encryption, access control, and incident response procedures</List.Item>
-              <List.Item>Compliance by Design: Our systems are built around UAE Federal Tax Authority requirements to keep sellers compliant.</List.Item>
+              <List.Item>Security First: We apply enterprise-grade security practices including encryption, access control, and incident response procedures.</List.Item>
+              <List.Item>Compliance by Design: Our systems are built around UAE Federal Tax Authority requirements to keep sellers compliant.
+              </List.Item>
               <List.Item>Seller Success: We focus on eliminating manual tasks so sellers can spend more time growing their business.</List.Item>
-              <List.Item>Innovation: We continuously improve our platform to support additional marketplaces such as KSA, UK, USA.</List.Item>
+              <List.Item>Innovation: We continuously improve our platform to support additional marketplaces such as KSA, UK, USA.
+              </List.Item>
             </List>
           </Stack>
 
@@ -90,6 +90,17 @@ export default function About() {
             </List>
           </Stack>
 
+
+          <Stack gap={24}>
+            <Group gap={16}>
+              <Title className="text-3xl text-[#424242] font-bold">
+                4. SP-API Compliance Statement
+              </Title>
+            </Group>
+            <Text className="text-base text-[#636363]">RunAnalytic complies with Amazon’s SP-API Data Protection Policy and Acceptable Use Policy. We only access the minimum customer data required to generate invoices, encrypt all data in transit and at rest, never store PII in logs, and automatically delete all customer data within 30 days.
+            </Text>
+          </Stack>
+
           {/* Contact */}
           <Stack gap={24}>
             <Group gap={16}>
@@ -99,7 +110,7 @@ export default function About() {
               </Title>
             </Group>
             <Text className="text-md text-[#636363]">
-              If you have any questions, please contact:
+            If you have questions about this policy or would like to exercise your rights regarding PII, please contact us:
             </Text>
             <List spacing={10} withPadding listStyleType="disc" className="text-md text-[#636363] font-weight-500">
               <List.Item>
