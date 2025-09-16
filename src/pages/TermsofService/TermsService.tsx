@@ -28,13 +28,15 @@ export default function TermsService() {
                     <Group gap={16}>
 
                         <Title className="text-5xl text-[#424242] pb-12 font-bold" >
-                            <strong>Terms of Service</strong>
+                            <strong>Terms of Service – RunAnalytic</strong>
                         </Title>
                     </Group>
-                    <Text className="w-full text-center text-m text-[#636363] font-semibold">Effective Date: 01-Aug-2025</Text>
+                    <Text className="w-full text-center text-m text-[#636363] font-semibold">Effective Date: 10-Sep-2025</Text>
                     <div className="w-24 h-1 bg-blue-500 mx-auto my-4"></div>
                     <Text className="text-lg text-[#424242]" style={{ lineHeight: '2' }}>
-                        Welcome to <strong>RunAnalytic Technology</strong> (“we,” “our,” “us”). By accessing  our services, including our Amazon SP-API integrated invoicing application (“Service”), you agree to be bound by these Terms of Service.
+                        Welcome to <strong>RunAnalytic Technology</strong>. By accessing  our services, including our Amazon SP-API integrated invoicing application (“Service”), you agree to be bound by these Terms of Service.
+                        If you do not agree to these Terms, please do not use our Service.
+
                     </Text>
 
                     <Text className="pt-4 text-md text-[#636363]">If you do not agree to these Terms, please do not use our Service.</Text>
@@ -57,7 +59,7 @@ export default function TermsService() {
                         <List spacing={10} withPadding listStyleType="disc" className="text-md text-[#636363] font-weight-500">
                             <List.Item>Be at least 18 years old.</List.Item>
                             <List.Item>Have an active Amazon Seller Central account.</List.Item>
-                            <List.Item>Be legally authorized to use Amazon’s invoice Selling Partner API (<Anchor href="https://developer-docs.amazon.com/sp-api/docs/invoices-api" target="_blank" fw={600}>SP-API</Anchor>).</List.Item>
+                            <List.Item>Be legally authorized to use  <Anchor href="https://developer-docs.amazon.com/sp-api/docs/invoices-api" target="_blank" fw={600}>Amazon’s invoice Selling Partner API (SP-API)</Anchor>.</List.Item>
                         </List>
                     </Stack>
 
@@ -76,7 +78,7 @@ export default function TermsService() {
 
                         <List spacing={10} withPadding listStyleType="disc" className="text-md text-[#636363] font-weight-500">
                             <List.Item>Automates <strong>UAE VAT-compliant invoice generation</strong> for Amazon orders.</List.Item>
-                            <List.Item>Retrieves order and customer data (<strong>PII</strong>) from <Anchor href="https://developer-docs.amazon.com/sp-api/docs/invoices-api" fw={600} target="_blank">Amazon SP-API</Anchor>.</List.Item>
+                            <List.Item>Retrieves minimum Amazon customer data  to generate tax-compliant invoices</List.Item>
                             <List.Item>Generates and securely delivers invoices to Amazon or to customers.</List.Item>
                         </List>
                         <Text className="text-md text-[#636363]">We may enhance, update, or discontinue features of our Service at any time, with or without notice.</Text>
@@ -110,11 +112,22 @@ export default function TermsService() {
                             <Title className="text-3xl text-[#424242] font-bold">
                                 4. Data Privacy & Security
                             </Title>
+
+                            <Text className="text-md text-[#636363]">
+                            We protect all PII using industry best practices:
+                        </Text>
                         </Group>
                         <List spacing={10} withPadding listStyleType="disc" className="text-md text-[#636363] font-weight-500">
-                            <List.Item>We collect and process Amazon Information only as necessary to provide the Service.</List.Item>
-                            <List.Item>Data is encrypted in transit (TLS 1.2+) and at rest (AES-256).</List.Item>
-                            <List.Item>PII is retained for no longer than 30 days after shipment, unless longer retention is required by law.</List.Item>
+                            <List.Item>In transit: Data is encrypted using TLS 1.2 or higher.</List.Item>
+                            <List.Item>At rest: Data is encrypted using AES-256 encryption.</List.Item>
+                            <List.Item>Hosting: Data is stored on secure [AWS/Cloud Provider] servers in [Region, USA].
+                            </List.Item>
+                            <List.Item>Firewalls, intrusion detection, and access controls are in place to protect against unauthorized access.</List.Item>
+                            <List.Item>Regular vulnerability scans and penetration testing
+                            </List.Item>
+                            <List.Item>Monitoring via Security Information and Event Management (SIEM) systems
+                            </List.Item>
+                            <List.Item>Incident response procedures including Amazon notification within 72 hours of any data breach involving Amazon Information</List.Item>
                             <List.Item>For full details, please see our <Anchor href={PATH_PAGES.privacy} fw={600}>Privacy Policy</Anchor>.</List.Item>
 
                         </List>
@@ -128,7 +141,8 @@ export default function TermsService() {
                             </Title>
                         </Group>
                         <Text className="text-md text-[#636363]">
-                            All content, code, design, and branding on our website and within our Service are the property of <strong>RunAnalytic Technology</strong>. You may not copy, modify, or redistribute our intellectual property without prior written consent.
+                        All content, code, design, and branding on our website and within our Service are the property of <strong>RunAnalytic Technology</strong>. You may not copy, modify, or redistribute our intellectual property without prior written consent.
+
                         </Text>
                     </Stack>
 
