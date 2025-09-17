@@ -37,7 +37,7 @@ const placeholder5 = (
 );
 const placeholder6 = (
   <span className="text-base">
-   Currently, RunAnalytic supports Amazon UAE(amazon.ae) sellers through SP-API integration. We plan to add integration with other Amazon marketplaces in the future.
+  Currently, RunAnalytic supports Amazon UAE(amazon.ae) sellers through SP-API integration. We are actively expanding to support additional Amazon marketplaces, including KSA, UK, and USA.
   </span>
 );
 const placeholder7 = (
@@ -112,7 +112,7 @@ const placeholder13 = (<span className="text-base">
 
 const placeholder14 = (
   <span className="text-base">
-    In the unlikely event of a data breach affecting Amazon customer data (PII), we will immediately secure affected systems, notify amazon security team via email (security@amazon.com) and impacted parties within 24 hours, and carry out a full investigation in line with industry best practices and legal requirements.
+    In the unlikely event of a data breach affecting Amazon customer data (PII), we will immediately secure affected systems, notify Amazon’s security team via email (security@amazon.com) and impacted parties within 24 hours, and carry out a full investigation in line with industry best practices and legal requirements.
   </span>
 );
 

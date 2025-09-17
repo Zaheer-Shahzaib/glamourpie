@@ -41,7 +41,7 @@ export default function About() {
           {/* What we do */}
           <Stack gap={24}>
             <Group gap={16}>
-              <Title className="text-3xl text-[#424242] font-bold">
+              <Title className="text-2xl text-[#424242] font-bold">
                 1. What We Do
               </Title>
             </Group>
@@ -61,7 +61,7 @@ export default function About() {
           {/* Our values */}
           <Stack gap={24}>
             <Group gap={16}>
-              <Title className="text-3xl text-[#424242] font-bold">
+              <Title className="text-2xl text-[#424242] font-bold">
                 2. Our Values
               </Title>
             </Group>
@@ -78,7 +78,7 @@ export default function About() {
           {/* Why Choose RunAnalytic */}
           <Stack gap={24}>
             <Group gap={16}>
-              <Title className="text-3xl text-[#424242] font-bold">
+              <Title className="text-2xl text-[#424242] font-bold">
                 3. Why Choose RunAnalytic
               </Title>
             </Group>
@@ -93,7 +93,7 @@ export default function About() {
 
           <Stack gap={24}>
             <Group gap={16}>
-              <Title className="text-3xl text-[#424242] font-bold">
+              <Title className="text-2xl text-[#424242] font-bold">
                 4. SP-API Compliance Statement
               </Title>
             </Group>
@@ -105,7 +105,7 @@ export default function About() {
           <Stack gap={24}>
             <Group gap={16}>
 
-              <Title className="text-3xl text-[#424242] font-bold">
+              <Title className="text-2xl text-[#424242] font-bold">
                 4. Contact Us
               </Title>
             </Group>

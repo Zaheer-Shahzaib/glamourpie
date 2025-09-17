@@ -49,7 +49,7 @@ export default function TermsService() {
                     <Stack gap={24}>
                         <Group gap={16}>
 
-                            <Title className="text-3xl text-[#424242] font-bold">
+                            <Title className="text-2xl text-[#424242] font-bold">
                                 1. Eligibility
                             </Title>
                         </Group>
@@ -67,7 +67,7 @@ export default function TermsService() {
                     <Stack gap={24}>
                         <Group gap={16} align="center">
 
-                            <Title className="text-3xl text-[#424242] font-bold">
+                            <Title className="text-2xl text-[#424242] font-bold">
                                 2. Our Services
                             </Title>
                         </Group>
@@ -88,7 +88,7 @@ export default function TermsService() {
                     <Stack gap={24}>
                         <Group gap={16} align="center">
 
-                            <Title className="text-3xl text-[#424242] font-bold">
+                            <Title className="text-2xl text-[#424242] font-bold">
                                 3. User Responsibilities
                             </Title>
                         </Group>
@@ -109,7 +109,7 @@ export default function TermsService() {
                     <Stack gap={24}>
                         <Group gap={16} align="center">
 
-                            <Title className="text-3xl text-[#424242] font-bold">
+                            <Title className="text-2xl text-[#424242] font-bold">
                                 4. Data Privacy & Security
                             </Title>
 
@@ -136,7 +136,7 @@ export default function TermsService() {
                     {/* Intellectual Property */}
                     <Stack gap={24}>
                         <Group gap={16}>
-                            <Title className="text-3xl text-[#424242] font-bold">
+                            <Title className="text-2xl text-[#424242] font-bold">
                                 5. Intellectual Property
                             </Title>
                         </Group>
@@ -150,7 +150,7 @@ export default function TermsService() {
                     <Stack gap={24}>
                         <Group gap={16} align="center">
 
-                            <Title className="text-3xl text-[#424242] font-bold">
+                            <Title className="text-2xl text-[#424242] font-bold">
                                 6. Service Availability
                             </Title>
                         </Group>
@@ -169,7 +169,7 @@ export default function TermsService() {
                     {/* Limitation of Liability */}
                     <Stack gap={24}>
                         <Group gap={16} align="center">
-                            <Title className="text-3xl text-[#424242] font-bold">
+                            <Title className="text-2xl text-[#424242] font-bold">
                                 7. Limitation of Liability
                             </Title>
                         </Group>
@@ -188,7 +188,7 @@ export default function TermsService() {
                     <Stack gap={24}>
                         <Group gap={16}>
 
-                            <Title className="text-3xl text-[#424242] font-bold">
+                            <Title className="text-2xl text-[#424242] font-bold">
                                 8. Termination
                             </Title>
                         </Group>
@@ -209,7 +209,7 @@ export default function TermsService() {
                     {/* Governing Law*/}
                     <Stack gap={24}>
                         <Group gap={16}>
-                            <Title className="text-3xl text-[#424242] font-bold">
+                            <Title className="text-2xl text-[#424242] font-bold">
                                 9. Governing Law
                             </Title>
                         </Group>
@@ -222,7 +222,7 @@ export default function TermsService() {
                     <Stack gap={24}>
                         <Group gap={16}>
 
-                            <Title className="text-3xl text-[#424242] font-bold">
+                            <Title className="text-2xl text-[#424242] font-bold">
                                 10. Contact Us
                             </Title>
                         </Group>

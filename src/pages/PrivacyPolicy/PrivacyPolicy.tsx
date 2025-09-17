@@ -47,11 +47,11 @@ export default function PrivacyPolicy() {
           <Stack gap={24}>
             <Group gap={16}>
 
-              <Title className="text-3xl text-[#424242] font-bold">
+              <Title className="text-2xl text-[#424242] font-bold">
                 1. Information We Collect
               </Title>
             </Group>
-            <Text className="text-md text-[#636363]">
+            <Text className="text-base text-[#636363]">
               We only access and process the minimum Amazon customer data required to generate tax-compliant invoices. This may include:
 
             </Text>
@@ -69,7 +69,7 @@ export default function PrivacyPolicy() {
           <Stack gap={24}>
             <Group gap={16} align="center">
 
-              <Title className="text-3xl text-[#424242] font-bold">
+              <Title className="text-2xl text-[#424242] font-bold">
                 2. Data Storage and Retention
               </Title>
             </Group>
@@ -87,12 +87,12 @@ export default function PrivacyPolicy() {
           <Stack gap={24}>
             <Group gap={16} align="center">
 
-              <Title className="text-3xl text-[#424242] font-bold">
+              <Title className="text-2xl text-[#424242] font-bold">
               3. Data Security & Encryption
               </Title>
             </Group>
 
-            <Text className="text-md text-[#636363]">
+            <Text className="text-base text-[#636363]">
             We protect all PII using industry best practices:
             </Text>
 
@@ -111,12 +111,12 @@ export default function PrivacyPolicy() {
           <Stack gap={24}>
             <Group gap={16} align="center">
 
-              <Title className="text-3xl text-[#424242] font-bold">
+              <Title className="text-2xl text-[#424242] font-bold">
                 4.  Logging and Monitoring
               </Title>
             </Group>
 
-            <Text className="text-md text-[#636363]">
+            <Text className="text-base text-[#636363]">
             We strictly follow Amazon’s<Anchor href="https://sellercentral.amazon.es/mws/static/policy?documentType=AUP&locale=en_EN" target="_blank" fw={600}> Acceptable Use Policy (AUP)</Anchor> and <Anchor href="https://sellercentral.amazon.es/mws/static/policy?documentType=DPP&locale=en_EN" target="_blank" fw={600}>Data Protection Policies (DDP)</Anchor>:
             </Text>
             <List spacing={10} withPadding listStyleType="disc" className="text-md text-[#636363] font-weight-500">
@@ -132,11 +132,11 @@ export default function PrivacyPolicy() {
           <Stack gap={24}>
             <Group gap={16} align="center">
 
-              <Title className="text-3xl text-[#424242] font-bold">
+              <Title className="text-2xl text-[#424242] font-bold">
                 5. Access Controls
               </Title>
             </Group>
-            <List spacing={10} withPadding listStyleType="disc" className="text-md text-[#636363] font-weight-500">
+            <List spacing={10} withPadding listStyleType="disc" className="text-base text-[#636363] font-weight-500">
               <List.Item style={{ lineHeight: '2' }}>PII is only accessible by authorized automated systems.
               </List.Item>
               <List.Item style={{ lineHeight: '2' }}>RunAnalytic staff do not have direct access to Amazon customer PII unless explicitly required for troubleshooting under a confidentiality agreement.
@@ -153,11 +153,11 @@ export default function PrivacyPolicy() {
           <Stack gap={24}>
             <Group gap={16}>
 
-              <Title className="text-3xl text-[#424242] font-bold">
+              <Title className="text-2xl text-[#424242] font-bold">
               6. Password and Authentication Policy
               </Title>
             </Group>
-            <List spacing={12} withPadding listStyleType="disc" className="text-md text-[#636363] font-weight-500">
+            <List spacing={12} withPadding listStyleType="disc" className="text-base text-[#636363] font-weight-500">
               <List.Item>User passwords must be at least 12 characters long and include uppercase, lowercase, numbers, and special characters.
               </List.Item>
               <List.Item>3 failed attempts allowed with an invalid password before a temporary lock-out.</List.Item>
@@ -171,11 +171,11 @@ export default function PrivacyPolicy() {
           <Stack gap={24}>
             <Group gap={16} align="center">
 
-              <Title className="text-3xl text-[#424242] font-bold">
+              <Title className="text-2xl text-[#424242] font-bold">
               7. Incident Response
               </Title>
             </Group>
-            <Text className="text-md text-[#636363]">
+            <Text className="text-base text-[#636363]">
             In the event of a data breach involving Amazon customer PII:
             </Text>
             <List spacing={12} withPadding listStyleType="disc" className="text-md text-[#636363] font-weight-500">
@@ -190,7 +190,7 @@ export default function PrivacyPolicy() {
           <Stack gap={24}>
             <Group gap={16} align="center">
 
-              <Title className="text-3xl text-[#424242] font-bold">
+              <Title className="text-2xl text-[#424242] font-bold">
               8. Compliance
               </Title>
             </Group>
@@ -225,7 +225,7 @@ export default function PrivacyPolicy() {
           <Stack gap={24}>
             <Group gap={16}>
 
-              <Title className="text-3xl text-[#424242] font-bold">
+              <Title className="text-2xl text-[#424242] font-bold">
                 9. Children's Privacy
               </Title>
             </Group>
@@ -237,7 +237,7 @@ export default function PrivacyPolicy() {
           <Stack gap={24}>
             <Group gap={16}>
 
-              <Title className="text-3xl text-[#424242] font-bold">
+              <Title className="text-2xl text-[#424242] font-bold">
                 10. Changes to This Privacy Policy
               </Title>
             </Group>
@@ -249,11 +249,11 @@ export default function PrivacyPolicy() {
           <Stack gap={24}>
             <Group gap={16}>
 
-              <Title className="text-3xl text-[#424242] font-bold">
+              <Title className="text-2xl text-[#424242] font-bold">
                 11. Contact Us
               </Title>
             </Group>
-            <Text className="text-md text-[#636363]">
+            <Text className="text-base text-[#636363]">
             If you have questions about this policy or would like to exercise your rights regarding PII, please contact us:
             </Text>
             <List spacing={10} withPadding listStyleType="disc" className="text-md text-[#636363] font-weight-500">
