@@ -27,11 +27,11 @@ export default function TermsService() {
                 <Stack align="center" mb={64} gap={8}>
                     <Group gap={16}>
 
-                        <Title className="text-5xl text-[#424242] pb-12 font-bold" >
+                        <Title className="text-3xl text-[#424242] pb-12 font-bold" >
                             <strong>Terms of Service – RunAnalytic</strong>
                         </Title>
                     </Group>
-                    <Text className="w-full text-center text-m text-[#636363] font-semibold">Effective Date: 10-Sep-2025</Text>
+                    <Text className="w-full text-start text-m text-[#636363] font-semibold">Effective Date: 10-Sep-2025</Text>
                     <div className="w-24 h-1 bg-blue-500 mx-auto my-4"></div>
                     <Text className="text-lg text-[#424242]" style={{ lineHeight: '2' }}>
                         Welcome to <strong>RunAnalytic Technology</strong>. By accessing  our services, including our Amazon SP-API integrated invoicing application (“Service”), you agree to be bound by these Terms of Service.
@@ -59,7 +59,7 @@ export default function TermsService() {
                         <List spacing={10} withPadding listStyleType="disc" className="text-md text-[#636363] font-weight-500">
                             <List.Item>Be at least 18 years old.</List.Item>
                             <List.Item>Have an active Amazon Seller Central account.</List.Item>
-                            <List.Item>Be legally authorized to use  <Anchor href="https://developer-docs.amazon.com/sp-api/docs/invoices-api" target="_blank" fw={600}>Amazon’s invoice Selling Partner API (SP-API)</Anchor>.</List.Item>
+                            <List.Item>Be legally authorized to use  <Anchor href="https://developer-docs.amazon.com/sp-api/docs/invoices-api" target="_blank" >Amazon’s invoice Selling Partner API (SP-API)</Anchor>.</List.Item>
                         </List>
                     </Stack>
 
@@ -100,7 +100,7 @@ export default function TermsService() {
                         <List spacing={10} withPadding listStyleType="disc" className="text-md text-[#636363] font-weight-500">
                             <List.Item>Provide accurate and lawful information.</List.Item>
                             <List.Item>Use the Service only for your authorized Amazon Seller account.</List.Item>
-                            <List.Item>Comply with all applicable laws, including <Anchor href="https://tax.gov.ae/en/taxes/Vat.aspx" target="_blank" fw={600} >UAE VAT regulations</Anchor>.</List.Item>
+                            <List.Item>Comply with all applicable laws, including <Anchor href="https://tax.gov.ae/en/taxes/Vat.aspx" target="_blank" >UAE VAT regulations</Anchor>.</List.Item>
                             <List.Item>Not misuse the Service for scraping, unauthorized automation, or violating Amazon’s policies.</List.Item>
                         </List>
                     </Stack>
@@ -128,7 +128,7 @@ export default function TermsService() {
                             <List.Item>Monitoring via Security Information and Event Management (SIEM) systems
                             </List.Item>
                             <List.Item>Incident response procedures including Amazon notification within 72 hours of any data breach involving Amazon Information</List.Item>
-                            <List.Item>For full details, please see our <Anchor href={PATH_PAGES.privacy} fw={600}>Privacy Policy</Anchor>.</List.Item>
+                            <List.Item>For full details, please see our <Anchor href={PATH_PAGES.privacy} >Privacy Policy</Anchor>.</List.Item>
 
                         </List>
                     </Stack>
@@ -231,7 +231,7 @@ export default function TermsService() {
                         </Text>
                         <List spacing={10} withPadding listStyleType="disc" className="text-md text-[#636363] font-weight-500">
                             <List.Item>
-                                Email: <Anchor href="mailto:support@runanalytic.com" fw={600}>support@runanalytic.com</Anchor>
+                                Email: <Anchor href="mailto:support@runanalytic.com" >support@runanalytic.com</Anchor>
                             </List.Item>
                             <List.Item>
                                 Address: Butina Sharjah UAE

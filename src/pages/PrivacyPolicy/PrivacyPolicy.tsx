@@ -26,14 +26,14 @@ export default function PrivacyPolicy() {
         <Stack align="center" mb={64} gap={8}>
           <Group gap={16}>
 
-            <Title className="text-5xl text-[#424242] pb-12 font-bold">
+            <Title className="text-3xl text-[#424242] pb-12 font-bold">
               <strong>Privacy Policy – RunAnalytic</strong>
             </Title>
           </Group>
-          <Text className="w-full text-center text-m text-[#636363] font-semibold">Last updated: 10-Sep-2025</Text>
+          <Text className="w-full text-start text-m text-[#636363] font-semibold">Last updated: 10-Sep-2025</Text>
           <div className="w-24 h-1 bg-blue-500 mx-auto my-4"></div>
           <Text className="text-lg text-[#424242]" style={{ lineHeight: '2' }}>
-          At RunAnalytic, we take your privacy and data protection seriously. This policy explains how we handle Personally Identifiable Information (PII) accessed through the <Anchor href="https://developer-docs.amazon.com/sp-api/docs/welcome?ld=ASXXSPAPIDirect&pageName=US%3ASPDS%3ASPAPI-home" target="_blank" fw={600}>Amazon Selling Partner API (SP-API)</Anchor> and other related services. 
+          At RunAnalytic, we take your privacy and data protection seriously. This policy explains how we handle Personally Identifiable Information (PII) accessed through the <Anchor href="https://developer-docs.amazon.com/sp-api/docs/welcome?ld=ASXXSPAPIDirect&pageName=US%3ASPDS%3ASPAPI-home" target="_blank" >Amazon Selling Partner API (SP-API)</Anchor> and other related services. 
           </Text>
 
 
@@ -77,9 +77,9 @@ export default function PrivacyPolicy() {
             <List spacing={10} withPadding listStyleType="disc" className=" text-[#636363] font-weight-500">
               <List.Item>Amazon customer PII is used in real time to generate invoices</List.Item>
               <List.Item>We do not permanently store customer PII.</List.Item>
-              <List.Item>All retrieved data is automatically deleted within 30 days, in compliance with <Anchor href="https://sellercentral.amazon.es/mws/static/policy?documentType=DPP&locale=en_EN" target="_blank" fw={600} >Amazon’s Data Protection Policy.</Anchor>
+              <List.Item>All retrieved data is automatically deleted within 30 days, in compliance with <Anchor href="https://sellercentral.amazon.es/mws/static/policy?documentType=DPP&locale=en_EN" target="_blank" >Amazon’s Data Protection Policy.</Anchor>
               </List.Item>
-              <List.Item>Customers may request earlier deletion of their data by contacting us at <Anchor href="mailto:support@runanalytic.com" target="_blank" fw={600}>support@runanalytic.com</Anchor></List.Item>
+              <List.Item>Customers may request earlier deletion of their data by contacting us at <Anchor href="mailto:support@runanalytic.com" target="_blank" >support@runanalytic.com</Anchor></List.Item>
             </List>
           </Stack>
 
@@ -117,7 +117,7 @@ export default function PrivacyPolicy() {
             </Group>
 
             <Text className="text-base text-[#636363]">
-            We strictly follow Amazon’s<Anchor href="https://sellercentral.amazon.es/mws/static/policy?documentType=AUP&locale=en_EN" target="_blank" fw={600}> Acceptable Use Policy (AUP)</Anchor> and <Anchor href="https://sellercentral.amazon.es/mws/static/policy?documentType=DPP&locale=en_EN" target="_blank" fw={600}>Data Protection Policies (DDP)</Anchor>:
+            We strictly follow Amazon’s<Anchor href="https://sellercentral.amazon.es/mws/static/policy?documentType=AUP&locale=en_EN" target="_blank" > Acceptable Use Policy (AUP)</Anchor> and <Anchor href="https://sellercentral.amazon.es/mws/static/policy?documentType=DPP&locale=en_EN" target="_blank" >Data Protection Policies (DDP)</Anchor>:
             </Text>
             <List spacing={10} withPadding listStyleType="disc" className="text-md text-[#636363] font-weight-500">
               <List.Item>No Amazon customer PII is ever stored in logs.
@@ -195,30 +195,11 @@ export default function PrivacyPolicy() {
               </Title>
             </Group>
             <List spacing={12} withPadding listStyleType="disc" className="text-md text-[#636363] font-weight-500">
-              <List.Item>We comply with Amazon’s <Anchor href="https://sellercentral.amazon.es/mws/static/policy?documentType=AUP&locale=en_EN" target="_blank" fw={600}>Acceptable Use Policy </Anchor>and <Anchor href="https://sellercentral.amazon.es/mws/static/policy?documentType=DPP&locale=en_EN" target="_blank" fw={600}>Data Protection Policy</Anchor>.
+              <List.Item>We comply with Amazon’s <Anchor href="https://sellercentral.amazon.es/mws/static/policy?documentType=AUP&locale=en_EN" target="_blank" >Acceptable Use Policy </Anchor>and <Anchor href="https://sellercentral.amazon.es/mws/static/policy?documentType=DPP&locale=en_EN" target="_blank" >Data Protection Policy</Anchor>.
               </List.Item>
               <List.Item>We follow international best practices (NIST/ISO27001 guidelines) for data protection and security.</List.Item>
             </List>
           </Stack>
-
-
-
-
-          {/* Governing Law*/}
-          {/* <Stack gap={24}>
-            <Group gap={16}>
-              <Title className="text-3xl text-[#424242] font-bold">
-                10. Secure Coding Practices
-              </Title>
-            </Group>
-            <Text className="text-md text-[#636363]" style={{ lineHeight: '2' }}>
-              The developers will never save or store keys, credentials or passwords in the application code or in public repositories, and will always keep their development and production environments separated.
-            </Text>
-          </Stack> */}
-
-
-
-
 
 
           {/* Children's Privacy */}
@@ -258,7 +239,7 @@ export default function PrivacyPolicy() {
             </Text>
             <List spacing={10} withPadding listStyleType="disc" className="text-md text-[#636363] font-weight-500">
               <List.Item>
-                Email: <Anchor href="mailto:support@runanalytic.com" fw={600}>support@runanalytic.com</Anchor>
+                Email: <Anchor href="mailto:support@runanalytic.com" >support@runanalytic.com</Anchor>
               </List.Item>
               <List.Item>
                 Address: Butina Sharjah UAE

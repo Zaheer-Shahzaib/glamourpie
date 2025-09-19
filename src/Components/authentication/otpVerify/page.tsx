@@ -19,6 +19,7 @@ import { api } from "../../../Services/api";
 import { notifications } from "@mantine/notifications";
 import { useAuth } from "../../../Context/useAuth";
 import { useNavigate } from "react-router-dom";
+import { PATH_DASHBOARD } from "../../../routes";
 
 function OTPVerify() {
   const mobile_match = useMediaQuery("(max-width: 425px)");
@@ -64,7 +65,7 @@ function OTPVerify() {
           color: "green",
           position: "top-right",
         });
-        navigate("/");
+        navigate(PATH_DASHBOARD.default);
       }
     } catch (err: any) {
       setError(err.response?.data?.message || "Verification failed");
@@ -149,8 +150,8 @@ function OTPVerify() {
               >
                 {timer > 0
                   ? `Resend in ${Math.floor(timer / 60)}:${String(
-                      timer % 60
-                    ).padStart(2, "0")}`
+                    timer % 60
+                  ).padStart(2, "0")}`
                   : "Re-Send"}
               </Button>
 
