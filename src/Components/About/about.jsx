@@ -24,7 +24,7 @@ export default function About() {
         <Stack align="center" mb={64} gap={8}>
           <Group gap={16}>
 
-            <Title className="text-5xl text-[#424242] pb-12 font-bold">
+            <Title className="text-3xl text-[#424242] pb-12 font-bold">
               <strong>About Us</strong>
             </Title>
           </Group>
@@ -46,7 +46,7 @@ export default function About() {
               </Title>
             </Group>
             <Text className="text-md text-[#636363]" style={{ lineHeight: '1.9' }}>
-              We are the creators of a cloud-based SaaS platform that integrates directly with <strong>Amazon's Selling Partner API (SP-API)</strong>. Our solution automatically generates <strong>UAE VAT-compliant invoices</strong> for every Amazon order, ensuring sellers meet <Anchor href="https://tax.gov.ae/en/default.aspx" target="_blank" fw={600}>Federal Tax Authority (FTA) </Anchor> regulations without manual effort. After uploading the generated invoice via SP-API to comply with amazon invoice uploaded policy.
+              We are the creators of a cloud-based SaaS platform that integrates directly with <strong>Amazon's Selling Partner API (SP-API)</strong>. Our solution automatically generates <strong>UAE VAT-compliant invoices</strong> for every Amazon order, ensuring sellers meet <Anchor href="https://tax.gov.ae/en/default.aspx" target="_blank" >Federal Tax Authority (FTA) </Anchor> regulations without manual effort. After uploading the generated invoice via SP-API to comply with amazon invoice uploaded policy.
             </Text>
             <Text className="text-md text-[#636363]">With RunAnalytic, Amazon sellers benefit from:</Text>
             <List spacing={10} withPadding listStyleType="disc" className="text-md text-[#636363] font-weight-500">
@@ -114,7 +114,7 @@ export default function About() {
             </Text>
             <List spacing={10} withPadding listStyleType="disc" className="text-md text-[#636363] font-weight-500">
               <List.Item>
-                Email: <Anchor href="mailto:support@runanalytic.com" fw={600}>support@runanalytic.com</Anchor>
+                Email: <Anchor href="mailto:support@runanalytic.com" >support@runanalytic.com</Anchor>
               </List.Item>
               <List.Item>
                 Address: Butina Sharjah UAE

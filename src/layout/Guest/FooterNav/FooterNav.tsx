@@ -112,6 +112,11 @@ const FooterNav = () => {
                   <Text className="text-sm hover:underline hover:font-semibold">Amazon Data Protection Policy</Text>
                 </Link>
               </li>
+              <li>
+                <Link to={PATH_PAGES.services} onClick={handleClick}>
+                  <Text className="text-sm hover:underline hover:font-semibold">Site Map</Text>
+                </Link>
+              </li>
             </ul>
           </Grid.Col>
         </Grid>

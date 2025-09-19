@@ -18,8 +18,11 @@ import ADDP from "./pages/AmazonDataProtectionPolicy/ADDP";    // new page addp
 import About from "./Components/About/about";
 import ErrorPage from "./pages/notFound";
 import { ContactUs } from "./pages/contact-us";
+import Sitemap from "./pages/services";     //sitemap page
 import ProtectedRoute from "./hooks/protectedRoute";
 import OTPVerify from "./Components/authentication/otpVerify/page";
+
+
 
 // --- Auth Simulation ---
 // export const useAuth = () => {
@@ -88,6 +91,7 @@ export default function App() {
         path={PATH_PAGES.contact}
         element={<ContactUs />}
       />
+      <Route path={PATH_PAGES.services} element={<Sitemap />} />
       <Route path={PATH_PAGES.privacy} element={<PrivacyPolicy />} />
       <Route path={PATH_PAGES.terms} element={<TermsService />} />
       <Route path={PATH_PAGES.about} element={<About />} />
