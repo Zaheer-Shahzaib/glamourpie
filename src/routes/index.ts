@@ -52,6 +52,7 @@ export const PATH_PAGES = {
   terms: path(ROOTS_PAGES, "terms-service"),
   support: path(ROOTS_PAGES, "support"),
   privacy: path(ROOTS_PAGES, "privacy-policy"), // ✅ FIXED
+  addp: path(ROOTS_PAGES, "amazon-data-protection-policy")
 };
 
 

@@ -32,32 +32,32 @@ const DASHBOARDS = [
   {
     icon: "/showcase/dashboard-default.png",
     title: "Automatic Invoice Uploading",
-    desp: "Generate and upload invoices seamlessly through API integration – no manual effort required.",
+    desp: "Generate and upload invoices seamlessly via SP-API integration — no manual effort required.",
   },
   {
     icon: "/showcase/dashboard-analytics.png",
     title: "Smart Invoice Templates",
-    desp: "Choose between Simple and Premium templates tailored for VAT and Non-VAT registered businesses",
+    desp: "Choose from simple and premium templates designed for both VAT and non-VAT registered businesses.",
   },
   {
     icon: "/showcase/dashboard-saas.png",
     title: "Built for Amazon Sellers",
-    desp: "Optimized to meet Amazon compliance requirements including Authorization Code and Uploading",
+    desp: " Optimized to meet Amazon compliance requirements, including invoice authorization and upload policies.",
   },
   {
     icon: "/showcase/dashboard-default-dark.png",
     title: "Track Everything",
-    desp: "View all your paid orders and track invoice status with real-time updates in your statistics dashboard.",
+    desp: "View all your paid orders and monitor invoice status with real-time updates in your dashboard.",
   },
   {
     icon: "/showcase/dashboard-default-dark.png",
     title: "Transparent Pricing",
-    desp: "Start for free and only pay when you scale.",
+    desp: "Start free and scale affordably — only pay when your business grows.",
   },
   {
     icon: "/showcase/dashboard-default-dark.png",
     title: " Mobile App Coming Soon",
-    desp: "iOS and Android apps launching soon for on-the-go invoice creation.",
+    desp: "iOS and Android apps for on-the-go invoicing are launching soon.",
   },
 ];
 
@@ -118,8 +118,7 @@ export default function Home() {
                   Invoices with RunAnalytic Fast, Easy & Accurate
                 </Title>
                 <Text>
-                  Say goodbye to manual billing! Generate & upload invoices
-                  directly to Amazon in just a few clicks.
+                RunAnalytic Technology helps Amazon sellers across the UAE and KSA stay compliant and grow. Our secure, data-driven platform delivers insights and automation that simplify invoicing and business operations.
                 </Text>
                 <Group my='lg'>
                   <Link to={PATH_AUTH.signin} className={classes.btn}>

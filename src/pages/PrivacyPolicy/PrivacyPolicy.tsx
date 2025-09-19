@@ -26,7 +26,7 @@ export default function PrivacyPolicy() {
         <Stack align="center" mb={64} gap={8}>
           <Group gap={16}>
 
-            <Title className="text-5xl text-[#424242] pb-12 font-bold">
+            <Title className="text-3xl text-[#424242] pb-12 font-bold">
               <strong>Privacy Policy – RunAnalytic</strong>
             </Title>
           </Group>
@@ -200,25 +200,6 @@ export default function PrivacyPolicy() {
               <List.Item>We follow international best practices (NIST/ISO27001 guidelines) for data protection and security.</List.Item>
             </List>
           </Stack>
-
-
-
-
-          {/* Governing Law*/}
-          {/* <Stack gap={24}>
-            <Group gap={16}>
-              <Title className="text-3xl text-[#424242] font-bold">
-                10. Secure Coding Practices
-              </Title>
-            </Group>
-            <Text className="text-md text-[#636363]" style={{ lineHeight: '2' }}>
-              The developers will never save or store keys, credentials or passwords in the application code or in public repositories, and will always keep their development and production environments separated.
-            </Text>
-          </Stack> */}
-
-
-
-
 
 
           {/* Children's Privacy */}

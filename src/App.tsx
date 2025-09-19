@@ -14,6 +14,7 @@ import { PATH_AUTH, PATH_DASHBOARD, PATH_PAGES } from "./routes/index"; // Impor
 import ResetPassword from "./Components/authentication/password-reset/page";
 import PrivacyPolicy from "./pages/PrivacyPolicy/PrivacyPolicy"; // ✅ Import the new page
 import TermsService from "./pages/TermsofService/TermsService";  // import termserivce page
+import ADDP from "./pages/AmazonDataProtectionPolicy/ADDP";    // new page addp
 import About from "./Components/About/about";
 import ErrorPage from "./pages/notFound";
 import { ContactUs } from "./pages/contact-us";
@@ -55,6 +56,28 @@ export default function App() {
       navigate(location.pathname, { replace: true, state: {} });
     }
   }, [location, navigate]);
+
+  useEffect(() => {
+    const handleContextMenu = (e: MouseEvent) => e.preventDefault();
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (
+        e.key === 'F12' ||
+        (e.ctrlKey && e.shiftKey && ['I', 'J', 'C'].includes(e.key)) ||
+        (e.ctrlKey && e.key === 'U')
+      ) {
+        e.preventDefault();
+      }
+    };
+
+    document.addEventListener('contextmenu', handleContextMenu);
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('contextmenu', handleContextMenu);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
+
   return (
     <Routes>
       <Route
@@ -68,6 +91,7 @@ export default function App() {
       <Route path={PATH_PAGES.privacy} element={<PrivacyPolicy />} />
       <Route path={PATH_PAGES.terms} element={<TermsService />} />
       <Route path={PATH_PAGES.about} element={<About />} />
+      <Route path={PATH_PAGES.addp} element={<ADDP />} />
       <Route path={PATH_AUTH.root}>
         <Route
           path={PATH_AUTH.signin}

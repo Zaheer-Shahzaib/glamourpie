@@ -38,9 +38,7 @@ const FooterNav = () => {
               RunAnalytic Technology
             </Text>
             <Text className="text-sm leading-relaxed mb-2">
-              RunAnalytic Technology is a trusted technology provider serving
-              businesses across UAE & KSA. Our team is dedicated to providing
-              data-driven insights and enterprise solutions.
+            RunAnalytic Technology helps Amazon sellers across the UAE stay compliant and grow. Our secure, data-driven platform delivers insights and automation that simplify invoicing and business operations.
             </Text>
 
             <Button
@@ -107,6 +105,11 @@ const FooterNav = () => {
               <li>
                 <Link to={PATH_PAGES.about} onClick={handleClick}>
                   <Text className="text-sm hover:underline hover:font-semibold">About Us</Text>
+                </Link>
+              </li>
+              <li>
+                <Link to={PATH_PAGES.addp} onClick={handleClick}>
+                  <Text className="text-sm hover:underline hover:font-semibold">Amazon Data Protection Policy</Text>
                 </Link>
               </li>
             </ul>
