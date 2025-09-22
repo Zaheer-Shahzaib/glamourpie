@@ -24,6 +24,7 @@ import { api } from "../../../Services/api";
 import { useState } from "react";
 import { IconInfoCircle } from "@tabler/icons-react";
 import { useAuth } from "../../../Context/useAuth";
+import { values } from "lodash";
 
 function SignupPage() {
   const theme = useMantineTheme();
@@ -34,15 +35,18 @@ function SignupPage() {
   const OTP_EXPIRY_SECONDS = 120;
   const form = useForm({
     initialValues: {
-      username: "",
+      firstname: "",
+      lastname: "",
       email: "",
       phone: "",
       password: "",
     },
 
     validate: {
-      username: (value: string) =>
-        String(value).trim().length === 0 ? "user name is required" : null,
+      firstname: (value: string) =>
+        String(value).trim().length === 0 ? "first name is required" : null,
+      lastname: (value: string) =>
+        String(value).trim().length === 0 ? "last name is required" : null,
       email: (value: string) =>
         /^\S+@\S+$/.test(value) ? null : "Invalid email",
       phone: (value: string | number) =>
@@ -112,26 +116,37 @@ function SignupPage() {
               gap={{ base: "md" }}
             >
               <TextInput
-                label='Username'
+                key="firstname"
+                label='First Name'
                 placeholder='John'
-                {...form.getInputProps("username")}
+                {...form.getInputProps("firstname")}
                 required
               />
+
               <TextInput
-                label='Email'
-                placeholder='john@example.com'
-                {...form.getInputProps("email")}
+                key="lastname"
+                label='Last Name'
+                placeholder='Alex'
+                {...form.getInputProps("lastname")}
                 required
               />
+
             </Flex>
 
-            <NumberInput
+            <TextInput
+              label='Email'
+              placeholder='john@example.com'
+              {...form.getInputProps("email")}
+              required
+            />
+
+            {/* <NumberInput
               label='Phone Number'
               placeholder='+921234567890'
               mt='md'
               hideControls
               {...form.getInputProps("phone")}
-            />
+            /> */}
 
             <PasswordInput
               label='Password'

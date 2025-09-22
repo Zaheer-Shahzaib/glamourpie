@@ -39,12 +39,12 @@ const HeaderNav = () => {
     {
       label: "Services",
       link: PATH_PAGES.services,
-      onClick: () => navigateToSection("services", "/"),
+      // onClick: () => navigateToSection("services", "/"),
     },
     {
-      link: PATH_PAGES.contact,
+      link: PATH_PAGES.root,
       label: "Pricing",
-      onClick: () => navigate("/contact-us"),
+      onClick: () => navigateToSection("pricing", "/"),
     },
     { link: PATH_PAGES.privacy, label: "Privacy Policy" },
     { link: PATH_PAGES.terms, label: "Terms of Service" },
