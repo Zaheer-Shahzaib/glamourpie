@@ -21,6 +21,7 @@ import { ContactUs } from "./pages/contact-us";
 import Sitemap from "./pages/services";     //sitemap page
 import ProtectedRoute from "./hooks/protectedRoute";
 import OTPVerify from "./Components/authentication/otpVerify/page";
+import Services from "./Components/services";
 
 
 
@@ -91,7 +92,7 @@ export default function App() {
         path={PATH_PAGES.contact}
         element={<ContactUs />}
       />
-      <Route path={PATH_PAGES.services} element={<Sitemap />} />
+      <Route path={PATH_PAGES.services} element={<Services />} />
       <Route path={PATH_PAGES.privacy} element={<PrivacyPolicy />} />
       <Route path={PATH_PAGES.terms} element={<TermsService />} />
       <Route path={PATH_PAGES.about} element={<About />} />

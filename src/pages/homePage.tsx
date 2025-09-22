@@ -118,7 +118,7 @@ export default function Home() {
                   Invoices with RunAnalytic Fast, Easy & Accurate
                 </Title>
                 <Text>
-                RunAnalytic Technology helps Amazon sellers across the UAE and KSA stay compliant and grow. Our secure, data-driven platform delivers insights and automation that simplify invoicing and business operations.
+                  RunAnalytic Technology helps Amazon sellers across the UAE and KSA stay compliant and grow. Our secure, data-driven platform delivers insights and automation that simplify invoicing and business operations.
                 </Text>
                 <Group my='lg'>
                   <Link to={PATH_AUTH.signin} className={classes.btn}>
@@ -131,7 +131,7 @@ export default function Home() {
                       Start for Free
                     </Button>
                   </Link>
-                </Group>
+                </Group>signup
               </Stack>
             </Grid.Col>
             <Grid.Col
@@ -208,7 +208,7 @@ export default function Home() {
           </SimpleGrid>
         </Container>
         <Container
-          // id='pricing'
+          id='pricing'
           fluid
           {...BOX_PROPS}
           style={{ position: 'relative' }}
@@ -229,13 +229,12 @@ export default function Home() {
             }}
           />
         </Container>
-        <Container
+        {/* <Container
           id='services'
           fluid
-          {...BOX_PROPS}
         >
           <Services />
-        </Container>
+        </Container> */}
         <Container
           fluid
           {...BOX_PROPS}
