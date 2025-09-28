@@ -38,7 +38,7 @@ function SignupPage() {
       firstname: "",
       lastname: "",
       email: "",
-      phone: "",
+      // phone: "",
       password: "",
     },
 
@@ -49,8 +49,8 @@ function SignupPage() {
         String(value).trim().length === 0 ? "last name is required" : null,
       email: (value: string) =>
         /^\S+@\S+$/.test(value) ? null : "Invalid email",
-      phone: (value: string | number) =>
-        String(value).trim().length < 10 ? "Invalid phone number" : null,
+      // phone: (value: string | number) =>
+      //   String(value).trim().length < 10 ? "Invalid phone number" : null,
       password: (value: string) =>
         value.length < 12 ? "Password must be at least 12 characters" : null,
     },
@@ -75,6 +75,7 @@ function SignupPage() {
 
       navigate(PATH_AUTH.otpVerify);
     } catch (err: any) {
+      console.log (values)
       const message =
         err.response?.data?.message || "Signup failed. Please try again.";
       setErrorMessage(message);
