@@ -63,6 +63,12 @@ function DashBoard() {
                 products: mockItems,
                 orders: mockItems,
               }}
+              tabsItems={[
+                { label: "Products", value: "products" },
+                { label: "Order Items", value: "orders" },
+              ]}
+              // initialTab="products"
+              // paperProps={PAPER_PROPS}
             />
 
             {/* <DetailedStatsGrid/> */}
