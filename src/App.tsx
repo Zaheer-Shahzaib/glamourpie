@@ -11,7 +11,6 @@ import Dashboard from "./pages/dashboardPage";
 import SignupPage from "./Components/authentication/signup/page";
 import LoginPage from "./Components/authentication/login/page";
 import { PATH_AUTH, PATH_DASHBOARD, PATH_PAGES } from "./routes/index"; // Import external routes
-import ResetPassword from "./Components/authentication/password-reset/page";
 import PrivacyPolicy from "./pages/PrivacyPolicy/PrivacyPolicy"; // ✅ Import the new page
 import TermsService from "./pages/TermsofService/TermsService";  // import termserivce page
 import ADDP from "./pages/AmazonDataProtectionPolicy/ADDP";    // new page addp
@@ -22,6 +21,8 @@ import Sitemap from "./pages/services";     //sitemap page
 import ProtectedRoute from "./hooks/protectedRoute";
 import OTPVerify from "./Components/authentication/otpVerify/page";
 import Services from "./Components/services";
+import ResetPassword from "./Components/authentication/forgetPassword/resetPassword";
+import ForgetPassword from "./Components/authentication/forgetPassword/page";
 
 
 
@@ -62,7 +63,7 @@ export default function App() {
   }, [location, navigate]);
 
   useEffect(() => {
-    const handleContextMenu = (e: MouseEvent) => e.preventDefault();
+    // const handleContextMenu = (e: MouseEvent) => e.preventDefault();
     const handleKeyDown = (e: KeyboardEvent) => {
       if (
         e.key === 'F12' ||
@@ -73,11 +74,11 @@ export default function App() {
       }
     };
 
-    document.addEventListener('contextmenu', handleContextMenu);
+    // document.addEventListener('contextmenu', handleContextMenu);
     document.addEventListener('keydown', handleKeyDown);
 
     return () => {
-      document.removeEventListener('contextmenu', handleContextMenu);
+      // document.removeEventListener('contextmenu', handleContextMenu);
       document.removeEventListener('keydown', handleKeyDown);
     };
   }, []);
@@ -110,6 +111,11 @@ export default function App() {
           path={PATH_AUTH.passwordReset}
           element={<ResetPassword />}
         />
+        <Route
+          path={PATH_AUTH.forgetPassword}
+          element={<ForgetPassword />}
+        />
+
         <Route
           path={PATH_AUTH.otpVerify}
           element={<OTPVerify />}

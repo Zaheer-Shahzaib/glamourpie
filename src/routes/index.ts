@@ -87,6 +87,7 @@ export const PATH_AUTH = {
   signin: path(ROOTS_AUTH, "/signin"),
   signup: path(ROOTS_AUTH, "/signup"),
   passwordReset: path(ROOTS_AUTH, "/password-reset"),
+  forgetPassword: path(ROOTS_AUTH, "/forget-password"),
   otpVerify: path(ROOTS_AUTH, "/otp-verify"),
   clerk: path(ROOTS_AUTH, "/clerk"),
   auth0: path(ROOTS_AUTH, "/auth0"),

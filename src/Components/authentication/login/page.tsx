@@ -67,7 +67,7 @@ function LoginPage() {
           position: "top-right",
         });
       }
-      navigate("/");
+      navigate(PATH_DASHBOARD.default);
     } catch (error: any) {
       const message = error.response?.data?.message;
       setErrorMessage(message || "An error occurred during login.");
@@ -130,7 +130,7 @@ function LoginPage() {
               />
               <Text
                 component={Link}
-                to={PATH_AUTH.passwordReset}
+                to={PATH_AUTH.forgetPassword}
                 size='sm'
                 {...LINK_PROPS}
               >
