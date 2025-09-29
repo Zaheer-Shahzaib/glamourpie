@@ -131,7 +131,7 @@ export default function Home() {
                       Start for Free
                     </Button>
                   </Link>
-                </Group>signup
+                </Group>
               </Stack>
             </Grid.Col>
             <Grid.Col
