@@ -1,9 +1,10 @@
 "use client";
 
-import React from "react";
+import React, { use } from "react";
 
 import {
   Button,
+  Alert,
   Group,
   Paper,
   Text,
@@ -11,9 +12,10 @@ import {
   Title,
   UnstyledButton,
   rem,
+  useMantineTheme
 } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
-import { IconChevronLeft } from "@tabler/icons-react";
+import { IconChevronLeft, IconInfoCircle } from "@tabler/icons-react";
 
 import { PATH_AUTH, PATH_DASHBOARD } from "../../../routes/index";
 
@@ -21,9 +23,62 @@ import classes from "./page.module.scss";
 import Surface from "../../Surface/Surface";
 import { Link } from "react-router-dom";
 import PasswordLayout from "./layout";
+import { useSearchParams, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { api } from "../../../Services/api";
+import { notifications } from "@mantine/notifications";
+import { set } from "lodash";
+
+
 
 function ResetPassword() {
   const mobile_match = useMediaQuery("(max-width: 425px)");
+  const theme = useMantineTheme();
+  const navigate = useNavigate();
+  
+  const [newPassword, setNewPassword] = useState<string | ''>('')
+  const [confirmPassword, setConfirmPassword] = useState<string | ''>('')
+  const [SearchParams] = useSearchParams();
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const token = SearchParams.get('token')
+  const email = SearchParams.get('email')
+
+
+
+  const handleClick = async () => {
+    console.log(token, email, newPassword, confirmPassword)
+    try { 
+      if (newPassword !== confirmPassword) {
+        setErrorMessage("Passwords do not match");
+        return;
+      }else if(!newPassword){
+        setErrorMessage("Password cannot be empty");
+        return;
+      }
+      setErrorMessage(null);
+      
+      const respo = await api.post('/api/reset-password', { newPassword, token, email })
+      console.log("response",respo);
+      if (respo.status === 200) {
+        notifications.show({
+          title: "Success",
+          message: "Password has been reset successfully!",
+          color: theme.colors.green[4],
+          position: "top-right",
+        });
+      }
+      navigate(PATH_AUTH.signin);
+
+    } catch (error: any) {
+      const message = error.response?.data?.message;
+      setErrorMessage(message || "An error occurred. Please try again.");
+    }
+
+
+  }
+
+
+
 
   return (
     <>
@@ -42,17 +97,33 @@ function ResetPassword() {
           component={Paper}
           className={classes.card}
         >
+          {errorMessage && (
+            <Alert
+              variant='light'
+              c={theme.colors.red[8]}
+              radius='lg'
+              title=''
+              icon={<IconInfoCircle />}
+            >
+              {errorMessage}
+            </Alert>
+          )}
           <TextInput
             label='New Password'
             placeholder='Enter new password'
             type="password"
+            value={newPassword}
             required
+            onChange={(e) => setNewPassword(e.currentTarget.value)}
+
           />
           <TextInput
             label='Confirm Password'
             placeholder='Confirm your password'
             type="password"
             required
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.currentTarget.value)}
           />
           <Group
             justify='center'
@@ -82,8 +153,7 @@ function ResetPassword() {
               </Group>
             </UnstyledButton> */}
             <Button
-              component={Link}
-              to={PATH_AUTH.signin}
+              onClick={handleClick}
               fullWidth={mobile_match}
             >
               Reset password

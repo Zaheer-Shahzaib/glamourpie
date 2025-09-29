@@ -11,6 +11,7 @@ import {
   Title,
   UnstyledButton,
   rem,
+  useMantineTheme,
 } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
 import { IconChevronLeft } from "@tabler/icons-react";
@@ -19,11 +20,46 @@ import { PATH_AUTH, PATH_DASHBOARD } from "../../../routes/index";
 
 import classes from "./page.module.scss";
 import Surface from "../../Surface/Surface";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import PasswordLayout from "./layout";
+import { log } from "console";
+import { api } from "../../../Services/api";
+import { notifications } from "@mantine/notifications";
+
+
+
 
 function ForgetPassword() {
+
+  const navigate = useNavigate();
+  const theme = useMantineTheme();
   const mobile_match = useMediaQuery("(max-width: 425px)");
+  const [email, setEmail] = React.useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
+  
+  const handleclick = async () => {
+    
+    try {
+    const respo = await api.post("/api/forgot-password", { email });
+    console.log(respo);
+    if (respo.status === 200) {
+     notifications.show({
+          title: "Success",
+          message: "A reset link has been sent to your email!",
+          color: theme.colors.green[4],
+          position: "top-right",
+        });
+    }
+    navigate(PATH_AUTH.signin);
+    } catch (error: any) {
+      const message = error.response?.data?.message;
+      setErrorMessage(message || "An error occurred during login.");
+    }
+    
+    
+
+  }
+
 
   return (
     <>
@@ -46,6 +82,7 @@ function ForgetPassword() {
             label='Your email'
             placeholder='me@email.com'
             required
+            onChange={(e) => setEmail(e.target.value)}
           />
           <Group
             justify='space-between'
@@ -75,9 +112,9 @@ function ForgetPassword() {
               </Group>
             </UnstyledButton>
             <Button
-              component={Link}
-              to={PATH_DASHBOARD.default}
+              
               fullWidth={mobile_match}
+              onClick={handleclick}
             >
               Reset password
             </Button>
