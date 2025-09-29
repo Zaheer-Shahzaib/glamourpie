@@ -19,7 +19,7 @@ import classes from "./page.module.scss";
 import Surface from "../../Surface/Surface";
 import { Link, useNavigate } from "react-router-dom";
 import SignInLayout from "./layout";
-import { PATH_AUTH, PATH_DASHBOARD } from "../../../routes";
+import { PATH_APPS, PATH_AUTH, PATH_DASHBOARD } from "../../../routes";
 import { api } from "../../../Services/api";
 import { notifications } from "@mantine/notifications";
 import { useAuth } from "../../../Context/useAuth";
@@ -56,10 +56,13 @@ function LoginPage() {
     console.log("Submitting form with values:", values);
     try {
       console.log("Form values:", values, "Remember Me:", rememberMe);
-      const resp = await api.post("/api/signin", { ...values });
+      const resp = await api.post("/api/signin", {
+        ...values,
+        isRememberMe: rememberMe,
+      });
       console.log(resp);
       if (resp.status === 200) {
-        login(resp.data.token);
+        login(resp.data.token, rememberMe);
         notifications.show({
           title: "Success",
           message: "Login successfully!",
@@ -67,7 +70,8 @@ function LoginPage() {
           position: "top-right",
         });
       }
-      navigate(PATH_DASHBOARD.default);
+      // navigate(PATH_DASHBOARD.default);
+      navigate('/');
     } catch (error: any) {
       const message = error.response?.data?.message;
       setErrorMessage(message || "An error occurred during login.");

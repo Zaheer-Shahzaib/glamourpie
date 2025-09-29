@@ -65,7 +65,8 @@ function OTPVerify() {
           color: "green",
           position: "top-right",
         });
-        navigate(PATH_DASHBOARD.default);
+        // navigate(PATH_DASHBOARD.default);
+        navigate('/');
       }
     } catch (err: any) {
       setError(err.response?.data?.message || "Verification failed");

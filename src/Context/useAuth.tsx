@@ -43,7 +43,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const login = (newToken: string, rememberMe?: boolean) => {
     if (rememberMe) {
-      Cookies.set("token", newToken, { expires: 6 });
+      Cookies.set("token", newToken, { expires: 30 });
     } else {
       Cookies.set("token", newToken);
     }
