@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  ActionIcon,
   Alert,
   Button,
   Center,
@@ -24,7 +25,7 @@ import { api } from "../../../Services/api";
 import { notifications } from "@mantine/notifications";
 import { useAuth } from "../../../Context/useAuth";
 import { useState } from "react";
-import { IconInfoCircle } from "@tabler/icons-react";
+import { IconArrowLeft, IconInfoCircle } from "@tabler/icons-react";
 
 const LINK_PROPS: TextProps = {
   className: classes.link,
@@ -95,6 +96,21 @@ function LoginPage() {
           component={Paper}
           className={classes.card}
         >
+          <ActionIcon
+            variant="filled"
+            // color="brand"
+            size="lg"
+            onClick={() => navigate(-1)}
+            style={{
+              position: 'absolute',
+              top: 16,
+              left: 16,
+              zIndex: 10
+            }}
+            title="Go back"
+          >
+            <IconArrowLeft size={20} />
+          </ActionIcon>
           {errorMessage && (
             <Alert
               variant='light'

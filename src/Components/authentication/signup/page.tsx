@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  ActionIcon,
   Alert,
   Button,
   Center,
@@ -22,7 +23,7 @@ import Surface from "../../Surface/Surface";
 import SignUpLayout from "./layout";
 import { api } from "../../../Services/api";
 import { useState } from "react";
-import { IconInfoCircle } from "@tabler/icons-react";
+import { IconArrowLeft, IconInfoCircle } from "@tabler/icons-react";
 import { useAuth } from "../../../Context/useAuth";
 import { values } from "lodash";
 
@@ -100,6 +101,21 @@ function SignupPage() {
           component={Paper}
           classNames={{ root: classes.card }}
         >
+           <ActionIcon
+            variant="filled"
+            // color="brand"
+            size="lg"
+            onClick={() => navigate(-1)}
+            style={{
+              position: 'absolute',
+              top: 16,
+              left: 16,
+              zIndex: 10
+            }}
+            title="Go back"
+          >
+            <IconArrowLeft size={20} />
+          </ActionIcon>
           {errorMessage && (
             <Alert
               variant='light'
