@@ -27,22 +27,22 @@ export default function InvoiceDetailsTable({
   const renderRows = (items: InvoiceItem[]) =>
     items.map((item, index) => (
       <Table.Tr key={index}
-       bg={selectedRows.includes(index) ? 'var(--mantine-color-blue-light)' : undefined}
+        bg={selectedRows.includes(index) ? 'var(--mantine-color-blue-light)' : undefined}
       >
         <Table.Td>
-             <Checkbox
-          aria-label="Select row"
-          checked={selectedRows.includes(index)}
-          onChange={(event) =>
-            setSelectedRows(
-              event.currentTarget.checked
-                ? [...selectedRows, index]
-                : selectedRows.filter((position) => position !== index)
-            )
-          }
-        />
+          <Checkbox
+            aria-label="Select row"
+            checked={selectedRows.includes(index)}
+            onChange={(event) =>
+              setSelectedRows(
+                event.currentTarget.checked
+                  ? [...selectedRows, index]
+                  : selectedRows.filter((position) => position !== index)
+              )
+            }
+          />
         </Table.Td>
-         <Table.Td>
+        <Table.Td>
           <Group wrap='nowrap'>
             <Box>
               <Text

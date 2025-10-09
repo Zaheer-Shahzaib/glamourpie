@@ -9,6 +9,8 @@ import {
   PaperProps,
   Stack,
   Text,
+  Box,
+  Title,
 } from "@mantine/core";
 import { IconChevronRight } from "@tabler/icons-react";
 import { Link } from "react-router-dom";
@@ -49,9 +51,10 @@ function DashBoard() {
         />
       </>
       <MainLayout>
+        {/* ORIGINAL DASHBOARD CODE - COMMENTED OUT FOR BLUR OVERLAY */}
+        {/* 
         <Container fluid>
           <Stack gap='lg'>
-            {/* <PageHeader title="Default dashboard" withActions={true} /> */}
             <StatsGrid
               data={statsData}
               loading={statsLoading}
@@ -65,10 +68,10 @@ function DashBoard() {
               }}
             />
 
-            {/* <DetailedStatsGrid/> */}
-            {/* Render profile info if available */}
+            <DetailedStatsGrid/>
+            Render profile info if available
 
-            {/* <Grid gutter={{ base: 5, xs: "md", md: "xl", xl: 50 }}>
+            <Grid gutter={{ base: 5, xs: "md", md: "xl", xl: 50 }}>
               <Grid.Col span={8}>
                 <RevenueChart {...PAPER_PROPS} />
               </Grid.Col>
@@ -104,11 +107,113 @@ function DashBoard() {
                   error={projectsError}
                   loading={projectsLoading}
                 />
-                </Paper>  */}
-            {/* </Grid.Col> */}
-            {/* </Grid> */}
+                </Paper>  
+            </Grid.Col>
+            </Grid>
           </Stack>
         </Container>
+        */}
+
+        {/* BLUR OVERLAY IMPLEMENTATION - START */}
+        <Box style={{ position: 'relative', minHeight: '100vh' }}>
+          {/* Blurred background content - Original dashboard with blur effect */}
+          <Box
+            style={{
+              filter: 'blur(8px)',
+              pointerEvents: 'none',
+              opacity: 0.3,
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              overflow: 'hidden'
+            }}
+          >
+            <Container fluid>
+              <Stack gap='lg'>
+                <StatsGrid
+                  data={statsData}
+                  loading={statsLoading}
+                  error={statsError}
+                  paperProps={PAPER_PROPS}
+                />
+                <InvoiceDetailsTable
+                  data={{
+                    products: mockItems,
+                    orders: mockItems,
+                  }}
+                />
+              </Stack>
+            </Container>
+          </Box>
+
+          {/* Full screen overlay with disclaimer message */}
+          <Box
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: 'rgba(0, 0, 0, 0.7)',
+              backdropFilter: 'blur(5px)',
+              zIndex: 1000,
+              minHeight: '100vh',
+            }}
+          >
+            <Paper
+              shadow="xl"
+              radius="lg"
+              p="xl"
+              style={{
+                maxWidth: 600,
+                textAlign: 'center',
+                backgroundColor: 'rgba(255, 255, 255, 0.98)',
+                backdropFilter: 'blur(20px)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+              }}
+            >
+              <Stack gap="lg" align="center">
+                <Title order={1} c="blue" size="h1">
+                  🚧 Dashboard Under Development
+                </Title>
+                <Text size="xl" c="dimmed" fw={500}>
+                  This dashboard is currently under construction.
+                  We're working hard to bring you the best experience.
+                </Text>
+                <Text size="lg" c="dimmed">
+                  Please check back soon for updates!
+                </Text>
+                <Box
+                  style={{
+                    width: '100%',
+                    height: '4px',
+                    backgroundColor: 'var(--mantine-color-blue-6)',
+                    borderRadius: '2px',
+                    marginTop: '1rem'
+                  }}
+                />
+                <Button
+                  component={Link}
+                  to="/"
+                  variant="filled"
+                  size="lg"
+                  style={{
+                    marginTop: '1rem',
+                    backgroundColor: 'var(--mantine-color-blue-6)',
+                  }}
+                >
+                  🏠 Back to Home
+                </Button>
+              </Stack>
+            </Paper>
+          </Box>
+        </Box>
+        {/* BLUR OVERLAY IMPLEMENTATION - END */}
       </MainLayout>
     </>
   );

@@ -70,9 +70,11 @@ function LoginPage() {
           color: theme.colors.green[4],
           position: "top-right",
         });
+        // navigate(PATH_DASHBOARD.default);
       }
       // navigate(PATH_DASHBOARD.default);
-      navigate('/');
+      // navigate('/');
+      navigate(PATH_DASHBOARD.default);
     } catch (error: any) {
       const message = error.response?.data?.message;
       setErrorMessage(message || "An error occurred during login.");
