@@ -170,7 +170,7 @@ export default function PrivacyPolicy() {
               </List.Item>
               <List.Item>3 failed attempts allowed with an invalid password before a temporary lock-out.</List.Item>
               <List.Item>1 day of minimum password age</List.Item>
-              <List.Item>180 days of password expiry time</List.Item>
+              <List.Item>90 days of password expiry time</List.Item>
               <List.Item>MFA is enforced for all administrative accounts.</List.Item>
             </List>
 
