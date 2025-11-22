@@ -20,6 +20,7 @@ import { notifications } from "@mantine/notifications";
 import { useAuth } from "../../../Context/useAuth";
 import { useNavigate } from "react-router-dom";
 import { PATH_DASHBOARD } from "../../../routes";
+import { fetchUserProfile } from "../../../Services/user-services";
 
 function OTPVerify() {
   const mobile_match = useMediaQuery("(max-width: 425px)");
@@ -76,6 +77,7 @@ function OTPVerify() {
   };
 
   const handleResend = async () => {
+    console.log("Resend OTP clicked",profile);
     if (profile?.email === undefined || profile?.email === null) {
       setError("Email not found. Please login again.");
       return;

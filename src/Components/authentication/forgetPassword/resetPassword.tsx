@@ -12,7 +12,7 @@ import {
   Title,
   UnstyledButton,
   rem,
-  useMantineTheme
+  useMantineTheme,
 } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
 import { IconChevronLeft, IconInfoCircle } from "@tabler/icons-react";
@@ -28,57 +28,65 @@ import { useState } from "react";
 import { api } from "../../../Services/api";
 import { notifications } from "@mantine/notifications";
 import { set } from "lodash";
-
-
+import { useForm } from "@mantine/form";
 
 function ResetPassword() {
   const mobile_match = useMediaQuery("(max-width: 425px)");
   const theme = useMantineTheme();
   const navigate = useNavigate();
-  
-  const [newPassword, setNewPassword] = useState<string | ''>('')
-  const [confirmPassword, setConfirmPassword] = useState<string | ''>('')
+
+  const [newPassword, setNewPassword] = useState<string | "">("");
+  const [confirmPassword, setConfirmPassword] = useState<string | "">("");
   const [SearchParams] = useSearchParams();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const token = SearchParams.get('token')
-  const email = SearchParams.get('email')
+  const token = SearchParams.get("token");
+  const email = SearchParams.get("email");
 
+  const form = useForm({
+    initialValues: {
+      newPassword: "",
+      confirmPassword: "",
+    },
 
+    validate: {
+      newPassword: (value: string) =>
+        value.length < 12 ? "Password must be at least 12 characters" : null,
 
-  const handleClick = async () => {
-    console.log(token, email, newPassword, confirmPassword)
-    try { 
+      confirmPassword: (value: any, values: any) =>
+        value !== values.newPassword ? "Passwords do not match" : null,
+    },
+  });
+
+  const handleClick = async (values: typeof form.values) => {
+    console.log(token, email, newPassword, confirmPassword);
+    try {
       if (newPassword !== confirmPassword) {
         setErrorMessage("Passwords do not match");
         return;
-      }else if(!newPassword){
-        setErrorMessage("Password cannot be empty");
-        return;
       }
       setErrorMessage(null);
-      
-      const respo = await api.post('/api/reset-password', { newPassword, token, email })
-      console.log("response",respo);
-      if (respo.status === 200) {
-        notifications.show({
-          title: "Success",
-          message: "Password has been reset successfully!",
-          color: theme.colors.green[4],
-          position: "top-right",
-        });
-      }
+      const resp = await api.post("/api/reset-password", {
+        newPassword: values.newPassword,
+        token,
+        email,
+      });
+
+      notifications.show({
+        title: "Success",
+        message: "Password has been reset successfully!",
+        color: theme.colors.green[4],
+        position: "top-right",
+      });
+
       navigate(PATH_AUTH.signin);
-
     } catch (error: any) {
-      const message = error.response?.data?.message;
-      setErrorMessage(message || "An error occurred. Please try again.");
+      const message =
+        error.response?.data?.message || "An error occurred. Please try again.";
+      form.setErrors({
+        newPassword: message,
+      });
     }
-
-
-  }
-
-
-
+  };
 
   return (
     <>
@@ -97,68 +105,47 @@ function ResetPassword() {
           component={Paper}
           className={classes.card}
         >
-          {errorMessage && (
-            <Alert
-              variant='light'
-              c={theme.colors.red[8]}
-              radius='lg'
-              title=''
-              icon={<IconInfoCircle />}
-            >
-              {errorMessage}
-            </Alert>
-          )}
-          <TextInput
-            label='New Password'
-            placeholder='Enter new password'
-            type="password"
-            value={newPassword}
-            required
-            onChange={(e) => setNewPassword(e.currentTarget.value)}
-
-          />
-          <TextInput
-            label='Confirm Password'
-            placeholder='Confirm your password'
-            type="password"
-            required
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.currentTarget.value)}
-          />
-          <Group
-            justify='center'
-            mt='lg'
-            className={classes.controls}
-          >
-            {/* <UnstyledButton
-              component={Link}
-              to={PATH_AUTH.signin}
-              color='dimmed'
-              className={classes.control}
-            >
-              <Group
-                gap={2}
-                align='center'
+          <form onSubmit={form.onSubmit((values) => handleClick(values))}>
+            {errorMessage && (
+              <Alert
+                variant='light'
+                c={theme.colors.red[8]}
+                radius='lg'
+                title=''
+                icon={<IconInfoCircle />}
               >
-                <IconChevronLeft
-                  stroke={1.5}
-                  style={{ width: rem(14), height: rem(14) }}
-                />
-                <Text
-                  size='sm'
-                  ml={5}
-                >
-                  Back to the login page
-                </Text>
-              </Group>
-            </UnstyledButton> */}
-            <Button
-              onClick={handleClick}
-              fullWidth={mobile_match}
+                {errorMessage}
+              </Alert>
+            )}
+            <TextInput
+              label='New Password'
+              type='password'
+              placeholder='Enter new password'
+              {...form.getInputProps("newPassword")}
+              required
+            />
+
+            <TextInput
+              label='Confirm Password'
+              type='password'
+              placeholder='Confirm your password'
+              mt='md'
+              {...form.getInputProps("confirmPassword")}
+              required
+            />
+            <Group
+              justify='center'
+              mt='lg'
+              className={classes.controls}
             >
-              Reset password
-            </Button>
-          </Group>
+              <Button
+                type='submit'
+                fullWidth={mobile_match}
+              >
+                Reset password
+              </Button>
+            </Group>
+          </form>
         </Surface>
       </PasswordLayout>
     </>

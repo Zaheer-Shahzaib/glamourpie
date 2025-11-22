@@ -61,20 +61,19 @@ function LoginPage() {
         ...values,
         isRememberMe: rememberMe,
       });
-      console.log(resp);
       if (resp.status === 200) {
         login(resp.data.token, rememberMe);
         notifications.show({
           title: "Success",
-          message: "Login successfully!",
+          message: "Otp sent successfully!",
           color: theme.colors.green[4],
           position: "top-right",
         });
         // navigate(PATH_DASHBOARD.default);
       }
+      navigate(PATH_AUTH.otpVerify);
       // navigate(PATH_DASHBOARD.default);
       // navigate('/');
-      navigate(PATH_DASHBOARD.default);
     } catch (error: any) {
       const message = error.response?.data?.message;
       setErrorMessage(message || "An error occurred during login.");
