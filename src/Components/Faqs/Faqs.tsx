@@ -99,7 +99,7 @@ const FaqData = [
           <List.Item>Passwords must be at least 12 characters long with uppercase, lowercase, numbers, and special characters.</List.Item>
           <List.Item>3 failed attempts allowed before a temporary lock-out.</List.Item>
           <List.Item>1 day of minimum password age.</List.Item>
-          <List.Item>180 days of password expiry time.</List.Item>
+          <List.Item>90 days of password expiry time.</List.Item>
           <List.Item>Multi-Factor Authentication (MFA) is enforced for all administrative accounts.</List.Item>
         </List>
       </span>
