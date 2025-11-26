@@ -1,6 +1,7 @@
 import { useState, createContext, useContext, useEffect } from "react";
 import Cookies from "js-cookie";
 import { fetchUserProfile } from "../Services/user-services";
+import { api } from "../Services/api";
 type AuthContextType = {
   isAuthenticated: boolean;
   token: string | null;
@@ -51,13 +52,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setIsAuthenticated(true);
   };
 
-  const logout = () => {
-    Cookies.remove("token");
-    setToken(null);
-    window.location.reload();
-    
-    setIsAuthenticated(false);
-  };
+const logout = async () => {
+  try {
+    await api.post("/api/logout", {}, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  } catch (err) {
+    console.log("Logout error (ignored):", err);
+  }
+
+  Cookies.remove("token");
+  setToken(null);
+  setIsAuthenticated(false);
+  window.location.reload();
+};
+
 
   return (
     <AuthContext.Provider
