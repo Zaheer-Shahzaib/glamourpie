@@ -26,6 +26,7 @@ import { useState } from "react";
 import { IconArrowLeft, IconInfoCircle } from "@tabler/icons-react";
 import { useAuth } from "../../../Context/useAuth";
 import { values } from "lodash";
+import PasswordRules from "../../CustomComponent/passwordRules";
 
 function SignupPage() {
   const theme = useMantineTheme();
@@ -33,6 +34,8 @@ function SignupPage() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState<boolean>(false);
   const { login } = useAuth();
+  const [passwordFocused, setPasswordFocused] = useState(false);
+
   const OTP_EXPIRY_SECONDS = 120;
   const form = useForm({
     initialValues: {
@@ -52,31 +55,45 @@ function SignupPage() {
         /^\S+@\S+$/.test(value) ? null : "Invalid email",
       // phone: (value: string | number) =>
       //   String(value).trim().length < 10 ? "Invalid phone number" : null,
-      password: (value: string) =>
-        value.length < 12 ? "Password must be at least 12 characters" : null,
+      password: (value: string) => {
+        const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{12,}$/;
+
+        if (!value || value.length < 12) {
+          return "Password must include at least 12 characters";
+        }
+
+        if (!passwordRegex.test(value)) {
+          return "Password must include at least one uppercase letter, one numeric character, and one special character";
+        }
+
+        return null;
+      },
     },
   });
-
-  const handleSubmit = async (values: typeof form.values) => {
+ const handleSubmit = async (values: typeof form.values) => {
     setSubmitting(true);
+    setErrorMessage(null);
     try {
+      // Call signup API
       const resp = await api.post("/api/signup", { ...values });
       console.log(resp);
       if (resp.data.otpSent === true) {
+        // Store email & remember info for OTP verification
+        localStorage.setItem("signup_email", values.email);
         const newExpiry = Date.now() + OTP_EXPIRY_SECONDS * 1000;
         localStorage.setItem("otp_expiry", String(newExpiry));
-        login(resp.data.token);
+
         notifications.show({
           title: "Success",
-          message: "OTP sent to your provided Email Address!",
+          message: "OTP sent to your email address!",
           color: theme.colors.green[4],
           position: "top-right",
         });
-      }
 
-      navigate(PATH_AUTH.otpVerify);
+        // Redirect to OTP verification page
+        navigate(PATH_AUTH.otpVerify);
+      }
     } catch (err: any) {
-      console.log (values)
       const message =
         err.response?.data?.message || "Signup failed. Please try again.";
       setErrorMessage(message);
@@ -84,7 +101,6 @@ function SignupPage() {
       setSubmitting(false);
     }
   };
-
   return (
     <>
       <>
@@ -101,18 +117,18 @@ function SignupPage() {
           component={Paper}
           classNames={{ root: classes.card }}
         >
-           <ActionIcon
-            variant="filled"
+          <ActionIcon
+            variant='filled'
             // color="brand"
-            size="lg"
+            size='lg'
             onClick={() => navigate(-1)}
             style={{
-              position: 'absolute',
+              position: "absolute",
               top: 16,
               left: 16,
-              zIndex: 10
+              zIndex: 10,
             }}
-            title="Go back"
+            title='Go back'
           >
             <IconArrowLeft size={20} />
           </ActionIcon>
@@ -133,7 +149,7 @@ function SignupPage() {
               gap={{ base: "md" }}
             >
               <TextInput
-                key="firstname"
+                key='firstname'
                 label='First Name'
                 placeholder='John'
                 {...form.getInputProps("firstname")}
@@ -141,13 +157,12 @@ function SignupPage() {
               />
 
               <TextInput
-                key="lastname"
+                key='lastname'
                 label='Last Name'
                 placeholder='Alex'
                 {...form.getInputProps("lastname")}
                 required
               />
-
             </Flex>
 
             <TextInput
@@ -170,9 +185,14 @@ function SignupPage() {
               placeholder='Your password'
               mt='md'
               {...form.getInputProps("password")}
+              onFocus={() => setPasswordFocused(true)}
+              onBlur={() => setPasswordFocused(false)}
               required
             />
-
+            <PasswordRules
+              password={form.values.password}
+              focused={passwordFocused}
+            />
             <Button
               fullWidth
               mt='xl'

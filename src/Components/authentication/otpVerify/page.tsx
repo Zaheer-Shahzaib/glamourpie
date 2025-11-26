@@ -31,7 +31,7 @@ function OTPVerify() {
   const { profile } = useAuth();
   const navigate = useNavigate();
   const OTP_EXPIRY_SECONDS = 120;
-
+  const { login } = useAuth();
   const form = useForm({
     initialValues: { otp: "" },
     validate: {
@@ -56,38 +56,68 @@ function OTPVerify() {
   const handleVerify = async (values: typeof form.values) => {
     setSubmitting(true);
     setError(null);
+
     try {
-      const response = await api.post("/api/verifyOtp", { otp: values.otp });
+      // Get stored email and rememberMe (signup or login)
+      const email =
+        localStorage.getItem("signup_email") ||
+        localStorage.getItem("otp_email");
+      const rememberMe =
+        localStorage.getItem("rememberMe") === "true" ? true : false;
+
+      if (!email) {
+        setError("Email not found. Please login/signup again.");
+        return;
+      }
+
+      // Call backend verifyOtp endpoint
+      const response = await api.post("/api/verifyOtp", {
+        email,
+        otp: values.otp,
+        isRememberMe: rememberMe,
+      });
+
       if (response.status === 200) {
+        // Remove stored email and expiry
         localStorage.removeItem("otp_expiry");
+        localStorage.removeItem("signup_email");
+        localStorage.removeItem("otp_email");
+        localStorage.removeItem("rememberMe");
+
+        // Assign JWT token
+        login(response.data.token, rememberMe);
+
         notifications.show({
           title: "Success",
-          message: "OTP Verified successfully!",
+          message: "OTP verified successfully!",
           color: "green",
           position: "top-right",
         });
+
         navigate(PATH_DASHBOARD.default);
-        // navigate('/');
       }
     } catch (err: any) {
-      setError(err.response?.data?.message || "Verification failed");
+      setError(err.response?.data?.message || "OTP verification failed");
     } finally {
       setSubmitting(false);
     }
   };
 
+  // Handle resending OTP
   const handleResend = async () => {
-    console.log("Resend OTP clicked",profile);
-    if (profile?.email === undefined || profile?.email === null) {
-      setError("Email not found. Please login again.");
+    const email =
+      localStorage.getItem("signup_email") ||
+      localStorage.getItem("otp_email");
+    if (!email) {
+      setError("Email not found. Please login/signup again.");
       return;
     }
+
     setSubmitting(true);
     setError(null);
+
     try {
-      const response = await api.post("/api/resendOtp", {
-        email: profile?.email,
-      });
+      const response = await api.post("/api/resendOtp", { email });
       if (response.status === 200) {
         notifications.show({
           title: "Success",
@@ -95,11 +125,11 @@ function OTPVerify() {
           color: "green",
           position: "top-right",
         });
-      }
 
-      const newExpiry = Date.now() + OTP_EXPIRY_SECONDS * 1000;
-      localStorage.setItem("otp_expiry", String(newExpiry));
-      setTimer(OTP_EXPIRY_SECONDS);
+        const newExpiry = Date.now() + OTP_EXPIRY_SECONDS * 1000;
+        localStorage.setItem("otp_expiry", String(newExpiry));
+        setTimer(OTP_EXPIRY_SECONDS);
+      }
     } catch (err: any) {
       setError(err.response?.data?.message || "Failed to resend OTP");
     } finally {
@@ -153,8 +183,8 @@ function OTPVerify() {
               >
                 {timer > 0
                   ? `Resend in ${Math.floor(timer / 60)}:${String(
-                    timer % 60
-                  ).padStart(2, "0")}`
+                      timer % 60
+                    ).padStart(2, "0")}`
                   : "Re-Send"}
               </Button>
 

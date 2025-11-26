@@ -29,6 +29,7 @@ import { api } from "../../../Services/api";
 import { notifications } from "@mantine/notifications";
 import { set } from "lodash";
 import { useForm } from "@mantine/form";
+import PasswordRules from "../../CustomComponent/passwordRules";
 
 function ResetPassword() {
   const mobile_match = useMediaQuery("(max-width: 425px)");
@@ -41,6 +42,7 @@ function ResetPassword() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const token = SearchParams.get("token");
   const email = SearchParams.get("email");
+  const [passwordFocused, setPasswordFocused] = useState(false);
 
   const form = useForm({
     initialValues: {
@@ -123,8 +125,14 @@ function ResetPassword() {
               placeholder='Enter new password'
               {...form.getInputProps("newPassword")}
               required
+              onFocus={() => setPasswordFocused(true)}
+              onBlur={() => setPasswordFocused(false)}
             />
 
+            <PasswordRules
+              password={form.values.newPassword}
+              focused={passwordFocused}
+            />
             <TextInput
               label='Confirm Password'
               type='password'

@@ -37,7 +37,7 @@ function LoginPage() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [rememberMe, setRememberMe] = useState(false);
 
-  const { login } = useAuth();
+  
 
   const form = useForm({
     initialValues: { email: "", password: "" },
@@ -53,32 +53,32 @@ function LoginPage() {
       // rememberMe: (value: boolean) => setRememberMe(value),
     },
   });
-  const handleSubmit = async (values: typeof form.values) => {
-    console.log("Submitting form with values:", values);
-    try {
-      console.log("Form values:", values, "Remember Me:", rememberMe);
-      const resp = await api.post("/api/signin", {
-        ...values,
-        isRememberMe: rememberMe,
+ const handleSubmit = async (values: typeof form.values) => {
+  try {
+    const resp = await api.post("/api/signin", {
+      ...values,
+      isRememberMe: rememberMe,
+    });
+
+    if (resp.status === 200) {
+      // Save email & rememberMe for OTP verification
+      localStorage.setItem("otp_email", values.email);
+      localStorage.setItem("rememberMe", rememberMe.toString());
+
+      notifications.show({
+        title: "Success",
+        message: "OTP sent successfully!",
+        color: theme.colors.green[4],
+        position: "top-right",
       });
-      if (resp.status === 200) {
-        login(resp.data.token, rememberMe);
-        notifications.show({
-          title: "Success",
-          message: "Otp sent successfully!",
-          color: theme.colors.green[4],
-          position: "top-right",
-        });
-        // navigate(PATH_DASHBOARD.default);
-      }
+
       navigate(PATH_AUTH.otpVerify);
-      // navigate(PATH_DASHBOARD.default);
-      // navigate('/');
-    } catch (error: any) {
-      const message = error.response?.data?.message;
-      setErrorMessage(message || "An error occurred during login.");
     }
-  };
+  } catch (error: any) {
+    setErrorMessage(error.response?.data?.message || "Login failed");
+  }
+};
+
 
   return (
     <>
