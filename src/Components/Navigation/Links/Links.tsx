@@ -13,7 +13,8 @@ import { IconChevronRight } from "@tabler/icons-react";
 import classes from "./Links.module.scss";
 import { useLocation, useNavigate } from "react-router-dom";
 import * as _ from "lodash";
-interface LinksGroupProps {
+
+export interface LinksGroupProps {
   icon?: any;
   label: string;
   initiallyOpened?: boolean;
@@ -40,35 +41,38 @@ export function LinksGroup(props: LinksGroupProps) {
   const location = useLocation();
   const hasLinks = Array.isArray(links);
   const [opened, setOpened] = useState(initiallyOpened || false);
-  const [currentPath, setCurrentPath] = useState<string | undefined>();
   const ChevronIcon = IconChevronRight;
 
-  const LinkItem = ({ link }: { link: { label: string; link: string } }) => {
+  const LinkItem = ({ linkData }: { linkData: { label: string; link: string } }) => {
     return (
       <Text
         component='button'
+        size="sm"
         className={classes.link}
         onClick={() => {
-          navigate(link.link);
+          navigate(linkData.link);
           closeSidebar();
         }}
-        data-active={link.link.toLowerCase() === location.pathname || undefined}
+        data-active={linkData.link.toLowerCase() === location.pathname.toLowerCase() || undefined}
         data-mini={isMini}
+        style={{
+          padding: "4px 10px 2px 40px",
+        }}
       >
-        {link.label}
+        {linkData.label}
       </Text>
     );
   };
 
-  const items = (hasLinks ? links : []).map((link) =>
+  const items = (hasLinks ? links : []).map((linkData) =>
     isMini ? (
-      <Menu.Item key={`menu-${link.label}`}>
-        <LinkItem link={link} />
+      <Menu.Item key={`menu-${linkData.label}`}>
+        <LinkItem linkData={linkData} />
       </Menu.Item>
     ) : (
       <LinkItem
-        key={link.label}
-        link={link}
+        key={linkData.label}
+        linkData={linkData}
       />
     )
   );
@@ -165,8 +169,9 @@ export function LinksGroup(props: LinksGroupProps) {
   useEffect(() => {
     const paths = location.pathname.split("/");
     setOpened(paths.includes(label.toLowerCase()));
-    setCurrentPath(_.last(paths)?.toLowerCase() || undefined);
   }, [location.pathname, label]);
 
   return <div className='menu_content'>{content}</div>;
 }
+
+

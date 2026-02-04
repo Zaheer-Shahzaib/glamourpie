@@ -12,7 +12,7 @@ import { IconChevronRight } from '@tabler/icons-react';
 import classes from './UserButton.module.scss';
 
 type UserProfileButtonProps = {
-  image: string;
+  image: string | undefined;
   name: string;
   email: string;
   icon?: ReactNode;
@@ -40,7 +40,7 @@ const UserProfileButton = ({
               {name}
             </Text>
 
-            <Text size="xs">{email}</Text>
+            <Text size="xs" c="white">{email}</Text>
           </div>
         )}
 
