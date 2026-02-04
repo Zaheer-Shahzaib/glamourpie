@@ -3,43 +3,113 @@
 import {
   Button,
   Container,
-  Grid,
-  Group,
-  Paper,
-  PaperProps,
   Stack,
   Text,
-  Box,
+  Group,
   Title,
 } from "@mantine/core";
-import { IconChevronRight } from "@tabler/icons-react";
-import { Link } from "react-router-dom";
-import { PATH_TASKS } from "../routes";
+import { IconFileExport, IconPlus } from "@tabler/icons-react";
+import { useState, useEffect } from "react";
 import MainLayout from "../layout/Main";
-import StatsGrid from "../Components/StatsGrid/StatsGrid";
-import useFetchData from "../hooks/userFetchData";
-import RevenueChart from "../Components/RevenueChart/RevenueChart";
 import { useAuth } from "../Context/useAuth";
-import { useEffect, useState } from "react";
-import { fetchUserProfile } from "../Services/user-services";
-import DetailedStatsCard from "../Components/StatsGrid/detailsStatsGrid";
+import InvoiceStatsGrid from "../Components/Invoice/InvoiceStatsGrid";
+import InvoiceList from "../Components/Invoice/InvoiceList";
+import InvoiceFilters from "../Components/Invoice/InvoiceFilters";
+import InvoiceDetailsModal from "../Components/Invoice/InvoiceDetailsModal";
+import InvoiceRevenueChart from "../Components/Invoice/InvoiceRevenueChart";
+import InvoiceExportModal from "../Components/Invoice/InvoiceExportModal";
+import { useInvoices } from "../hooks/useInvoices";
+import { InvoiceQueryParams, InvoiceStats } from "../types/invoice.types";
+import { fetchInvoiceStats, fetchRevenueData } from "../Services/invoice-services";
+import { RevenueDataPoint } from "../types/invoice.types";
+import RevenueChart from "../Components/RevenueChart/RevenueChart";
 import DetailedStatsGrid from "../Components/StatsGrid/detailsStatsGrid";
-import InvoiceDetailsTable from "../Components/InvoiceDetails/InvoiceDetailsTable";
-import { mockItems } from "../constant/mock-data";
-
-const PAPER_PROPS: PaperProps = {
-  p: "md",
-  shadow: "md",
-  radius: "md",
-  style: { height: "100%" },
-};
 
 function DashBoard() {
-  const {
-    data: statsData,
-    error: statsError,
-    loading: statsLoading,
-  } = useFetchData();
+  const { token } = useAuth();
+  const [filters, setFilters] = useState<InvoiceQueryParams>({ limit: 10, offset: 0 });
+  const [currentPage, setCurrentPage] = useState(1);
+  const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | null>(null);
+  const [detailsModalOpened, setDetailsModalOpened] = useState(false);
+  const [exportModalOpened, setExportModalOpened] = useState(false);
+  const [stats, setStats] = useState<InvoiceStats | null>(null);
+  const [statsLoading, setStatsLoading] = useState(true);
+  const [revenueData, setRevenueData] = useState<RevenueDataPoint[]>([]);
+  const [revenueLoading, setRevenueLoading] = useState(true);
+
+  const { invoices, loading, pagination, refetch, setFilters: updateFilters } = useInvoices(filters);
+
+  // Fetch invoice statistics
+  useEffect(() => {
+    const loadStats = async () => {
+      if (!token) return;
+
+      try {
+        setStatsLoading(true);
+        const data = await fetchInvoiceStats(token);
+        setStats(data);
+      } catch (error) {
+        console.error('Error fetching stats:', error);
+      } finally {
+        setStatsLoading(false);
+      }
+    };
+
+    loadStats();
+  }, [token]);
+
+  // Fetch revenue chart data
+  useEffect(() => {
+    const loadRevenueData = async () => {
+      if (!token) return;
+
+      try {
+        setRevenueLoading(true);
+        const data = await fetchRevenueData(token);
+        setRevenueData(data);
+      } catch (error) {
+        console.error('Error fetching revenue data:', error);
+      } finally {
+        setRevenueLoading(false);
+      }
+    };
+
+    loadRevenueData();
+  }, [token]);
+
+  const handleFilterChange = (newFilters: InvoiceQueryParams) => {
+    const updatedFilters = { ...newFilters, limit: 10, offset: 0 };
+    setFilters(updatedFilters);
+    updateFilters(updatedFilters);
+    setCurrentPage(1);
+  };
+
+  const handleClearFilters = () => {
+    const clearedFilters = { limit: 10, offset: 0 };
+    setFilters(clearedFilters);
+    updateFilters(clearedFilters);
+    setCurrentPage(1);
+  };
+
+  const handlePageChange = (page: number) => {
+    const offset = (page - 1) * 10;
+    const updatedFilters = { ...filters, offset };
+    setFilters(updatedFilters);
+    updateFilters(updatedFilters);
+    setCurrentPage(page);
+  };
+
+  const handleInvoiceClick = (invoiceId: string) => {
+    setSelectedInvoiceId(invoiceId);
+    setDetailsModalOpened(true);
+  };
+
+  const handleCloseDetailsModal = () => {
+    setDetailsModalOpened(false);
+    setSelectedInvoiceId(null);
+  };
+
+  const totalPages = pagination ? Math.ceil(pagination.total / 10) : 1;
 
   return (
     <>
@@ -47,176 +117,70 @@ function DashBoard() {
         <title>Dashboard | Runanalytic Invoice</title>
         <meta
           name='description'
-          content='Explore our versatile dashboard website template featuring a stunning array of themes and meticulously crafted components. Elevate your web project with seamless integration, customizable themes, and a rich variety of components for a dynamic user experience. Effortlessly bring your data to life with our intuitive dashboard template, designed to streamline development and captivate users. Discover endless possibilities in design and functionality today!'
+          content='Manage your Amazon invoices with automated generation, tracking, and compliance tools.'
         />
       </>
       <MainLayout>
-        {/* ORIGINAL DASHBOARD CODE - COMMENTED OUT FOR BLUR OVERLAY */}
-        {/* 
         <Container fluid>
           <Stack gap='lg'>
-            <StatsGrid
-              data={statsData}
-              loading={statsLoading}
-              error={statsError}
-              paperProps={PAPER_PROPS}
-            />
-            <InvoiceDetailsTable
-              data={{
-                products: mockItems,
-                orders: mockItems,
-              }}
+            {/* Header */}
+            <Group justify="space-between">
+              <div>
+                <Title order={2} size="xl" fw={550}>Invoice Dashboard</Title>
+                <Text c="dimmed" size="sm">
+                  Manage and track your Amazon marketplace invoices
+                </Text>
+              </div>
+              <Group>
+                <Button
+                  leftSection={<IconFileExport size={18} />}
+                  variant="light"
+                  onClick={() => setExportModalOpened(true)}
+                >
+                  Export Invoices
+                </Button>
+              </Group>
+            </Group>
+
+
+            <InvoiceStatsGrid stats={stats} loading={statsLoading} />
+
+            {/* Revenue Chart */}
+            <InvoiceRevenueChart data={revenueData} loading={revenueLoading} />
+
+            {/* Filters */}
+            <InvoiceFilters
+              onFilterChange={handleFilterChange}
+              onClearFilters={handleClearFilters}
             />
 
-            <DetailedStatsGrid/>
-            Render profile info if available
-
-            <Grid gutter={{ base: 5, xs: "md", md: "xl", xl: 50 }}>
-              <Grid.Col span={8}>
-                <RevenueChart {...PAPER_PROPS} />
-              </Grid.Col>
-              <Grid.Col span={4}> 
-                 <SalesChart {...PAPER_PROPS} />
-               </Grid.Col>
-              <Grid.Col span={4}> 
-               <MobileDesktopChart {...PAPER_PROPS} /> 
-              </Grid.Col>
-              <Grid.Col span={8}> 
-               <Paper {...PAPER_PROPS}> 
-                <Group
-                    justify='space-between'
-                    mb='md'
-                  >
-                    <Text
-                      size='lg'
-                      fw={600}
-                    >
-                      Tasks
-                    </Text>
-                    <Button
-                      variant='subtle'
-                      component={Link}
-                      to={PATH_TASKS.root}
-                      rightSection={<IconChevronRight size={18} />}
-                    >
-                      View all
-                    </Button>
-                  </Group> 
-                 <ProjectsTable
-                  data={projectsData.slice(0, 6)}
-                  error={projectsError}
-                  loading={projectsLoading}
-                />
-                </Paper>  
-            </Grid.Col>
-            </Grid>
+            {/* Invoice List */}
+            <InvoiceList
+              invoices={invoices}
+              loading={loading}
+              totalPages={totalPages}
+              currentPage={currentPage}
+              onPageChange={handlePageChange}
+              onInvoiceClick={handleInvoiceClick}
+            />
           </Stack>
         </Container>
-        */}
 
-        {/* BLUR OVERLAY IMPLEMENTATION - START */}
-        <Box style={{ position: 'relative', minHeight: '100vh' }}>
-          {/* Blurred background content - Original dashboard with blur effect */}
-          <Box
-            style={{
-              filter: 'blur(8px)',
-              pointerEvents: 'none',
-              opacity: 0.3,
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              overflow: 'hidden'
-            }}
-          >
-            <Container fluid>
-              <Stack gap='lg'>
-                <StatsGrid
-                  data={statsData}
-                  loading={statsLoading}
-                  error={statsError}
-                  paperProps={PAPER_PROPS}
-                />
-                <InvoiceDetailsTable
-                  data={{
-                    products: mockItems,
-                    orders: mockItems,
-                  }}
-                />
-              </Stack>
-            </Container>
-          </Box>
+        {/* Modals */}
+        <InvoiceDetailsModal
+          invoiceId={selectedInvoiceId}
+          opened={detailsModalOpened}
+          onClose={handleCloseDetailsModal}
+        />
 
-          {/* Full screen overlay with disclaimer message */}
-          <Box
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              backgroundColor: 'rgba(0, 0, 0, 0.7)',
-              backdropFilter: 'blur(5px)',
-              zIndex: 1000,
-              minHeight: '100vh',
-            }}
-          >
-            <Paper
-              shadow="xl"
-              radius="lg"
-              p="xl"
-              style={{
-                maxWidth: 600,
-                textAlign: 'center',
-                backgroundColor: 'rgba(255, 255, 255, 0.98)',
-                backdropFilter: 'blur(20px)',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
-              }}
-            >
-              <Stack gap="lg" align="center">
-                <Title order={1} c="blue" size="h1">
-                  🚧 Dashboard Under Development
-                </Title>
-                <Text size="xl" c="dimmed" fw={500}>
-                  This dashboard is currently under construction.
-                  We're working hard to bring you the best experience.
-                </Text>
-                <Text size="lg" c="dimmed">
-                  Please check back soon for updates!
-                </Text>
-                <Box
-                  style={{
-                    width: '100%',
-                    height: '4px',
-                    backgroundColor: 'var(--mantine-color-blue-6)',
-                    borderRadius: '2px',
-                    marginTop: '1rem'
-                  }}
-                />
-                <Button
-                  component={Link}
-                  to="/"
-                  variant="filled"
-                  size="lg"
-                  style={{
-                    marginTop: '1rem',
-                    backgroundColor: 'var(--mantine-color-blue-6)',
-                  }}
-                >
-                  🏠 Back to Home
-                </Button>
-              </Stack>
-            </Paper>
-          </Box>
-        </Box>
-        {/* BLUR OVERLAY IMPLEMENTATION - END */}
+        <InvoiceExportModal
+          opened={exportModalOpened}
+          onClose={() => setExportModalOpened(false)}
+        />
       </MainLayout>
     </>
   );
 }
 
 export default DashBoard;
+

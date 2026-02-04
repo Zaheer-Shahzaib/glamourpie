@@ -5,9 +5,11 @@ export type KanbanColumn = {
   title: string;
 };
 
-export interface User{
+export interface User {
   id: Id;
   username: string;
+  firstName: string;
+  lastName: string;
   email: string;
   avatar?: string;
   phone?: string;
