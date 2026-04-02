@@ -27,7 +27,7 @@ export const theme = createTheme({
   white: "#FFFFFF",
   black: "#000000",
   primaryColor: "blue",
-  primaryShade: { light:4, dark: 4 },
+  primaryShade: { light: 6, dark: 6 },
   spacing: {
     none: "0px",
     xxs: "2px",
@@ -104,8 +104,8 @@ export const theme = createTheme({
   //  *  Overrides theme.focusRing property.
   //  */
   // focusClassName: ;
-// focusRing: "never", // Disables default focus ring if needed
-//   focusClassName: "custom-focus",
+  // focusRing: "never", // Disables default focus ring if needed
+  //   focusClassName: "custom-focus",
   // /** Allows adding classNames, styles and defaultProps to any component */
   // components: MantineThemeComponents;
   // /** Any other properties that you want to access with the theme objects */

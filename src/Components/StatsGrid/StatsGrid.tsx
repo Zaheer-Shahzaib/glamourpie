@@ -109,20 +109,18 @@ const StatsCard = ({ data, ...others }: StatsCardProps) => {
 
       <Group
         align='flex-end'
-        gap='xs'
-        mt={25}
+        gap='sm'
+        mt={20}
       >
         <Text className={classes.value}>{value}</Text>
         <Text
           c={diff > 0 ? theme.colors.teal[6] : theme.colors.red[6]}
-          fz='sm'
-          fw={600}
           className={classes.diff}
         >
           <span>{diff}%</span>
           <DiffIcon
             size='1rem'
-            stroke={1.5}
+            stroke={2}
           />
         </Text>
       </Group>
@@ -132,60 +130,25 @@ const StatsCard = ({ data, ...others }: StatsCardProps) => {
       <Group justify='space-between'>
         <Box>
           <Text
-            size='sm'
+            size='xs'
             c='dimmed'
+            fw={500}
           >
             Orders / Units
           </Text>
-          <Text size='sm'>
+          <Text size='sm' fw={600} mt={4}>
             {orders} / {units}
           </Text>
         </Box>
-        <Box>
+        <Box style={{ textAlign: 'right' }}>
           <Text
-            size='sm'
+            size='xs'
             c='dimmed'
+            fw={500}
           >
             Refunds
           </Text>
-          <Text size='sm'>{refunds}</Text>
-        </Box>
-      </Group>
-
-      <Divider my='sm' />
-
-      <Group justify='space-between' align='flex-end'>
-        <Box >
-          <Text
-            size='sm'
-            c='dimmed'
-          >
-            Adv. cost
-          </Text>
-          <Text
-            size='sm'
-            fw={600}
-            c={diff > 0 ? theme.colors.teal[6] : theme.colors.red[6]}
-            display={'flex'}
-          >
-            {advCost}
-           
-              {" "}
-              <span className={classes.diff}>%</span>
-              <DiffIcon
-                size='1rem'
-                stroke={1.5}
-              />
-          </Text>
-        </Box>
-        <Box>
-          <Text
-            size='sm'
-            c='dimmed'
-          >
-            Est. payout
-          </Text>
-          <Text size='sm'>{estPayout}</Text>
+          <Text size='sm' fw={600} mt={4}>{refunds}</Text>
         </Box>
       </Group>
 
@@ -194,21 +157,55 @@ const StatsCard = ({ data, ...others }: StatsCardProps) => {
       <Group justify='space-between'>
         <Box>
           <Text
-            size='sm'
+            size='xs'
             c='dimmed'
+            fw={500}
+          >
+            Adv. cost
+          </Text>
+          <Text
+            size='sm'
+            fw={600}
+            c='red'
+            mt={4}
+          >
+            {advCost}
+          </Text>
+        </Box>
+        <Box style={{ textAlign: 'right' }}>
+          <Text
+            size='xs'
+            c='dimmed'
+            fw={500}
+          >
+            Est. payout
+          </Text>
+          <Text size='sm' fw={600} mt={4}>{estPayout}</Text>
+        </Box>
+      </Group>
+
+      <Divider my='sm' />
+
+      <Group justify='space-between'>
+        <Box>
+          <Text
+            size='xs'
+            c='dimmed'
+            fw={500}
           >
             Gross profit
           </Text>
-          <Text size='sm'>{grossProfit}</Text>
+          <Text size='sm' fw={600} mt={4}>{grossProfit}</Text>
         </Box>
-        <Box>
+        <Box style={{ textAlign: 'right' }}>
           <Text
-            size='sm'
+            size='xs'
             c='dimmed'
+            fw={500}
           >
             Net profit
           </Text>
-          <Text size='sm'>{netProfit}</Text>
+          <Text size='sm' fw={600} mt={4}>{netProfit}</Text>
         </Box>
       </Group>
       <Text
@@ -250,12 +247,12 @@ export default function StatsGrid({
         >
           {loading
             ? Array.from({ length: 4 }).map((o, i) => (
-                <Skeleton
-                  key={`stats-loading-${i}`}
-                  visible={true}
-                  height={200}
-                />
-              ))
+              <Skeleton
+                key={`stats-loading-${i}`}
+                visible={true}
+                height={200}
+              />
+            ))
             : stats}
         </SimpleGrid>
       )}

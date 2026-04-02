@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import { ActionIcon, Box, Flex, Group, ScrollArea, Text } from "@mantine/core";
+import { ActionIcon, Box, Flex, Group, Image, ScrollArea, Text } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
 import {
   IconBrandAuth0,
@@ -26,9 +26,11 @@ import { SidebarState, User } from "../../types/index";
 import { LinksGroup } from "./Links/Links";
 import UserProfileButton from "../UserButton";
 import { useNavigate } from "react-router-dom";
-import { PATH_DASHBOARD } from "../../routes";
+import { PATH_DASHBOARD, PATH_APPS } from "../../routes";
 import { useAuth } from "../../Context/useAuth";
 import { fetchUserProfile } from "../../Services/user-services";
+import { UserProfile } from "../../types/profile.types";
+import { getAvatarUrl } from "../../utils/helperFunctions";
 const mockdata = [
   {
     title: "Dashboard",
@@ -37,56 +39,48 @@ const mockdata = [
       {
         label: "Analytics",
         icon: IconChartInfographic,
-        link: "",
+        link: PATH_APPS.analytics,
       },
-      // { label: "SaaS", icon: IconChartArcs3, link: PATH_DASHBOARD.saas },
     ],
   },
   {
     title: "Apps",
     links: [
-      { label: "Profile", icon: IconUserCircle, link: "" },
-      { label: "Settings", icon: IconUserCode, link: "" },
-      // { label: "Chat", icon: IconMessages, link: "" },
-      // { label: "Projects", icon: IconBriefcase, link: "" },
-      { label: "Orders", icon: IconListDetails, link: "" },
+      {
+        label: "Profile",
+        icon: IconUserCircle,
+        links: [
+          { label: "Personal Info", link: PATH_APPS.profile.personal },
+          { label: "Security", link: PATH_APPS.profile.security },
+          { label: "API Credentials", link: PATH_APPS.profile.credentials },
+          { label: "Statistics", link: PATH_APPS.profile.statistics },
+        ]
+      },
+      {
+        label: "Settings",
+        icon: IconUserCode,
+        links: [
+          { label: "SP-API Credentials", link: PATH_APPS.settings.spApi },
+          { label: "Marketplace", link: PATH_APPS.settings.marketplace },
+          { label: "Invoices", link: PATH_APPS.settings.invoices },
+          { label: "Notifications", link: PATH_APPS.settings.notifications },
+          { label: "Business Info", link: PATH_APPS.settings.business },
+        ]
+      },
+      { label: "Orders", icon: IconListDetails, link: PATH_APPS.orders },
       {
         label: "Invoices",
         icon: IconFileInvoice,
         links: [
-          {
-            label: "List",
-            link: "",
-          },
-          {
-            label: "Details",
-            link: "",
-          },
+          { label: "List", link: PATH_APPS.invoices.all },
+          { label: "Details", link: PATH_APPS.invoices.sample },
         ],
       },
-      { label: "Tasks", icon: IconListDetails, link: "" },
-      { label: "Calendar", icon: IconCalendar, link: "" },
-      {
-        label: "File Manager",
-        icon: IconFiles,
-        link: "",
-      },
+      { label: "Tasks", icon: IconListDetails, link: PATH_APPS.tasks },
+      { label: "Calendar", icon: IconCalendar, link: PATH_APPS.calendar },
+      { label: "File Manager", icon: IconFiles, link: PATH_APPS.fileManager },
     ],
   },
-  // {
-  //   title: "Auth",
-  //   links: [
-  //     { label: "Sign In", icon: IconLogin2, link: "" },
-  //     { label: "Sign Up", icon: IconUserPlus, link: "" },
-  //     {
-  //       label: "Reset Password",
-  //       icon: IconRotateRectangle,
-  //       link: "",
-  //     },
-  //     { label: "Clerk", icon: IconUserShield, link: "" },
-  //     { label: "Auth0", icon: IconBrandAuth0, link: "" },
-  //   ],
-  // },
 ];
 
 type NavigationProps = {
@@ -103,7 +97,7 @@ const Navigation = ({
   const tablet_match = useMediaQuery("(max-width: 768px)");
   const navigate = useNavigate();
   const { token } = useAuth();
-  const [profile, setProfile] = useState<User>();
+  const [profile, setProfile] = useState<UserProfile>();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -115,7 +109,7 @@ const Navigation = ({
     }
   }, [token]);
 
-   useEffect(() => {
+  useEffect(() => {
     if (tablet_match) {
       onSidebarStateChange("full");
     }
@@ -155,7 +149,7 @@ const Navigation = ({
     </Box>
   ));
 
- 
+
   return (
     <div
       className={classes.navbar}
@@ -171,7 +165,12 @@ const Navigation = ({
             justify={sidebarState === "mini" ? "center" : "space-between"}
             style={{ flex: tablet_match ? "auto" : 1 }}
           >
-            {/* <Logo className={classes.logo} showText={sidebarState !== 'mini'} /> */}
+            <Image src="/bgremove-background.png" alt="Logo" h={120} className={classes.logo}
+              style={{
+                flex: tablet_match ? "auto" : 1,
+                width: tablet_match ? "auto" : 100
+
+              }} />
           </Group>
           {tablet_match && (
             <ActionIcon
@@ -194,13 +193,13 @@ const Navigation = ({
       </ScrollArea>
 
       <div className={classes.footer}>
-       {profile && 
-        <UserProfileButton
-          email={profile.email}
-          image={profile?.avatar ?? ""}
-          name={profile?.username}
-          showText={sidebarState !== "mini"}
-        />
+        {profile &&
+          <UserProfileButton
+            email={profile.email}
+            image={getAvatarUrl(profile?.avatar)}
+            name={profile?.firstname + " " + profile?.lastname}
+            showText={sidebarState !== "mini"}
+          />
         }
       </div>
     </div>

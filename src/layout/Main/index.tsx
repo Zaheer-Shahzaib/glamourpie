@@ -44,7 +44,7 @@ export default function MainLayout({ children }: Props) {
         breakpoint: 'md',
         collapsed: { mobile: !mobileOpened, desktop: !desktopOpened },
       }}
-     bg={theme.colors.gray[4]}
+      bg={theme.colors.gray[2]}
     >
       <AppShell.Header
         style={{
@@ -52,7 +52,7 @@ export default function MainLayout({ children }: Props) {
           boxShadow: tablet_match ? theme.shadows.md : theme.shadows.sm,
         }}
       >
-        <Container fluid py="sm"  px="lg" pl={15}>
+        <Container fluid py="sm" px="lg" pl={15}>
           <HeaderNav
             mobileOpened={mobileOpened}
             toggleMobile={toggleMobile}

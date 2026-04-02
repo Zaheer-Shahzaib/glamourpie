@@ -27,19 +27,32 @@ export const PATH_APPS = {
   calendar: path(ROOT_APPS, "/calendar"),
   chat: path(ROOT_APPS, "/chat"),
   invoices: {
+    root: path(ROOT_APPS, ROOTS_INVOICES),
     all: path(ROOT_APPS, ROOTS_INVOICES + "/list"),
     sample: path(ROOT_APPS, ROOTS_INVOICES + `/details/`),
     invoice_details: (id: string): string =>
       path(ROOT_APPS, ROOTS_INVOICES + `/details/${id}`),
   },
   orders: path(ROOT_APPS, "/orders"),
-  profile: path(ROOT_APPS, "/profile"),
-  projects: path(ROOT_APPS, "/projects"),
-  settings: path(ROOT_APPS, "/settings"),
-  tasks: path(ROOT_APPS, "/tasks"),
-  fileManager: {
-    root: path(ROOT_APPS, "/file-manager"),
+  profile: {
+    root: path(ROOT_APPS, "/profile"),
+    personal: path(ROOT_APPS, "/profile/personal"),
+    security: path(ROOT_APPS, "/profile/security"),
+    credentials: path(ROOT_APPS, "/profile/credentials"),
+    statistics: path(ROOT_APPS, "/profile/statistics"),
   },
+  projects: path(ROOT_APPS, "/projects"),
+  settings: {
+    root: path(ROOT_APPS, "/settings"),
+    spApi: path(ROOT_APPS, "/settings/sp-api"),
+    marketplace: path(ROOT_APPS, "/settings/marketplace"),
+    invoices: path(ROOT_APPS, "/settings/invoices"),
+    notifications: path(ROOT_APPS, "/settings/notifications"),
+    business: path(ROOT_APPS, "/settings/business"),
+  },
+  tasks: path(ROOT_APPS, "/tasks"),
+  fileManager: path(ROOT_APPS, "/file-manager"),
+  analytics: path(ROOT_APPS, "/analytics"),
 };
 // routes/index.ts
 

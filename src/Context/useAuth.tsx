@@ -2,12 +2,13 @@ import { useState, createContext, useContext, useEffect } from "react";
 import Cookies from "js-cookie";
 import { fetchUserProfile } from "../Services/user-services";
 import { api } from "../Services/api";
+import { UserProfile } from "../types/profile.types";
 type AuthContextType = {
   isAuthenticated: boolean;
   token: string | null;
   login: (token: string, rememberMe?: boolean) => void;
   logout: () => void;
-  profile?: any;
+  profile?: UserProfile | null;
   loading?: boolean;
 };
 
@@ -18,7 +19,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     () => Cookies.get("token") || null
   );
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(!!token);
-  const [profile, setProfile] = useState<any>(null);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   console.log(
     "AuthProvider render, token:",
@@ -33,7 +34,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     if (token) {
       fetchUserProfile(token)
-        .then((data) => setProfile(data))
+        .then((data) => {
+          setProfile(data)
+        })
+
         .catch((err) => console.error(err))
         .finally(() => setLoading(false));
     } else {
@@ -52,20 +56,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setIsAuthenticated(true);
   };
 
-const logout = async () => {
-  try {
-    await api.post("/api/logout", {}, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-  } catch (err) {
-    console.log("Logout error (ignored):", err);
-  }
+  const logout = async () => {
+    try {
+      await api.post("/api/logout", {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+    } catch (err) {
+      console.log("Logout error (ignored):", err);
+    }
 
-  Cookies.remove("token");
-  setToken(null);
-  setIsAuthenticated(false);
-  window.location.reload();
-};
+    Cookies.remove("token");
+    setToken(null);
+    setIsAuthenticated(false);
+    window.location.reload();
+  };
 
 
   return (

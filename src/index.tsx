@@ -5,10 +5,11 @@ import { MantineProvider } from "@mantine/core";
 import { theme } from "./theme/theme";
 import '@mantine/notifications/styles.css';
 import "@mantine/core/styles.css";
+import "@mantine/dates/styles.css";
 import { Notifications } from '@mantine/notifications';
 import { AuthProvider } from "./Context/useAuth";
 import { ScrollProvider } from "./Context/scrollContext";
-import {   BrowserRouter as Router } from "react-router-dom";
+import { BrowserRouter as Router } from "react-router-dom";
 import './styles/index.css'
 import "./styles/globals.scss";
 const root = ReactDOM.createRoot(
@@ -22,7 +23,7 @@ root.render(
       theme={theme}
       defaultColorScheme='light'
     >
-        <Notifications />
+      <Notifications />
       <AuthProvider>
         <Router>
           <ScrollProvider>

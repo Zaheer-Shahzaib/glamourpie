@@ -59,7 +59,7 @@
 }
 
 .logo {
-  // Theme-specific overrides can go here if needed
+  display: block;
 }
 
 .links {
@@ -78,8 +78,9 @@
 }
 
 .linkHeader {
-  font-weight: 500;
-  color: var(--mantine-color-error);
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.5);
+  letter-spacing: 0.5px;
 }
 
 .footer {
@@ -103,7 +104,7 @@ html[data-mantine-color-scheme="light"] {
   }
 
   .linkHeader {
-    color: var(--mantine-color-black);
+    color: rgba(255, 255, 255, 0.6);
   }
 }
 
@@ -120,6 +121,6 @@ html[data-mantine-color-scheme="dark"] {
   }
 
   .linkHeader {
-    color: var(--mantine-primary-color-filled);
+    color: var(--mantine-primary-color-light-color);
   }
 }
