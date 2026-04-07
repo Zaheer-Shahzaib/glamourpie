@@ -17,7 +17,12 @@ import {
     Badge,
     Alert,
     Loader,
+    Collapse,
+    Anchor,
+    Box,
 } from '@mantine/core';
+import { useDisclosure } from '@mantine/hooks';
+import { useSearchParams } from 'react-router-dom';
 import {
     IconKey,
     IconWorld,
@@ -28,9 +33,11 @@ import {
     IconCheck,
     IconAlertCircle,
     IconSettings,
+    IconCreditCard,
 } from '@tabler/icons-react';
 import { useAuth } from '../Context/useAuth';
 import { notifications } from '@mantine/notifications';
+import { getSubscriptionStatus, createPortalSession } from '../Services/stripeService';
 import {
     fetchSellerSettings,
     updateSellerSettings,
@@ -46,7 +53,17 @@ export default function SettingsPage() {
     const [saving, setSaving] = useState(false);
     const [testing, setTesting] = useState(false);
     const [syncing, setSyncing] = useState(false);
+    const [connecting, setConnecting] = useState(false); // New state for OAuth connect
     const [settings, setSettings] = useState<SellerSettings | null>(null);
+    const [showAdvanced, { toggle: toggleAdvanced }] = useDisclosure(false);
+    const [searchParams, setSearchParams] = useSearchParams();
+
+    // Subscription & Billing state
+    const [billingLoading, setBillingLoading] = useState(false);
+    const [activePlans, setActivePlans] = useState<string[]>([]);
+    const [totalAllowedInvoices, setTotalAllowedInvoices] = useState<number>(0);
+    const [hasPastDue, setHasPastDue] = useState(false);
+    const [portalAvailable, setPortalAvailable] = useState(false);
 
     // Form state
     const [spApiCredentials, setSpApiCredentials] = useState({
@@ -94,7 +111,43 @@ export default function SettingsPage() {
 
     useEffect(() => {
         loadSettings();
+        loadBilling();
+
+        const amazonAuth = searchParams.get('amazon_auth');
+        if (amazonAuth === 'success') {
+            notifications.show({
+                title: 'Success',
+                message: 'Successfully connected to Amazon Seller Central.',
+                color: 'green',
+            });
+            // remove url params
+            searchParams.delete('amazon_auth');
+            setSearchParams(searchParams);
+        } else if (amazonAuth === 'error') {
+            notifications.show({
+                title: 'Connection Failed',
+                message: 'Failed to connect to Amazon Seller Central: ' + (searchParams.get('error') || 'Unknown error'),
+                color: 'red',
+            });
+            // remove url params
+            searchParams.delete('amazon_auth');
+            searchParams.delete('error');
+            setSearchParams(searchParams);
+        }
     }, [token]);
+
+    const loadBilling = async () => {
+        if (!token) return;
+        try {
+            const data = await getSubscriptionStatus();
+            setActivePlans(data.activePlans || []);
+            setTotalAllowedInvoices(data.totalAllowedInvoices || 0);
+            setHasPastDue(data.hasPastDue || false);
+            setPortalAvailable(data.portalAvailable || false);
+        } catch (error) {
+            console.error("Failed to fetch billing status");
+        }
+    };
 
     const loadSettings = async () => {
         if (!token) return;
@@ -251,6 +304,51 @@ export default function SettingsPage() {
         }
     };
 
+    const handleConnectAmazon = async () => {
+        if (!token) return;
+        setConnecting(true);
+        try {
+            // Adjust endpoint depending on your environment, assuming backend is running on process.env.VITE_API_URL or similar
+            // Our backend runs on http://localhost:5173 for some reason (see .env PORT=5173 which is unusual for backend, but we'll use API token call)
+            const response = await fetch('http://localhost:5173/api/aws/sp-api/auth-url', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            const data = await response.json();
+            if (data.success && data.url) {
+                window.location.href = data.url;
+            } else {
+                throw new Error("Invalid response");
+            }
+        } catch (error) {
+            notifications.show({
+                title: 'Error',
+                message: 'Failed to generate Amazon authorization URL',
+                color: 'red',
+            });
+        } finally {
+            setConnecting(false);
+        }
+    };
+
+    const handlePortalAccess = async () => {
+        setBillingLoading(true);
+        try {
+            const result = await createPortalSession();
+            window.location.href = result.url;
+        } catch (err: any) {
+            notifications.show({
+                title: "Error",
+                message: err?.response?.data?.error || "Failed to open billing portal.",
+                color: "red",
+            });
+        } finally {
+            setBillingLoading(false);
+        }
+    };
+
     if (loading) {
         return (
             <MainLayout>
@@ -312,6 +410,9 @@ export default function SettingsPage() {
                             <Tabs.Tab value="business" leftSection={<IconBuilding size={16} />}>
                                 Business Info
                             </Tabs.Tab>
+                            <Tabs.Tab value="billing" leftSection={<IconCreditCard size={16} />}>
+                                Billing & Subscription
+                            </Tabs.Tab>
                         </Tabs.List>
 
                         {/* SP-API Credentials Tab */}
@@ -342,85 +443,117 @@ export default function SettingsPage() {
 
                                     <Divider />
 
-                                    <TextInput
-                                        label="Seller ID"
-                                        placeholder="Enter your Amazon Seller ID"
-                                        value={spApiCredentials.sellerId}
-                                        onChange={(e) =>
-                                            setSpApiCredentials({ ...spApiCredentials, sellerId: e.target.value })
-                                        }
-                                        required
-                                    />
+                                    <Box my="lg">
+                                        <Stack gap="md">
+                                            <Box>
+                                                <Text fw={500} size="lg">One-Click Setup</Text>
+                                                <Text size="sm" c="dimmed">Securely authorize this application to manage your Amazon Seller account.</Text>
+                                            </Box>
+                                            <Button 
+                                                size="md" 
+                                                color="orange"
+                                                onClick={handleConnectAmazon}
+                                                loading={connecting}
+                                                leftSection={<IconWorld size={18} />}
+                                                w={{ base: '100%', sm: 'auto' }}
+                                                style={{ alignSelf: 'flex-start' }}
+                                            >
+                                                Connect to Amazon Seller Central
+                                            </Button>
+                                        </Stack>
+                                    </Box>
 
-                                    <TextInput
-                                        label="Marketplace ID"
-                                        placeholder="e.g., A2VIGQ35RCS4UG (UAE)"
-                                        value={spApiCredentials.marketplaceId}
-                                        onChange={(e) =>
-                                            setSpApiCredentials({ ...spApiCredentials, marketplaceId: e.target.value })
-                                        }
-                                        required
-                                    />
+                                    <Divider />
+                                    <Group justify="center" mt="md">
+                                        <Anchor component="button" type="button" c="dimmed" size="sm" onClick={toggleAdvanced}>
+                                            {showAdvanced ? 'Hide Advanced Settings' : 'Show Advanced Settings (Manual Credentials)'}
+                                        </Anchor>
+                                    </Group>
 
-                                    <Select
-                                        label="Region"
-                                        placeholder="Select region"
-                                        value={spApiCredentials.region}
-                                        onChange={(value) =>
-                                            setSpApiCredentials({ ...spApiCredentials, region: value as 'NA' | 'EU' | 'FE' })
-                                        }
-                                        data={[
-                                            { value: 'NA', label: 'North America' },
-                                            { value: 'EU', label: 'Europe' },
-                                            { value: 'FE', label: 'Far East' },
-                                        ]}
-                                        required
-                                    />
+                                    <Collapse in={showAdvanced}>
+                                        <Stack gap="md" mt="md" p="md" bg="var(--mantine-color-gray-0)" style={{ borderRadius: '8px' }}>
+                                            <Text fw={500}>Manual API Setup</Text>
+                                            <TextInput
+                                                label="Seller ID"
+                                                placeholder="Enter your Amazon Seller ID"
+                                                value={spApiCredentials.sellerId}
+                                                onChange={(e) =>
+                                                    setSpApiCredentials({ ...spApiCredentials, sellerId: e.target.value })
+                                                }
+                                                required={showAdvanced}
+                                            />
 
-                                    <TextInput
-                                        label="Client ID"
-                                        placeholder="Enter your LWA Client ID"
-                                        value={spApiCredentials.clientId}
-                                        onChange={(e) =>
-                                            setSpApiCredentials({ ...spApiCredentials, clientId: e.target.value })
-                                        }
-                                    />
+                                            <TextInput
+                                                label="Marketplace ID"
+                                                placeholder="e.g., A2VIGQ35RCS4UG (UAE)"
+                                                value={spApiCredentials.marketplaceId}
+                                                onChange={(e) =>
+                                                    setSpApiCredentials({ ...spApiCredentials, marketplaceId: e.target.value })
+                                                }
+                                                required={showAdvanced}
+                                            />
 
-                                    <PasswordInput
-                                        label="Client Secret"
-                                        placeholder="Enter your LWA Client Secret"
-                                        value={spApiCredentials.clientSecret}
-                                        onChange={(e) =>
-                                            setSpApiCredentials({ ...spApiCredentials, clientSecret: e.target.value })
-                                        }
-                                    />
+                                            <Select
+                                                label="Region"
+                                                placeholder="Select region"
+                                                value={spApiCredentials.region}
+                                                onChange={(value) =>
+                                                    setSpApiCredentials({ ...spApiCredentials, region: value as 'NA' | 'EU' | 'FE' })
+                                                }
+                                                data={[
+                                                    { value: 'NA', label: 'North America' },
+                                                    { value: 'EU', label: 'Europe' },
+                                                    { value: 'FE', label: 'Far East' },
+                                                ]}
+                                                required={showAdvanced}
+                                            />
 
-                                    <PasswordInput
-                                        label="Refresh Token"
-                                        placeholder="Enter your SP-API Refresh Token"
-                                        value={spApiCredentials.refreshToken}
-                                        onChange={(e) =>
-                                            setSpApiCredentials({ ...spApiCredentials, refreshToken: e.target.value })
-                                        }
-                                    />
+                                            <TextInput
+                                                label="Client ID (LWA)"
+                                                placeholder="Enter your LWA Client ID"
+                                                value={spApiCredentials.clientId}
+                                                onChange={(e) =>
+                                                    setSpApiCredentials({ ...spApiCredentials, clientId: e.target.value })
+                                                }
+                                            />
 
-                                    <PasswordInput
-                                        label="Access Key ID"
-                                        placeholder="Enter AWS Access Key ID"
-                                        value={spApiCredentials.accessKeyId}
-                                        onChange={(e) =>
-                                            setSpApiCredentials({ ...spApiCredentials, accessKeyId: e.target.value })
-                                        }
-                                    />
+                                            <PasswordInput
+                                                label="Client Secret (LWA)"
+                                                placeholder="Enter your LWA Client Secret"
+                                                value={spApiCredentials.clientSecret}
+                                                onChange={(e) =>
+                                                    setSpApiCredentials({ ...spApiCredentials, clientSecret: e.target.value })
+                                                }
+                                            />
 
-                                    <PasswordInput
-                                        label="Secret Access Key"
-                                        placeholder="Enter AWS Secret Access Key"
-                                        value={spApiCredentials.secretAccessKey}
-                                        onChange={(e) =>
-                                            setSpApiCredentials({ ...spApiCredentials, secretAccessKey: e.target.value })
-                                        }
-                                    />
+                                            <PasswordInput
+                                                label="Refresh Token"
+                                                placeholder="Enter your SP-API Refresh Token"
+                                                value={spApiCredentials.refreshToken}
+                                                onChange={(e) =>
+                                                    setSpApiCredentials({ ...spApiCredentials, refreshToken: e.target.value })
+                                                }
+                                            />
+
+                                            <PasswordInput
+                                                label="IAM Access Key ID"
+                                                placeholder="Enter AWS IAM Access Key ID"
+                                                value={spApiCredentials.accessKeyId}
+                                                onChange={(e) =>
+                                                    setSpApiCredentials({ ...spApiCredentials, accessKeyId: e.target.value })
+                                                }
+                                            />
+
+                                            <PasswordInput
+                                                label="IAM Secret Access Key"
+                                                placeholder="Enter AWS IAM Secret Access Key"
+                                                value={spApiCredentials.secretAccessKey}
+                                                onChange={(e) =>
+                                                    setSpApiCredentials({ ...spApiCredentials, secretAccessKey: e.target.value })
+                                                }
+                                            />
+                                        </Stack>
+                                    </Collapse>
                                 </Stack>
                             </Paper>
                         </Tabs.Panel>
@@ -676,6 +809,67 @@ export default function SettingsPage() {
                                             setBusinessInfo({ ...businessInfo, vatNumber: e.target.value })
                                         }
                                     />
+                                </Stack>
+                            </Paper>
+                        </Tabs.Panel>
+
+                        {/* Billing & Subscription Tab */}
+                        <Tabs.Panel value="billing" pt="lg">
+                            <Paper p="xl" radius="md" withBorder>
+                                <Stack gap="md">
+                                    <Title order={3}>Subscription & Billing Overview</Title>
+                                    <Divider />
+                                    
+                                    {hasPastDue && (
+                                        <Alert icon={<IconAlertCircle size={16} />} title="Payment Action Required" color="red" variant="filled">
+                                            Your recent subscription payment failed. Your automated invoicing feature is currently paused. Please update your payment details.
+                                        </Alert>
+                                    )}
+
+                                    <Group align="flex-start" grow>
+                                        <Paper withBorder p="md" radius="md" bg="var(--mantine-color-gray-0)">
+                                            <Text c="dimmed" size="sm" fw={500} tt="uppercase">Active Plans</Text>
+                                            <Group gap="xs" mt="xs">
+                                                {activePlans.length > 0 ? (
+                                                    activePlans.map(plan => (
+                                                        <Badge key={plan} size="xl" color="blue" variant="light">
+                                                            {plan.charAt(0).toUpperCase() + plan.slice(1)}
+                                                        </Badge>
+                                                    ))
+                                                ) : (
+                                                    <Text fw={500}>No active plans</Text>
+                                                )}
+                                            </Group>
+                                        </Paper>
+
+                                        <Paper withBorder p="md" radius="md" bg="var(--mantine-color-gray-0)">
+                                            <Text c="dimmed" size="sm" fw={500} tt="uppercase">Combined Monthly Invoice Limit</Text>
+                                            <Text size="xl" fw={700} mt="xs">
+                                                {totalAllowedInvoices > 0 ? totalAllowedInvoices.toLocaleString() : '0'} Invoices
+                                            </Text>
+                                        </Paper>
+                                    </Group>
+
+                                    {portalAvailable ? (
+                                        <Stack align="flex-start" mt="md">
+                                            <Text size="sm" c="dimmed">
+                                                Manage your payment methods, download previous receipts, and cancel your subscriptions securely via Stripe. To upgrade your plan, visit the Pricing page.
+                                            </Text>
+                                            <Button 
+                                                variant="light" 
+                                                color="grape" 
+                                                leftSection={<IconCreditCard size={18} />}
+                                                onClick={handlePortalAccess}
+                                                loading={billingLoading}
+                                            >
+                                                Manage Billing & Update Payment Methods
+                                            </Button>
+                                        </Stack>
+                                    ) : (
+                                        <Text size="sm" c="dimmed" mt="md">
+                                            You are currently on the Free plan. To link a payment method and manage billing, please upgrade your plan on the Pricing page first.
+                                        </Text>
+                                    )}
                                 </Stack>
                             </Paper>
                         </Tabs.Panel>

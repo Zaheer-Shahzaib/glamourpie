@@ -65,6 +65,7 @@ const mockdata = [
           { label: "Invoices", link: PATH_APPS.settings.invoices },
           { label: "Notifications", link: PATH_APPS.settings.notifications },
           { label: "Business Info", link: PATH_APPS.settings.business },
+          { label: "Billing & Subscription", link: PATH_APPS.settings.billing },
         ]
       },
       { label: "Orders", icon: IconListDetails, link: PATH_APPS.orders },

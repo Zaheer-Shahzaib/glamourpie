@@ -214,7 +214,7 @@ export default function Home() {
           style={{ position: 'relative' }}
         >
           <Pricing />
-          <button
+          {/* <button
             onClick={() => window.location.href = '/contact-us'} // or use `navigate`
             style={{
               position: 'absolute',
@@ -227,7 +227,7 @@ export default function Home() {
               border: 'none',
               background: 'transparent',
             }}
-          />
+          /> */}
         </Container>
         {/* <Container
           id='services'

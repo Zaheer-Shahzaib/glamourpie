@@ -127,6 +127,7 @@ export default function ProfilePersonalPage() {
         }
     };
 
+    console.log(getAvatarUrl(profile?.avatar))
     const handleProfileUpdate = async () => {
         if (!token) return;
 

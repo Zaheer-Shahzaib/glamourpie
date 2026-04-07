@@ -1,6 +1,5 @@
 import {
   Button,
-  Container,
   Group,
   List,
   Paper,
@@ -9,7 +8,6 @@ import {
   Text,
   ThemeIcon,
   Title,
-  rem,
 } from "@mantine/core";
 import { IconArrowRight, IconCheck } from "@tabler/icons-react";
 import CountUp from "react-countup";
@@ -20,12 +18,16 @@ type PricingCardProps = {
   description: string;
   price: {
     month: number;
-    year: number;
+    year?: number;
   };
   features: string[];
   preferred: boolean;
   actionText: string;
   monthly: boolean;
+  customPrice?: boolean;
+  onAction?: () => void;
+  loading?: boolean;
+  isCurrentPlan?: boolean;
 } & PaperProps;
 
 const PricingCard = (props: PricingCardProps) => {
@@ -37,6 +39,10 @@ const PricingCard = (props: PricingCardProps) => {
     tier,
     monthly,
     description,
+    customPrice,
+    onAction,
+    loading,
+    isCurrentPlan,
     ...others
   } = props;
 
@@ -50,22 +56,30 @@ const PricingCard = (props: PricingCardProps) => {
         align='center'
         justify='center'
       >
-        <sup style={{ fontSize: rem(24) }}>$</sup>
-        <Group
-          align='flex-end'
-          gap={1}
-        >
-          <Title size={48}>
-            <CountUp end={monthly ? price.year : price.month} />
+        {customPrice ? (
+          <Title size={40} ta='center'>
+            Custom Pricing
           </Title>
-          <Text
-            size='md'
-            fw={500}
-            mb={6}
-          >
-            /mo
-          </Text>
-        </Group>
+        ) : (
+          <>
+            <Text size='xl' fw={700} mb={6} style={{ alignSelf: 'flex-end' }}>AED</Text>
+            <Group
+              align='flex-end'
+              gap={1}
+            >
+              <Title size={48}>
+                <CountUp end={monthly && price.year ? price.year : price.month} />
+              </Title>
+              <Text
+                size='md'
+                fw={500}
+                mb={6}
+              >
+                /mo
+              </Text>
+            </Group>
+          </>
+        )}
       </Group>
       <Title
         ta='center'
@@ -104,22 +118,30 @@ const PricingCard = (props: PricingCardProps) => {
       </List>
       <Stack justify="flex-end" mt={"xl"} h={'inherit'} >
         <Button
-          variant={preferred ? "filled" : "outline"}
-          rightSection={<IconArrowRight size={18} />}
+          variant={isCurrentPlan ? "filled" : preferred ? "filled" : "outline"}
+          color={isCurrentPlan ? "green" : undefined}
+          rightSection={!loading && !isCurrentPlan ? <IconArrowRight size={18} /> : undefined}
           fullWidth
           size='md'
           mb='sm'
           style={{ textTransform: "capitalize" }}
+          onClick={onAction}
+          loading={loading}
+          disabled={isCurrentPlan}
         >
           {actionText}
         </Button>
-        <Text
-          ta='center'
-          c='dimmed'
-          size='sm'
-        >
-          No card required
-        </Text>
+        {
+          !isCurrentPlan && (
+            <Text
+              ta='center'
+              c='dimmed'
+              size='sm'
+            >
+              No card required
+            </Text>
+          )
+        }
       </Stack>
     </Surface>
   );

@@ -36,8 +36,25 @@ function LoginPage() {
   const theme = useMantineTheme();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [rememberMe, setRememberMe] = useState(false);
+  const [amazonConnecting, setAmazonConnecting] = useState(false);
 
-  
+  const handleAmazonLogin = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    setAmazonConnecting(true);
+    setErrorMessage(null);
+    try {
+      const resp = await api.get("/api/amazon");
+      if (resp.data.success && resp.data.url) {
+        window.location.href = resp.data.url;
+      } else {
+        setErrorMessage("Failed to initiate Amazon SSO.");
+      }
+    } catch (err: any) {
+      setErrorMessage(err.response?.data?.message || JSON.stringify(err.response?.data) || "Could not connect to Amazon SSO.");
+    } finally {
+      setAmazonConnecting(false);
+    }
+  };
 
   const form = useForm({
     initialValues: { email: "", password: "" },
@@ -53,60 +70,56 @@ function LoginPage() {
       // rememberMe: (value: boolean) => setRememberMe(value),
     },
   });
- const handleSubmit = async (values: typeof form.values) => {
-  try {
-    const resp = await api.post("/api/signin", {
-      ...values,
-      isRememberMe: rememberMe,
-    });
-
-    if (resp.status === 200) {
-      // Save email & rememberMe for OTP verification
-      localStorage.setItem("otp_email", values.email);
-      localStorage.setItem("rememberMe", rememberMe.toString());
-
-      notifications.show({
-        title: "Success",
-        message: "OTP sent successfully!",
-        color: theme.colors.green[4],
-        position: "top-right",
+  const handleSubmit = async (values: typeof form.values) => {
+    try {
+      const resp = await api.post("/api/signin", {
+        ...values,
+        isRememberMe: rememberMe,
       });
 
-      navigate(PATH_AUTH.otpVerify);
-    }
-  } catch (error: any) {
-    setErrorMessage(error.response?.data?.message || "Login failed");
-  }
-};
+      if (resp.status === 200) {
+        // Save email & rememberMe for OTP verification
+        localStorage.setItem("otp_email", values.email);
+        localStorage.setItem("rememberMe", rememberMe.toString());
 
+        notifications.show({
+          title: "Success",
+          message: "OTP sent successfully!",
+          color: theme.colors.green[4],
+          position: "top-right",
+        });
+
+        navigate(PATH_AUTH.otpVerify);
+      }
+    } catch (error: any) {
+      setErrorMessage(error.response?.data?.message || "Login failed");
+    }
+  };
 
   return (
     <>
       <>
         <title>Sign in | Runanalytic Invoice</title>
         <meta
-          name='description'
-          content='Explore our versatile dashboard website template featuring a stunning array of themes and meticulously crafted components. Elevate your web project with seamless integration, customizable themes, and a rich variety of components for a dynamic user experience. Effortlessly bring your data to life with our intuitive dashboard template, designed to streamline development and captivate users. Discover endless possibilities in design and functionality today!'
+          name="description"
+          content="Explore our versatile dashboard website template featuring a stunning array of themes and meticulously crafted components. Elevate your web project with seamless integration, customizable themes, and a rich variety of components for a dynamic user experience. Effortlessly bring your data to life with our intuitive dashboard template, designed to streamline development and captivate users. Discover endless possibilities in design and functionality today!"
         />
       </>
       <SignInLayout>
-        <Title ta='center'>Welcome back!</Title>
-        <Text ta='center'>Sign in to your account to continue</Text>
+        <Title ta="center">Welcome back!</Title>
+        <Text ta="center">Sign in to your account to continue</Text>
 
-        <Surface
-          component={Paper}
-          className={classes.card}
-        >
+        <Surface component={Paper} className={classes.card}>
           <ActionIcon
             variant="filled"
             // color="brand"
             size="lg"
             onClick={() => navigate(-1)}
             style={{
-              position: 'absolute',
+              position: "absolute",
               top: 16,
               left: 16,
-              zIndex: 10
+              zIndex: 10,
             }}
             title="Go back"
           >
@@ -114,10 +127,10 @@ function LoginPage() {
           </ActionIcon>
           {errorMessage && (
             <Alert
-              variant='light'
+              variant="light"
               c={theme.colors.red[8]}
-              radius='lg'
-              title=''
+              radius="lg"
+              title=""
               icon={<IconInfoCircle />}
             >
               {errorMessage}
@@ -125,26 +138,23 @@ function LoginPage() {
           )}
           <form onSubmit={form.onSubmit(handleSubmit)}>
             <TextInput
-              label='Email'
-              placeholder='example@domain.com'
+              label="Email"
+              placeholder="example@domain.com"
               required
               classNames={{ label: classes.label }}
               {...form.getInputProps("email")}
             />
             <PasswordInput
-              label='Password'
-              placeholder='Your password'
+              label="Password"
+              placeholder="Your password"
               required
-              mt='md'
+              mt="md"
               classNames={{ label: classes.label }}
               {...form.getInputProps("password")}
             />
-            <Group
-              justify='space-between'
-              mt='lg'
-            >
+            <Group justify="space-between" mt="lg">
               <Checkbox
-                label='Remember me'
+                label="Remember me"
                 classNames={{ label: classes.label }}
                 checked={rememberMe}
                 onChange={(event) => setRememberMe(event.currentTarget.checked)}
@@ -152,24 +162,32 @@ function LoginPage() {
               <Text
                 component={Link}
                 to={PATH_AUTH.forgetPassword}
-                size='sm'
+                size="sm"
                 {...LINK_PROPS}
               >
                 Forgot password?
               </Text>
             </Group>
-            <Button
-              fullWidth
-              mt='xl'
-              type='submit'
-            >
+            <Button fullWidth mt="xl" type="submit">
               Sign in
             </Button>
+            
+            <Group justify="center" mt="md">
+              <a href="#" id="LoginWithAmazon" onClick={handleAmazonLogin} style={{ cursor: amazonConnecting ? 'wait' : 'pointer', opacity: amazonConnecting ? 0.7 : 1 }}>
+                <img
+                  alt="Login with Amazon"
+                  src="https://images-na.ssl-images-amazon.com/images/G/01/lwa/btnLWA_gold_156x32.png"
+                  width="156"
+                  height="32"
+                  style={{ border: 0 }}
+                />
+              </a>
+            </Group>
           </form>
-          <Center mt='md'>
+          <Center mt="md">
             <Text
-              fz='sm'
-              ta='center'
+              fz="sm"
+              ta="center"
               component={Link}
               to={PATH_AUTH.signup}
               {...LINK_PROPS}

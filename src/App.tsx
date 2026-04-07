@@ -18,6 +18,7 @@ import SettingsMarketplacePage from "./pages/settings/SettingsMarketplacePage";
 import SettingsInvoicesPage from "./pages/settings/SettingsInvoicesPage";
 import SettingsNotificationsPage from "./pages/settings/SettingsNotificationsPage";
 import SettingsBusinessPage from "./pages/settings/SettingsBusinessPage";
+import SettingsBillingPage from "./pages/settings/SettingsBillingPage";
 import ComingSoonPage from "./pages/ComingSoonPage";
 import AnalyticsPage from "./pages/AnalyticsPage";
 import SignupPage from "./Components/authentication/signup/page";
@@ -35,7 +36,9 @@ import OTPVerify from "./Components/authentication/otpVerify/page";
 import Services from "./Components/services";
 import ResetPassword from "./Components/authentication/forgetPassword/resetPassword";
 import ForgetPassword from "./Components/authentication/forgetPassword/page";
-
+import PaymentSuccess from "./pages/PaymentSuccess";
+import PaymentCancelled from "./pages/PaymentCancelled";
+import SsoCallbackPage from "./Components/authentication/ssoCallback/page";
 
 
 // --- Auth Simulation ---
@@ -110,6 +113,8 @@ export default function App() {
       <Route path={PATH_PAGES.terms} element={<TermsService />} />
       <Route path={PATH_PAGES.about} element={<About />} />
       <Route path={PATH_PAGES.addp} element={<ADDP />} />
+      <Route path={PATH_PAGES.paymentSuccess} element={<PaymentSuccess />} />
+      <Route path={PATH_PAGES.paymentCancelled} element={<PaymentCancelled />} />
       <Route path={PATH_AUTH.root}>
         <Route
           path={PATH_AUTH.signin}
@@ -131,6 +136,10 @@ export default function App() {
         <Route
           path={PATH_AUTH.otpVerify}
           element={<OTPVerify />}
+        />
+        <Route
+          path={PATH_AUTH.ssoSuccess}
+          element={<SsoCallbackPage />}
         />
       </Route>
       {/* Protected Routes */}
@@ -197,6 +206,10 @@ export default function App() {
         <Route
           path={PATH_APPS.settings.business}
           element={<SettingsBusinessPage />}
+        />
+        <Route
+          path={PATH_APPS.settings.billing}
+          element={<SettingsBillingPage />}
         />
       </Route>
       {/* Placeholder Routes */}

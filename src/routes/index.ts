@@ -49,6 +49,7 @@ export const PATH_APPS = {
     invoices: path(ROOT_APPS, "/settings/invoices"),
     notifications: path(ROOT_APPS, "/settings/notifications"),
     business: path(ROOT_APPS, "/settings/business"),
+    billing: path(ROOT_APPS, "/settings/billing"),
   },
   tasks: path(ROOT_APPS, "/tasks"),
   fileManager: path(ROOT_APPS, "/file-manager"),
@@ -64,8 +65,10 @@ export const PATH_PAGES = {
   services: path(ROOTS_PAGES, "services"),
   terms: path(ROOTS_PAGES, "terms-service"),
   support: path(ROOTS_PAGES, "support"),
-  privacy: path(ROOTS_PAGES, "privacy-policy"), // ✅ FIXED
-  addp: path(ROOTS_PAGES, "amazon-data-protection-policy")
+  privacy: path(ROOTS_PAGES, "privacy-policy"),
+  addp: path(ROOTS_PAGES, "amazon-data-protection-policy"),
+  paymentSuccess: path(ROOTS_PAGES, "payment-success"),
+  paymentCancelled: path(ROOTS_PAGES, "payment-cancelled"),
 };
 
 
@@ -102,6 +105,7 @@ export const PATH_AUTH = {
   passwordReset: path(ROOTS_AUTH, "/password-reset"),
   forgetPassword: path(ROOTS_AUTH, "/forget-password"),
   otpVerify: path(ROOTS_AUTH, "/otp-verify"),
+  ssoSuccess: path(ROOTS_AUTH, "/sso-success"),
   clerk: path(ROOTS_AUTH, "/clerk"),
   auth0: path(ROOTS_AUTH, "/auth0"),
 };
