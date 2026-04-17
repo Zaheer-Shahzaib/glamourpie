@@ -13,6 +13,7 @@ import ProfileSecurityPage from "./pages/profile/ProfileSecurityPage";
 import ProfileCredentialsPage from "./pages/profile/ProfileCredentialsPage";
 import ProfileStatisticsPage from "./pages/profile/ProfileStatisticsPage";
 import OrdersPage from "./pages/ordersPage";
+import InvoicesPage from "./pages/invoicesPage";
 import SettingsSpApiPage from "./pages/settings/SettingsSpApiPage";
 import SettingsMarketplacePage from "./pages/settings/SettingsMarketplacePage";
 import SettingsInvoicesPage from "./pages/settings/SettingsInvoicesPage";
@@ -38,6 +39,7 @@ import ResetPassword from "./Components/authentication/forgetPassword/resetPassw
 import ForgetPassword from "./Components/authentication/forgetPassword/page";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import PaymentCancelled from "./pages/PaymentCancelled";
+import ConnectSellerPage from "./pages/ConnectSellerPage";
 import SsoCallbackPage from "./Components/authentication/ssoCallback/page";
 
 
@@ -144,6 +146,15 @@ export default function App() {
       </Route>
       {/* Protected Routes */}
       <Route
+        path="/connect-amazon"
+        element={<ProtectedRoute requireSeller={false} />}
+      >
+        <Route
+          index
+          element={<ConnectSellerPage />}
+        />
+      </Route>
+      <Route
         path={PATH_DASHBOARD.root}
         element={<ProtectedRoute />}
       >
@@ -180,6 +191,15 @@ export default function App() {
         <Route
           index
           element={<OrdersPage />}
+        />
+      </Route>
+      <Route
+        path={PATH_APPS.invoices.root}
+        element={<ProtectedRoute />}
+      >
+        <Route
+          index
+          element={<InvoicesPage />}
         />
       </Route>
       {/* Settings Child Routes */}

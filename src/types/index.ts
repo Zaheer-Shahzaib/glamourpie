@@ -1,3 +1,5 @@
+import { InvoiceStatus } from "./invoice.types";
+
 export type Id = string | number;
 export type SidebarState = 'hidden' | 'mini' | 'full';
 export type KanbanColumn = {
@@ -35,14 +37,6 @@ export type Orders = {
   status: OrderStatus;
   payment_method: string;
 };
-
-export type InvoiceStatus =
-  | 'pending'
-  | 'sent'
-  | 'cancelled'
-  | 'approved'
-  | 'suspended'
-  | string;
 
 export type Invoices = {
   id: string;

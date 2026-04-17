@@ -18,13 +18,13 @@ import {
 import { useForm } from "@mantine/form";
 import classes from "./page.module.scss";
 import Surface from "../../Surface/Surface";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import SignInLayout from "./layout";
 import { PATH_APPS, PATH_AUTH, PATH_DASHBOARD } from "../../../routes";
 import { api } from "../../../Services/api";
 import { notifications } from "@mantine/notifications";
 import { useAuth } from "../../../Context/useAuth";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { IconArrowLeft, IconInfoCircle } from "@tabler/icons-react";
 
 const LINK_PROPS: TextProps = {
@@ -34,9 +34,25 @@ const LINK_PROPS: TextProps = {
 function LoginPage() {
   const navigate = useNavigate();
   const theme = useMantineTheme();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [rememberMe, setRememberMe] = useState(false);
   const [amazonConnecting, setAmazonConnecting] = useState(false);
+
+  useEffect(() => {
+    const code = searchParams.get('code');
+    const amzError = searchParams.get('error_description') || searchParams.get('error');
+
+    if (amzError) {
+      setErrorMessage(amzError);
+      searchParams.delete('error');
+      searchParams.delete('error_description');
+      setSearchParams(searchParams);
+    } else if (code && !amazonConnecting) {
+      setAmazonConnecting(true);
+      window.location.href = `http://localhost:5173/api/amazon/callback?code=${encodeURIComponent(code)}`;
+    }
+  }, [searchParams]);
 
   const handleAmazonLogin = async (e: React.MouseEvent) => {
     e.preventDefault();

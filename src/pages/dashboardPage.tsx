@@ -21,19 +21,30 @@ import InvoiceRevenueChart from "../Components/Invoice/InvoiceRevenueChart";
 import InvoiceExportModal from "../Components/Invoice/InvoiceExportModal";
 import { useInvoices } from "../hooks/useInvoices";
 import { InvoiceQueryParams, InvoiceStats } from "../types/invoice.types";
-import { fetchInvoiceStats, fetchRevenueData } from "../Services/invoice-services";
+import {
+  fetchInvoiceStats,
+  fetchRevenueData,
+} from "../Services/invoice-services";
 import { RevenueDataPoint } from "../types/invoice.types";
 import RevenueChart from "../Components/RevenueChart/RevenueChart";
 import DetailedStatsGrid from "../Components/StatsGrid/detailsStatsGrid";
-import { getSubscriptionStatus ,getCustomerInvoicesDetails} from "../Services/stripeService";
+import {
+  getSubscriptionStatus,
+  getCustomerInvoicesDetails,
+} from "../Services/stripeService";
 import { useNavigate } from "react-router-dom";
 
 function DashBoard() {
   const { token } = useAuth();
   const navigate = useNavigate();
-  const [filters, setFilters] = useState<InvoiceQueryParams>({ limit: 10, offset: 0 });
+  const [filters, setFilters] = useState<InvoiceQueryParams>({
+    limit: 10,
+    offset: 0,
+  });
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | null>(null);
+  const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | null>(
+    null,
+  );
   const [detailsModalOpened, setDetailsModalOpened] = useState(false);
   const [exportModalOpened, setExportModalOpened] = useState(false);
   const [stats, setStats] = useState<InvoiceStats | null>(null);
@@ -41,22 +52,28 @@ function DashBoard() {
   const [revenueData, setRevenueData] = useState<RevenueDataPoint[]>([]);
   const [revenueLoading, setRevenueLoading] = useState(true);
 
-  const { invoices, loading, pagination, refetch, setFilters: updateFilters } = useInvoices(filters);
+  const {
+    invoices,
+    loading,
+    pagination,
+    refetch,
+    setFilters: updateFilters,
+  } = useInvoices(filters);
   const [hasPastDue, setHasPastDue] = useState(false);
 
   // Fetch billing status to check for past due subscriptions
   useEffect(() => {
     if (!token) return;
     getSubscriptionStatus()
-      .then(data => setHasPastDue(data.hasPastDue || false))
+      .then((data) => setHasPastDue(data.hasPastDue || false))
       .catch(() => setHasPastDue(false));
   }, [token]);
 
   useEffect(() => {
     if (!token) return;
     getCustomerInvoicesDetails()
-      .then(data => console.log("Stripe Invoices Fetched:", data))
-      .catch(err => console.error("Failed to fetch customer invoices:", err));
+      .then((data) => console.log("Stripe Invoices Fetched:", data))
+      .catch((err) => console.error("Failed to fetch customer invoices:", err));
   }, [token]);
 
   // Fetch invoice statistics
@@ -67,9 +84,9 @@ function DashBoard() {
       try {
         setStatsLoading(true);
         const data = await fetchInvoiceStats(token);
-        setStats(data);
+        setStats(data.payload);
       } catch (error) {
-        console.error('Error fetching stats:', error);
+        console.error("Error fetching stats:", error);
       } finally {
         setStatsLoading(false);
       }
@@ -86,9 +103,9 @@ function DashBoard() {
       try {
         setRevenueLoading(true);
         const data = await fetchRevenueData(token);
-        setRevenueData(data);
+        setRevenueData(data.payload);
       } catch (error) {
-        console.error('Error fetching revenue data:', error);
+        console.error("Error fetching revenue data:", error);
       } finally {
         setRevenueLoading(false);
       }
@@ -136,17 +153,19 @@ function DashBoard() {
       <>
         <title>Dashboard | Runanalytic Invoice</title>
         <meta
-          name='description'
-          content='Manage your Amazon invoices with automated generation, tracking, and compliance tools.'
+          name="description"
+          content="Manage your Amazon invoices with automated generation, tracking, and compliance tools."
         />
       </>
       <MainLayout>
         <Container fluid>
-          <Stack gap='lg'>
+          <Stack gap="lg">
             {/* Header */}
             <Group justify="space-between">
               <div>
-                <Title order={2} size="xl" fw={550}>Invoice Dashboard</Title>
+                <Title order={2} size="xl" fw={550}>
+                  Invoice Dashboard
+                </Title>
                 <Text c="dimmed" size="sm">
                   Manage and track your Amazon marketplace invoices
                 </Text>
@@ -163,20 +182,20 @@ function DashBoard() {
             </Group>
 
             {hasPastDue && (
-              <Alert 
-                icon={<IconAlertCircle size={16} />} 
-                title="Payment Action Required" 
-                color="red" 
+              <Alert
+                icon={<IconAlertCircle size={16} />}
+                title="Payment Action Required"
+                color="red"
                 variant="filled"
               >
-                Your recent subscription payment failed. The ability to export and generate invoices may be restricted. 
-                {" "}
-                <Text 
+                Your recent subscription payment failed. The ability to export
+                and generate invoices may be restricted.{" "}
+                <Text
                   span
-                  bg="transparent" 
+                  bg="transparent"
                   td="underline"
                   style={{ cursor: "pointer", fontWeight: 600 }}
-                  onClick={() => navigate('/dashboard/settings?tab=billing')}
+                  onClick={() => navigate("/dashboard/settings?tab=billing")}
                 >
                   Update your payment details
                 </Text>
@@ -186,7 +205,7 @@ function DashBoard() {
             <InvoiceStatsGrid stats={stats} loading={statsLoading} />
 
             {/* Revenue Chart */}
-            <InvoiceRevenueChart data={revenueData} loading={revenueLoading} />
+            {/* <InvoiceRevenueChart data={revenueData} loading={revenueLoading} /> */}
 
             {/* Filters */}
             <InvoiceFilters
@@ -223,4 +242,3 @@ function DashBoard() {
 }
 
 export default DashBoard;
-

@@ -44,7 +44,7 @@ export const useInvoices = (initialFilters?: InvoiceQueryParams): UseInvoicesRet
             const response = await fetchInvoices(token, filters);
 
             setInvoices(response.payload.invoices);
-            setPagination(response.payload.pagination);
+            setPagination(response.payload.pagination ?? null);
         } catch (err) {
             setError(err instanceof Error ? err : new Error('Failed to fetch invoices'));
             console.error('Error fetching invoices:', err);
@@ -94,7 +94,7 @@ export const useInvoiceDetails = (invoiceId: string | null): UseInvoiceDetailsRe
             setError(null);
 
             const response = await fetchInvoiceDetails(token, invoiceId);
-            setInvoice(response.payload);
+            setInvoice(response.payload.invoice);
         } catch (err) {
             setError(err instanceof Error ? err : new Error('Failed to fetch invoice details'));
             console.error('Error fetching invoice details:', err);

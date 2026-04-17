@@ -14,13 +14,12 @@ import {
 // Mock Invoices - Full Details
 export const mockInvoices: Invoice[] = [
     {
-        invoiceId: 'INV-2025-001-AE',
+        id: 'INV-2025-001-AE',
         amazonOrderId: '405-8967478-6005135',
-        sellerId: 'SELLER-001',
         invoiceNumber: 'JUNI-2025-000001',
-        invoiceDate: '2025-12-17T00:00:00.000Z',
+        issueDate: '2025-12-17T00:00:00.000Z',
         invoiceType: 'INVOICE',
-        status: 'SUBMITTED',
+        invoiceStatus: 'SUBMITTED',
 
         seller: {
             name: 'RunAnalytic Technology LLC',
@@ -52,30 +51,22 @@ export const mockInvoices: Invoice[] = [
 
         subtotal: 39.00,
         discounts: 0,
-        taxAmount: 1.95,
+        taxAmount: { amount: 1.95, currencyCode: 'AED' },
         shippingCharges: 0,
-        totalAmount: 40.95,
+        totalAmount: { amount: 40.95, currencyCode: 'AED' },
         currency: 'AED',
 
         paymentMethod: 'Credit Card',
         paymentDueDate: '2025-12-24T00:00:00.000Z',
-
         marketplaceId: 'amazon.ae',
-        invoiceURI: 's3://runanalytic-invoices/INV-2025-001-AE.pdf',
-        documentHash: 'sha256:a1b2c3d4e5f6...',
-
-        createdAt: '2025-12-17T08:30:00.000Z',
-        updatedAt: '2025-12-17T08:30:00.000Z',
-        submittedAt: '2025-12-17T09:00:00.000Z',
     },
     {
-        invoiceId: 'INV-2025-002-AE',
+        id: 'INV-2025-002-AE',
         amazonOrderId: '408-5078436-9053930',
-        sellerId: 'SELLER-001',
         invoiceNumber: 'JUNI-2025-000002',
-        invoiceDate: '2025-12-18T00:00:00.000Z',
+        issueDate: '2025-12-18T00:00:00.000Z',
         invoiceType: 'INVOICE',
-        status: 'ACCEPTED',
+        invoiceStatus: 'ACCEPTED',
 
         seller: {
             name: 'RunAnalytic Technology LLC',
@@ -107,30 +98,22 @@ export const mockInvoices: Invoice[] = [
 
         subtotal: 91.00,
         discounts: 0,
-        taxAmount: 4.55,
+        taxAmount: { amount: 4.55, currencyCode: 'AED' },
         shippingCharges: 0,
-        totalAmount: 95.55,
+        totalAmount: { amount: 95.55, currencyCode: 'AED' },
         currency: 'AED',
 
         paymentMethod: 'Debit Card',
         paymentDueDate: '2025-12-25T00:00:00.000Z',
-
         marketplaceId: 'amazon.ae',
-        invoiceURI: 's3://runanalytic-invoices/INV-2025-002-AE.pdf',
-        documentHash: 'sha256:b2c3d4e5f6a7...',
-
-        createdAt: '2025-12-18T10:15:00.000Z',
-        updatedAt: '2025-12-18T11:20:00.000Z',
-        submittedAt: '2025-12-18T10:30:00.000Z',
     },
     {
-        invoiceId: 'INV-2025-003-BR',
+        id: 'INV-2025-003-BR',
         amazonOrderId: '409-1234567-8901234',
-        sellerId: 'SELLER-001',
         invoiceNumber: 'JUNI-2025-000003',
-        invoiceDate: '2025-12-19T00:00:00.000Z',
+        issueDate: '2025-12-19T00:00:00.000Z',
         invoiceType: 'INVOICE',
-        status: 'DRAFT',
+        invoiceStatus: 'DRAFT',
 
         seller: {
             name: 'RunAnalytic Brasil LTDA',
@@ -162,29 +145,22 @@ export const mockInvoices: Invoice[] = [
 
         subtotal: 1500.00,
         discounts: 50.00,
-        taxAmount: 270.00,
+        taxAmount: { amount: 270.00, currencyCode: 'BRL' },
         shippingCharges: 30.00,
-        totalAmount: 1750.00,
+        totalAmount: { amount: 1750.00, currencyCode: 'BRL' },
         currency: 'BRL',
 
         paymentMethod: 'PIX',
         paymentDueDate: '2025-12-26T00:00:00.000Z',
-
         marketplaceId: 'amazon.com.br',
-        invoiceURI: 's3://runanalytic-invoices/INV-2025-003-BR.pdf',
-        documentHash: 'sha256:c3d4e5f6a7b8...',
-
-        createdAt: '2025-12-19T14:00:00.000Z',
-        updatedAt: '2025-12-19T14:00:00.000Z',
     },
     {
-        invoiceId: 'INV-2025-004-AE',
+        id: 'INV-2025-004-AE',
         amazonOrderId: '410-9876543-2109876',
-        sellerId: 'SELLER-001',
         invoiceNumber: 'JUNI-2025-000004',
-        invoiceDate: '2025-12-20T00:00:00.000Z',
+        issueDate: '2025-12-20T00:00:00.000Z',
         invoiceType: 'INVOICE',
-        status: 'REJECTED',
+        invoiceStatus: 'REJECTED',
 
         seller: {
             name: 'RunAnalytic Technology LLC',
@@ -215,30 +191,22 @@ export const mockInvoices: Invoice[] = [
 
         subtotal: 120.00,
         discounts: 0,
-        taxAmount: 6.00,
+        taxAmount: { amount: 6.00, currencyCode: 'AED' },
         shippingCharges: 10.00,
-        totalAmount: 136.00,
+        totalAmount: { amount: 136.00, currencyCode: 'AED' },
         currency: 'AED',
 
         paymentMethod: 'Cash on Delivery',
         paymentDueDate: '2025-12-27T00:00:00.000Z',
-
         marketplaceId: 'amazon.ae',
-        invoiceURI: 's3://runanalytic-invoices/INV-2025-004-AE.pdf',
-        documentHash: 'sha256:d4e5f6a7b8c9...',
-
-        createdAt: '2025-12-20T09:00:00.000Z',
-        updatedAt: '2025-12-20T15:30:00.000Z',
-        submittedAt: '2025-12-20T09:15:00.000Z',
     },
     {
-        invoiceId: 'INV-2025-005-IN',
+        id: 'INV-2025-005-IN',
         amazonOrderId: '411-5555666-7778888',
-        sellerId: 'SELLER-001',
         invoiceNumber: 'JUNI-2025-000005',
-        invoiceDate: '2025-12-21T00:00:00.000Z',
+        issueDate: '2025-12-21T00:00:00.000Z',
         invoiceType: 'CREDIT_NOTE',
-        status: 'ACCEPTED',
+        invoiceStatus: 'ACCEPTED',
 
         seller: {
             name: 'RunAnalytic India Pvt Ltd',
@@ -270,34 +238,28 @@ export const mockInvoices: Invoice[] = [
 
         subtotal: -25.00,
         discounts: 0,
-        taxAmount: -3.00,
+        taxAmount: { amount: -3.00, currencyCode: 'INR' },
         shippingCharges: 0,
-        totalAmount: -28.00,
+        totalAmount: { amount: -28.00, currencyCode: 'INR' },
         currency: 'INR',
 
         paymentMethod: 'Refund to Original Payment',
-
         marketplaceId: 'amazon.in',
-        invoiceURI: 's3://runanalytic-invoices/INV-2025-005-IN.pdf',
-        documentHash: 'sha256:e5f6a7b8c9d0...',
-
-        createdAt: '2025-12-21T11:00:00.000Z',
-        updatedAt: '2025-12-21T12:00:00.000Z',
-        submittedAt: '2025-12-21T11:15:00.000Z',
     },
 ];
 
 // Mock Invoice List Items (Simplified)
 export const mockInvoiceListItems: InvoiceListItem[] = mockInvoices.map((inv) => ({
-    invoiceId: inv.invoiceId,
+    id: inv.id,
     invoiceNumber: inv.invoiceNumber,
-    invoiceDate: inv.invoiceDate,
-    status: inv.status,
+    issueDate: inv.issueDate,
+    invoiceStatus: inv.invoiceStatus,
     invoiceType: inv.invoiceType,
     totalAmount: inv.totalAmount,
+    taxAmount: inv.taxAmount,
     currency: inv.currency,
     amazonOrderId: inv.amazonOrderId,
-    buyerName: inv.buyer.name,
+    buyerName: inv.buyer?.name || inv.buyerName || '-',
     marketplaceId: inv.marketplaceId,
 }));
 

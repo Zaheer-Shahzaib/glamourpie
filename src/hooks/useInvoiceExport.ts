@@ -31,7 +31,7 @@ export const useInvoiceExport = (): UseInvoiceExportReturn => {
     const [exports, setExports] = useState<InvoiceExport[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<Error | null>(null);
-
+    console.log("exports", exports)
     /**
      * Create a new invoice export
      */
@@ -107,7 +107,7 @@ export const useInvoiceExport = (): UseInvoiceExportReturn => {
             setError(null);
 
             const response = await fetchInvoiceExports(token);
-            setExports(response.payload.exports);
+            setExports(response.payload.exports || []);
         } catch (err) {
             setError(err instanceof Error ? err : new Error('Failed to fetch exports'));
             console.error('Error fetching exports:', err);

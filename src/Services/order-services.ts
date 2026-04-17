@@ -13,7 +13,7 @@ import {
 } from '../types/order.types';
 
 // Environment flag to use mock data
-const USE_MOCK_DATA = true; // Set to false when backend is ready
+const USE_MOCK_DATA = false; // Set to false since backend is ready
 
 // Mock Orders Data
 const mockOrders: OrderListItem[] = [
@@ -142,10 +142,11 @@ export const fetchOrders = async (
         };
     }
 
-    const response = await api.get('/orders', {
+    const response = await api.get('/api/aws/orders', {
         headers: { Authorization: `Bearer ${token}` },
         params,
     });
+    console.log('Orders response:', response.data);
     return response.data;
 };
 
@@ -212,7 +213,7 @@ export const fetchOrderDetails = async (
         };
     }
 
-    const response = await api.get(`/orders/${orderId}`, {
+    const response = await api.get(`/api/aws/orders/${orderId}`, {
         headers: { Authorization: `Bearer ${token}` },
     });
     return response.data;
@@ -229,7 +230,7 @@ export const fetchOrderStats = async (
         return mockOrderStats;
     }
 
-    const response = await api.get('/orders/stats', {
+    const response = await api.get('/api/aws/orders/stats', {
         headers: { Authorization: `Bearer ${token}` },
     });
     return response.data.payload;

@@ -132,7 +132,7 @@ const PricingCard = (props: PricingCardProps) => {
           {actionText}
         </Button>
         {
-          !isCurrentPlan && (
+         'Free' === tier && (
             <Text
               ta='center'
               c='dimmed'

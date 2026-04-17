@@ -60,7 +60,7 @@ const PRICING: PricingTier[] = [
     ],
     preferred: false,
     actionText: "Start Free — No Credit Card Required",
-    description: "Perfect for testing and new sellers.",
+  description:""
   },
   {
     tier: "Starter",
@@ -77,7 +77,7 @@ const PRICING: PricingTier[] = [
     ],
     preferred: false,
     actionText: "Get Starter Plan",
-    description: "For Small Amazon Sellers — Save time by automating your daily invoicing.",
+    description: "",
   },
   {
     tier: "Growth",
@@ -94,7 +94,7 @@ const PRICING: PricingTier[] = [
     ],
     preferred: true,
     actionText: "Get Growth Plan",
-    description: "For Growing Sellers & Agencies — Scale your business with full automation.",
+    description: "",
   },
   {
     tier: "Scale",
@@ -110,7 +110,7 @@ const PRICING: PricingTier[] = [
     ],
     preferred: false,
     actionText: "Get Scale Plan",
-    description: "For High-Volume Sellers — Built for speed, automation, and performance.",
+    description: "",
   },
   {
     tier: "Enterprise",
@@ -128,7 +128,7 @@ const PRICING: PricingTier[] = [
     preferred: false,
     actionText: "Contact Sales",
     actionUrl: PATH_PAGES.contact,
-    description: "Custom Solutions for Large Businesses — Tailored for advanced workflows and integrations.",
+    description: "",
   },
 ];
 
