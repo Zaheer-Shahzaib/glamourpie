@@ -30,7 +30,7 @@ function OTPVerify() {
   const [timer, setTimer] = useState(0);
   const { profile } = useAuth();
   const navigate = useNavigate();
-  const OTP_EXPIRY_SECONDS = 120;
+  const OTP_EXPIRY_SECONDS = 30;
   const { login } = useAuth();
   const form = useForm({
     initialValues: { otp: "" },
@@ -106,8 +106,7 @@ function OTPVerify() {
   // Handle resending OTP
   const handleResend = async () => {
     const email =
-      localStorage.getItem("signup_email") ||
-      localStorage.getItem("otp_email");
+      localStorage.getItem("signup_email") || localStorage.getItem("otp_email");
     if (!email) {
       setError("Email not found. Please login/signup again.");
       return;
@@ -141,20 +140,17 @@ function OTPVerify() {
     <>
       <title>OTP Verification</title>
       <PasswordLayout>
-        <Title ta='center'>OTP Verification</Title>
-        <Text ta='center'>
+        <Title ta="center">OTP Verification</Title>
+        <Text ta="center">
           Please Enter the 6 digit OTP Code that we sent to your email
         </Text>
 
-        <Surface
-          component={Paper}
-          className={classes.card}
-        >
+        <Surface component={Paper} className={classes.card}>
           {error && (
             <Alert
-              variant='light'
+              variant="light"
               c={theme.colors.red[8]}
-              radius='lg'
+              radius="lg"
               icon={<IconInfoCircle />}
             >
               {error}
@@ -163,33 +159,29 @@ function OTPVerify() {
 
           <form onSubmit={form.onSubmit(handleVerify)}>
             <TextInput
-              label='Enter OTP'
-              placeholder='123456'
+              label="Enter OTP"
+              placeholder="123456"
               required
               {...form.getInputProps("otp")}
             />
 
-            <Group
-              justify='space-between'
-              mt='lg'
-              className={classes.controls}
-            >
+            <Group justify="space-between" mt="lg" className={classes.controls}>
               <Button
-                variant='subtle'
+                variant="subtle"
                 onClick={handleResend}
                 loading={submitting}
-                type='button'
+                type="button"
                 disabled={timer > 0}
               >
                 {timer > 0
                   ? `Resend in ${Math.floor(timer / 60)}:${String(
-                      timer % 60
+                      timer % 60,
                     ).padStart(2, "0")}`
                   : "Re-Send"}
               </Button>
 
               <Button
-                type='submit'
+                type="submit"
                 // loading={submitting}
                 fullWidth={mobile_match}
               >

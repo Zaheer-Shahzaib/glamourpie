@@ -23,7 +23,7 @@ import { useInvoiceDetails } from "../../hooks/useInvoices";
 import { useAuth } from "../../Context/useAuth";
 import { notifications } from "@mantine/notifications";
 import { useState } from "react";
-import { fetchInvoiceDocument } from "../../Services/invoice-services";
+import { downloadInvoiceDocument } from "../../Services/invoice-services";
 import {
   formatCurrency,
   formatDate,
@@ -51,18 +51,17 @@ export default function InvoiceDetailsModal({
 
     try {
       setDownloading(true);
-      const response = await fetchInvoiceDocument(token, invoiceId);
-      window.open(response.payload.documentUrl, "_blank");
+      await downloadInvoiceDocument(token, invoiceId);
 
       notifications.show({
         title: "Success",
-        message: "Invoice document opened",
+        message: "Invoice PDF downloaded",
         color: "green",
       });
     } catch (error) {
       notifications.show({
         title: "Error",
-        message: "Failed to download invoice document",
+        message: "Failed to download invoice PDF",
         color: "red",
       });
     } finally {
@@ -101,14 +100,15 @@ export default function InvoiceDetailsModal({
                   </Text>
                 </Group>
               </div>
-              <Stack gap="xs" align="flex-end">
+                <Stack gap="xs" align="flex-end">
                 <Badge
                   size="md"
-                  color={getStatusColor(invoice.invoiceStatus.toUpperCase())}
+                  color={getStatusColor((invoice.invoiceStatus || 'PENDING').toUpperCase())}
                   variant="filled"
                 >
-                  {invoice.invoiceStatus}
+                  {invoice.invoiceStatus || 'Pending'}
                 </Badge>
+                {invoice.invoiceType && (
                 <Badge
                   size="md"
                   color={getTypeColor(invoice.invoiceType)}
@@ -116,6 +116,7 @@ export default function InvoiceDetailsModal({
                 >
                   {invoice.invoiceType}
                 </Badge>
+                )}
               </Stack>
             </Group>
 

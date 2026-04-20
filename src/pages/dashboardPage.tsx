@@ -33,6 +33,7 @@ import {
   getCustomerInvoicesDetails,
 } from "../Services/stripeService";
 import { useNavigate } from "react-router-dom";
+import { notifications } from "@mantine/notifications";
 
 function DashBoard() {
   const { token } = useAuth();
@@ -59,14 +60,41 @@ function DashBoard() {
     refetch,
     setFilters: updateFilters,
   } = useInvoices(filters);
-  const [hasPastDue, setHasPastDue] = useState(false);
 
-  // Fetch billing status to check for past due subscriptions
+  const [hasPastDue, setHasPastDue] = useState(false);
+  const [activePlan, setActivePlan] = useState<string | null>(null);
+  const [subLoading, setSubLoading] = useState(true);
+
+  // Fetch billing status to check for past due subscriptions and active plan
   useEffect(() => {
     if (!token) return;
+    setSubLoading(true);
     getSubscriptionStatus()
-      .then((data) => setHasPastDue(data.hasPastDue || false))
-      .catch(() => setHasPastDue(false));
+      .then((data) => {
+        setHasPastDue(data.hasPastDue || false);
+        const plans: string[] = data.activePlans || [];
+        const PLAN_RANK: Record<string, number> = {
+          free: 0,
+          starter: 1,
+          growth: 2,
+          scale: 3,
+          enterprise: 4,
+        };
+        const best = plans.reduce<string | null>((acc, p) => {
+          if (!acc) return p;
+          const currentPlan = p.toLowerCase();
+          const accPlan = acc.toLowerCase();
+          return (PLAN_RANK[currentPlan] ?? -1) > (PLAN_RANK[accPlan] ?? -1)
+            ? p
+            : acc;
+        }, null);
+        setActivePlan(best);
+      })
+      .catch(() => {
+        setHasPastDue(false);
+        setActivePlan(null);
+      })
+      .finally(() => setSubLoading(false));
   }, [token]);
 
   useEffect(() => {
@@ -146,6 +174,21 @@ function DashBoard() {
     setSelectedInvoiceId(null);
   };
 
+  const handleOpenExport = () => {
+    const isFreeOrNone = !activePlan || activePlan.toLowerCase() === "free";
+    if (isFreeOrNone && !subLoading) {
+      notifications.show({
+        title: "Subscription Required",
+        message:
+          "You need an active plan to export invoices. Choose a plan to get started.",
+        color: "orange",
+        icon: <IconFileExport size={16} />,
+        autoClose: 6000,
+      });
+    }
+    setExportModalOpened(true);
+  };
+
   const totalPages = pagination ? Math.ceil(pagination.total / 10) : 1;
 
   return (
@@ -174,7 +217,7 @@ function DashBoard() {
                 <Button
                   leftSection={<IconFileExport size={18} />}
                   variant="light"
-                  onClick={() => setExportModalOpened(true)}
+                  onClick={handleOpenExport}
                 >
                   Export Invoices
                 </Button>
@@ -235,6 +278,7 @@ function DashBoard() {
         <InvoiceExportModal
           opened={exportModalOpened}
           onClose={() => setExportModalOpened(false)}
+          userPlan={activePlan}
         />
       </MainLayout>
     </>

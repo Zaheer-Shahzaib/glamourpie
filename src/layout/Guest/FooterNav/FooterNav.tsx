@@ -38,7 +38,10 @@ const FooterNav = () => {
               RunAnalytic Technology
             </Text>
             <Text className="text-sm leading-relaxed mb-2">
-            RunAnalytic Technology helps Amazon sellers across the UAE stay compliant and grow. Our secure, data-driven platform delivers insights and automation that simplify invoicing and business operations.
+              RunAnalytic Technology helps Amazon sellers across the UAE stay
+              compliant and grow. Our secure, data-driven platform delivers
+              insights and automation that simplify invoicing and business
+              operations.
             </Text>
 
             <Button
@@ -60,22 +63,24 @@ const FooterNav = () => {
             <ul className="space-y-3 text-sm text-gray-300">
               <li>
                 <Text className="text-sm">
-                  <span className="block font-medium text-gray-400">Address</span>
+                  <span className="block font-medium text-gray-400">
+                    Address
+                  </span>
                   UAE
                 </Text>
               </li>
               <li>
                 <Text className="text-sm">
                   <span className="block font-medium text-gray-400">Phone</span>
-                  +971 54 385 8251
+                  +971543858251
                 </Text>
               </li>
               <li>
                 <Text className="text-sm">
                   <span className="block font-medium text-gray-400">Email</span>
-                  <a 
-                    href="https://mail.google.com/mail/?view=cm&to=support@runanalytic.com" 
-                    target="_blank" 
+                  <a
+                    href="https://mail.google.com/mail/?view=cm&to=support@runanalytic.com"
+                    target="_blank"
                     rel="noopener noreferrer"
                     className="hover:underline"
                   >
@@ -88,28 +93,34 @@ const FooterNav = () => {
 
           {/* More Section */}
           <Grid.Col span={{ base: 12, sm: 4, md: 4 }}>
-            <Text className="font-semibold text-lg mb-4 text-white">
-              More
-            </Text>
+            <Text className="font-semibold text-lg mb-4 text-white">More</Text>
             <ul className="space-y-3 text-sm text-gray-300">
               <li>
                 <Link to={PATH_PAGES.privacy} onClick={handleClick}>
-                  <Text className="text-sm hover:underline hover:font-semibold">Privacy Policy</Text>
+                  <Text className="text-sm hover:underline hover:font-semibold">
+                    Privacy Policy
+                  </Text>
                 </Link>
               </li>
               <li>
                 <Link to={PATH_PAGES.terms} onClick={handleClick}>
-                  <Text className="text-sm hover:underline hover:font-semibold">Terms Of Service</Text>
+                  <Text className="text-sm hover:underline hover:font-semibold">
+                    Terms Of Service
+                  </Text>
                 </Link>
               </li>
               <li>
                 <Link to={PATH_PAGES.about} onClick={handleClick}>
-                  <Text className="text-sm hover:underline hover:font-semibold">About Us</Text>
+                  <Text className="text-sm hover:underline hover:font-semibold">
+                    About Us
+                  </Text>
                 </Link>
               </li>
               <li>
                 <Link to={PATH_PAGES.addp} onClick={handleClick}>
-                  <Text className="text-sm hover:underline hover:font-semibold">Amazon Data Protection Policy</Text>
+                  <Text className="text-sm hover:underline hover:font-semibold">
+                    Amazon Data Protection Policy
+                  </Text>
                 </Link>
               </li>
               {/* <li>
@@ -126,7 +137,8 @@ const FooterNav = () => {
         {/* Bottom Footer */}
         <div className="flex flex-col sm:flex-row justify-between items-center py-4 text-sm text-gray-300">
           <Text>
-            &copy; 2025 <span className="font-semibold">RunAnalytic Technology</span> - All
+            &copy; 2025{" "}
+            <span className="font-semibold">RunAnalytic Technology</span> - All
             Rights Reserved&reg;.
           </Text>
           {/* Uncomment if you want social icons */}

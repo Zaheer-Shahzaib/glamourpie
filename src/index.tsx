@@ -3,17 +3,17 @@ import ReactDOM from "react-dom/client";
 import App from "./App";
 import { MantineProvider } from "@mantine/core";
 import { theme } from "./theme/theme";
-import '@mantine/notifications/styles.css';
+import "@mantine/notifications/styles.css";
 import "@mantine/core/styles.css";
 import "@mantine/dates/styles.css";
-import { Notifications } from '@mantine/notifications';
+import { Notifications } from "@mantine/notifications";
 import { AuthProvider } from "./Context/useAuth";
 import { ScrollProvider } from "./Context/scrollContext";
 import { BrowserRouter as Router } from "react-router-dom";
-import './styles/index.css'
+import "./styles/index.css";
 import "./styles/globals.scss";
 const root = ReactDOM.createRoot(
-  document.getElementById("root") as HTMLElement
+  document.getElementById("root") as HTMLElement,
 );
 root.render(
   <React.StrictMode>
@@ -21,7 +21,7 @@ root.render(
       withCssVariables
       withGlobalClasses
       theme={theme}
-      defaultColorScheme='light'
+      defaultColorScheme="light"
     >
       <Notifications />
       <AuthProvider>
@@ -32,5 +32,5 @@ root.render(
         </Router>
       </AuthProvider>
     </MantineProvider>
-  </React.StrictMode>
+  </React.StrictMode>,
 );

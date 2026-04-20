@@ -1,10 +1,5 @@
 // Base Mantine + TypeScript + Routing + Auth layout
-import {
-  Routes,
-  Route,
-  useLocation,
-  useNavigate,
-} from "react-router-dom";
+import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import Home from "./pages/homePage";
 import Dashboard from "./pages/dashboardPage";
@@ -24,7 +19,12 @@ import ComingSoonPage from "./pages/ComingSoonPage";
 import AnalyticsPage from "./pages/AnalyticsPage";
 import SignupPage from "./Components/authentication/signup/page";
 import LoginPage from "./Components/authentication/login/page";
-import { PATH_AUTH, PATH_DASHBOARD, PATH_PAGES, PATH_APPS } from "./routes/index";
+import {
+  PATH_AUTH,
+  PATH_DASHBOARD,
+  PATH_PAGES,
+  PATH_APPS,
+} from "./routes/index";
 import PrivacyPolicy from "./pages/PrivacyPolicy/PrivacyPolicy";
 import TermsService from "./pages/TermsofService/TermsService";
 import ADDP from "./pages/AmazonDataProtectionPolicy/ADDP";
@@ -41,7 +41,7 @@ import PaymentSuccess from "./pages/PaymentSuccess";
 import PaymentCancelled from "./pages/PaymentCancelled";
 import ConnectSellerPage from "./pages/ConnectSellerPage";
 import SsoCallbackPage from "./Components/authentication/ssoCallback/page";
-
+import SettingsPage from "./pages/settingsPage";
 
 // --- Auth Simulation ---
 // export const useAuth = () => {
@@ -102,71 +102,38 @@ export default function App() {
 
   return (
     <Routes>
-      <Route
-        path={PATH_PAGES.root}
-        element={<Home />}
-      />
-      <Route
-        path={PATH_PAGES.contact}
-        element={<ContactUs />}
-      />
+      <Route path={PATH_PAGES.root} element={<Home />} />
+      <Route path={PATH_PAGES.contact} element={<ContactUs />} />
       <Route path={PATH_PAGES.services} element={<Services />} />
       <Route path={PATH_PAGES.privacy} element={<PrivacyPolicy />} />
       <Route path={PATH_PAGES.terms} element={<TermsService />} />
       <Route path={PATH_PAGES.about} element={<About />} />
       <Route path={PATH_PAGES.addp} element={<ADDP />} />
       <Route path={PATH_PAGES.paymentSuccess} element={<PaymentSuccess />} />
-      <Route path={PATH_PAGES.paymentCancelled} element={<PaymentCancelled />} />
+      <Route
+        path={PATH_PAGES.paymentCancelled}
+        element={<PaymentCancelled />}
+      />
       <Route path={PATH_AUTH.root}>
-        <Route
-          path={PATH_AUTH.signin}
-          element={<LoginPage />}
-        />
-        <Route
-          path={PATH_AUTH.signup}
-          element={<SignupPage />}
-        />
-        <Route
-          path={PATH_AUTH.passwordReset}
-          element={<ResetPassword />}
-        />
-        <Route
-          path={PATH_AUTH.forgetPassword}
-          element={<ForgetPassword />}
-        />
+        <Route path={PATH_AUTH.signin} element={<LoginPage />} />
+        <Route path={PATH_AUTH.signup} element={<SignupPage />} />
+        <Route path={PATH_AUTH.passwordReset} element={<ResetPassword />} />
+        <Route path={PATH_AUTH.forgetPassword} element={<ForgetPassword />} />
 
-        <Route
-          path={PATH_AUTH.otpVerify}
-          element={<OTPVerify />}
-        />
-        <Route
-          path={PATH_AUTH.ssoSuccess}
-          element={<SsoCallbackPage />}
-        />
+        <Route path={PATH_AUTH.otpVerify} element={<OTPVerify />} />
+        <Route path={PATH_AUTH.ssoSuccess} element={<SsoCallbackPage />} />
       </Route>
       {/* Protected Routes */}
       <Route
         path="/connect-amazon"
         element={<ProtectedRoute requireSeller={false} />}
       >
-        <Route
-          index
-          element={<ConnectSellerPage />}
-        />
+        <Route index element={<ConnectSellerPage />} />
       </Route>
-      <Route
-        path={PATH_DASHBOARD.root}
-        element={<ProtectedRoute />}
-      >
-        <Route
-          path={PATH_DASHBOARD.default}
-          element={<Dashboard />}
-        />
+      <Route path={PATH_DASHBOARD.root} element={<ProtectedRoute />}>
+        <Route path={PATH_DASHBOARD.default} element={<Dashboard />} />
       </Route>
-      <Route
-        path={PATH_APPS.profile.root}
-        element={<ProtectedRoute />}
-      >
+      <Route path={PATH_APPS.profile.root} element={<ProtectedRoute />}>
         <Route
           path={PATH_APPS.profile.personal}
           element={<ProfilePersonalPage />}
@@ -184,29 +151,15 @@ export default function App() {
           element={<ProfileStatisticsPage />}
         />
       </Route>
-      <Route
-        path={PATH_APPS.orders}
-        element={<ProtectedRoute />}
-      >
-        <Route
-          index
-          element={<OrdersPage />}
-        />
+      <Route path={"/settings"} element={<SettingsPage />} />
+      <Route path={PATH_APPS.orders} element={<ProtectedRoute />}>
+        <Route index element={<OrdersPage />} />
       </Route>
-      <Route
-        path={PATH_APPS.invoices.root}
-        element={<ProtectedRoute />}
-      >
-        <Route
-          index
-          element={<InvoicesPage />}
-        />
+      <Route path={PATH_APPS.invoices.root} element={<ProtectedRoute />}>
+        <Route index element={<InvoicesPage />} />
       </Route>
       {/* Settings Child Routes */}
-      <Route
-        path={PATH_APPS.settings.root}
-        element={<ProtectedRoute />}
-      >
+      <Route path={PATH_APPS.settings.root} element={<ProtectedRoute />}>
         <Route
           path={PATH_APPS.settings.spApi}
           element={<SettingsSpApiPage />}
@@ -233,46 +186,43 @@ export default function App() {
         />
       </Route>
       {/* Placeholder Routes */}
-      <Route
-        path={PATH_APPS.tasks}
-        element={<ProtectedRoute />}
-      >
+      <Route path={PATH_APPS.tasks} element={<ProtectedRoute />}>
         <Route
           index
-          element={<ComingSoonPage title="Tasks" description="Task management feature is coming soon." />}
+          element={
+            <ComingSoonPage
+              title="Tasks"
+              description="Task management feature is coming soon."
+            />
+          }
         />
       </Route>
-      <Route
-        path={PATH_APPS.calendar}
-        element={<ProtectedRoute />}
-      >
+      <Route path={PATH_APPS.calendar} element={<ProtectedRoute />}>
         <Route
           index
-          element={<ComingSoonPage title="Calendar" description="Calendar feature is coming soon." />}
+          element={
+            <ComingSoonPage
+              title="Calendar"
+              description="Calendar feature is coming soon."
+            />
+          }
         />
       </Route>
-      <Route
-        path={PATH_APPS.fileManager}
-        element={<ProtectedRoute />}
-      >
+      <Route path={PATH_APPS.fileManager} element={<ProtectedRoute />}>
         <Route
           index
-          element={<ComingSoonPage title="File Manager" description="File management feature is coming soon." />}
+          element={
+            <ComingSoonPage
+              title="File Manager"
+              description="File management feature is coming soon."
+            />
+          }
         />
       </Route>
-      <Route
-        path={PATH_APPS.analytics}
-        element={<ProtectedRoute />}
-      >
-        <Route
-          index
-          element={<AnalyticsPage />}
-        />
+      <Route path={PATH_APPS.analytics} element={<ProtectedRoute />}>
+        <Route index element={<AnalyticsPage />} />
       </Route>
-      <Route
-        path='*'
-        element={<ErrorPage />}
-      />
+      <Route path="*" element={<ErrorPage />} />
     </Routes>
   );
 }

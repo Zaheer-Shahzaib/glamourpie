@@ -43,11 +43,75 @@ export const fetchInvoiceDetails = async (
 export const fetchInvoiceDocument = async (
     token: string,
     invoiceId: string
-): Promise<{ payload: { documentUrl: string } }> => {
+): Promise<{ payload: { documentUrl: string; generateUrl?: string; isSandbox?: boolean } }> => {
     const response = await api.get(`/api/aws/invoices/${invoiceId}/document`, {
         headers: { Authorization: `Bearer ${token}` },
     });
     return response.data;
+};
+
+/**
+ * Download invoice as PDF.
+ * - Sandbox: POSTs to the generate endpoint (streams PDF from SP-API sandbox order)
+ * - Production: opens the pre-signed S3 URL
+ */
+export const downloadInvoiceDocument = async (
+    token: string,
+    invoiceId: string
+): Promise<void> => {
+    const docResponse = await fetchInvoiceDocument(token, invoiceId);
+    console.log(docResponse)
+    const { documentUrl, generateUrl, isSandbox } = docResponse.payload;
+
+    if (isSandbox && generateUrl) {
+        // POST to generate endpoint — response is a PDF blob stream
+        const pdfRes = await api.post(generateUrl, {}, {
+            headers: { Authorization: `Bearer ${token}` },
+            responseType: 'blob',
+        });
+        const blob = new Blob([pdfRes.data], { type: 'application/pdf' });
+        const url  = URL.createObjectURL(blob);
+        const a    = document.createElement('a');
+        a.href     = url;
+        a.download  = `${invoiceId}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 2000);
+    } else {
+        // Production: open pre-signed URL in a new tab
+        window.open(documentUrl, '_blank');
+    }
+};
+
+/**
+ * Download a previously generated export file natively with authentication.
+ * Uses blob response type to ensure binary data is saved correctly.
+ */
+export const downloadExportedFile = async (
+    token: string,
+    urlPath: string
+): Promise<void> => {
+    const res = await api.get(urlPath, {
+        headers: { Authorization: `Bearer ${token}` },
+        responseType: 'blob',
+    });
+    
+    // Extract filename from URL (e.g., "EXP-SANDBOX-1234.pdf")
+    const filename = urlPath.split('/').pop() || 'export.pdf';
+
+    // The backend uses correct content-type because of our previous fix
+    const blob = new Blob([res.data], { type: res.headers['content-type'] });
+    const url  = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { 
+        URL.revokeObjectURL(url); 
+        a.remove(); 
+    }, 2000);
 };
 
 /**

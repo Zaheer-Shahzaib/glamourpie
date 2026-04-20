@@ -8,27 +8,28 @@ import {
   rem,
   useMantineColorScheme,
   useMantineTheme,
-} from '@mantine/core';
-import { useMediaQuery } from '@mantine/hooks';
-import { IconDots } from '@tabler/icons-react';
-
+} from "@mantine/core";
+import { useMediaQuery } from "@mantine/hooks";
+import { IconDots } from "@tabler/icons-react";
+import { PATH_PAGES } from "../../routes";
+import { Link } from "react-router-dom";
 
 const FooterNav = () => {
   const theme = useMantineTheme();
   const { colorScheme } = useMantineColorScheme();
-  const mobile_match = useMediaQuery('(max-width: 425px)');
+  const mobile_match = useMediaQuery("(max-width: 425px)");
 
   const BUTTON_PROPS: ButtonProps = {
-    variant: 'subtle',
+    variant: "subtle",
     style: {
       padding: `${rem(8)} ${rem(12)}`,
-      color: colorScheme === 'dark' ? theme.white : theme.black,
+      color: colorScheme === "dark" ? theme.white : theme.black,
 
-      '&:hover': {
-        transition: 'all ease 150ms',
+      "&:hover": {
+        transition: "all ease 150ms",
         backgroundColor:
-          colorScheme === 'dark' ? theme.colors.dark[5] : theme.colors.gray[2],
-        textDecoration: 'none',
+          colorScheme === "dark" ? theme.colors.dark[5] : theme.colors.gray[2],
+        textDecoration: "none",
       },
     },
   };
@@ -52,10 +53,18 @@ const FooterNav = () => {
         </Menu>
       ) : (
         <Group gap={4}>
-          <Button {...BUTTON_PROPS}>Support</Button>
-          <Button {...BUTTON_PROPS}>Help Center</Button>
-          <Button {...BUTTON_PROPS}>Privacy</Button>
-          <Button {...BUTTON_PROPS}>Terms of Use</Button>
+          <Button {...BUTTON_PROPS} component={Link} to={PATH_PAGES.contact}>
+            Support
+          </Button>
+          <Button {...BUTTON_PROPS} component={Link} to={PATH_PAGES.contact}>
+            Help Center
+          </Button>
+          <Button {...BUTTON_PROPS} component={Link} to={PATH_PAGES.privacy}>
+            Privacy
+          </Button>
+          <Button {...BUTTON_PROPS} component={Link} to={PATH_PAGES.terms}>
+            Terms of Use
+          </Button>
         </Group>
       )}
     </Group>

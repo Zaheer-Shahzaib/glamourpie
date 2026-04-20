@@ -97,7 +97,7 @@ export default function InvoiceFilters({
             label="Date Range"
             placeholder="Select date range"
             value={dateRange}
-            onChange={() => setDateRange}
+            onChange={setDateRange}
             clearable
             size="sm"
           />

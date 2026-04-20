@@ -13,9 +13,8 @@ import {
   Center,
 } from "@mantine/core";
 import { IconEye, IconFileDownload } from "@tabler/icons-react";
-import { InvoiceStatus, InvoiceType } from "../../types/invoice.types";
 import { useAuth } from "../../Context/useAuth";
-// import { fetchInvoiceDocument } from '../../Services/invoice-services';
+import { downloadInvoiceDocument } from "../../Services/invoice-services";
 import { notifications } from "@mantine/notifications";
 import { Invoice } from "../../types/invoice.types";
 import {
@@ -44,40 +43,36 @@ export default function InvoiceList({
   const { token } = useAuth();
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
-  // const handleDownload = async (invoiceId: string, e: React.MouseEvent) => {
-  //     e.stopPropagation();
+  const handleDownload = async (invoiceId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
 
-  //     if (!token) {
-  //         notifications.show({
-  //             title: 'Error',
-  //             message: 'Authentication required',
-  //             color: 'red',
-  //         });
-  //         return;
-  //     }
+    if (!token) {
+      notifications.show({
+        title: "Error",
+        message: "Authentication required",
+        color: "red",
+      });
+      return;
+    }
 
-  //     try {
-  //         setDownloadingId(invoiceId);
-  //         // const response = await fetchInvoiceDocument(token, invoiceId);
-
-  //         // Open document in new tab
-  //         // window.open(response.payload.documentUrl, '_blank');
-
-  //         notifications.show({
-  //             title: 'Success',
-  //             message: 'Invoice document opened',
-  //             color: 'green',
-  //         });
-  //     } catch (error) {
-  //         notifications.show({
-  //             title: 'Error',
-  //             message: 'Failed to download invoice document',
-  //             color: 'red',
-  //         });
-  //     } finally {
-  //         setDownloadingId(null);
-  //     }
-  // };
+    try {
+      setDownloadingId(invoiceId);
+      await downloadInvoiceDocument(token, invoiceId);
+      notifications.show({
+        title: "Success",
+        message: "Invoice PDF downloaded",
+        color: "green",
+      });
+    } catch (error) {
+      notifications.show({
+        title: "Error",
+        message: "Failed to download invoice PDF. Please try again.",
+        color: "red",
+      });
+    } finally {
+      setDownloadingId(null);
+    }
+  };
 
   if (loading) {
     return (
@@ -120,86 +115,89 @@ export default function InvoiceList({
                 <Table.Th>Date</Table.Th>
                 <Table.Th>Customer</Table.Th>
                 <Table.Th>Order ID</Table.Th>
-                <Table.Th>Type</Table.Th>
                 <Table.Th>Status</Table.Th>
                 <Table.Th>Amount</Table.Th>
-                <Table.Th>Marketplace</Table.Th>
+                <Table.Th>Tax</Table.Th>
                 <Table.Th>Actions</Table.Th>
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
-              {invoices.map((invoice) => (
-                <Table.Tr
-                  key={invoice.id}
-                  style={{ cursor: "pointer" }}
-                  onClick={() => onInvoiceClick?.(invoice.id)}
-                >
-                  <Table.Td>
-                    <Text fw={600} size="sm">
-                      {invoice.invoiceNumber}
-                    </Text>
-                  </Table.Td>
-                  <Table.Td>{formatDate(invoice.issueDate)}</Table.Td>
-                  <Table.Td>{invoice.buyerName}</Table.Td>
-                  <Table.Td>
-                    <Text size="sm" c="dimmed">
-                      {invoice.amazonOrderId}
-                    </Text>
-                  </Table.Td>
-                  <Table.Td>
-                    {/* <Badge color={getTypeColor(invoice.invoiceType)} variant="light">
-                                            {invoice.invoiceType.replace('_', ' ')}
-                                        </Badge> */}
-                  </Table.Td>
-                  <Table.Td>
-                    <Badge
-                      color={getStatusColor(
-                        invoice.invoiceStatus.toUpperCase(),
-                      )}
-                      variant="filled"
-                    >
-                      {invoice.invoiceStatus}
-                    </Badge>
-                  </Table.Td>
-                  <Table.Td>
-                    <Text fw={500} size="sm">
-                      {formatCurrency(
-                        invoice.totalAmount.amount,
-                        invoice.totalAmount.currencyCode,
-                      )}
-                    </Text>
-                  </Table.Td>
-                  <Table.Td>
-                    <Badge variant="outline">{invoice.marketplaceId}</Badge>
-                  </Table.Td>
-                  <Table.Td>
-                    <Group gap="xs">
-                      <Tooltip label="View Details">
-                        <ActionIcon
-                          variant="subtle"
-                          color="blue"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onInvoiceClick?.(invoice.id);
-                          }}
-                        >
-                          <IconEye size={18} />
-                        </ActionIcon>
-                      </Tooltip>
-                      {/* <Tooltip label="Download Document">
-                                                <ActionIcon
-                                                    variant="subtle"
-                                                    color="green"
-                                                    onClick={(e) => handleDownload(invoice.invoiceId, e)}
-                                                    loading={downloadingId === invoice.invoiceId}
-                                                >
-                                                    <IconFileDownload size={18} />
-                                                </ActionIcon>
-                                            </Tooltip> */}
-                    </Group>
-                  </Table.Td>
-                </Table.Tr>
-              ))}
+              {invoices.map((invoice: any) => {
+                const displayId =
+                  invoice.invoiceNumber ?? invoice.id ?? invoice.amazonOrderId;
+                return (
+                  <Table.Tr
+                    key={invoice.id || displayId}
+                    style={{ cursor: "pointer" }}
+                    onClick={() => onInvoiceClick?.(displayId)}
+                  >
+                    <Table.Td>
+                      <Text fw={600} size="sm">
+                        {displayId}
+                      </Text>
+                    </Table.Td>
+                    <Table.Td>{formatDate(invoice.issueDate)}</Table.Td>
+                    <Table.Td>{invoice.buyerName || "—"}</Table.Td>
+                    <Table.Td>
+                      <Text size="sm" c="dimmed">
+                        {invoice.amazonOrderId || "—"}
+                      </Text>
+                    </Table.Td>
+                    <Table.Td>
+                      <Badge
+                        color={getStatusColor(
+                          (invoice.invoiceStatus || "").toUpperCase()
+                        )}
+                        variant="filled"
+                      >
+                        {invoice.invoiceStatus || "Pending"}
+                      </Badge>
+                    </Table.Td>
+                    <Table.Td>
+                      <Text fw={500} size="sm">
+                        {formatCurrency(
+                          invoice.totalAmount?.amount,
+                          invoice.totalAmount?.currencyCode
+                        )}
+                      </Text>
+                    </Table.Td>
+                    <Table.Td>
+                      <Text size="sm">
+                        {formatCurrency(
+                          invoice.taxAmount?.amount,
+                          invoice.taxAmount?.currencyCode
+                        ) || "—"}
+                      </Text>
+                    </Table.Td>
+                    <Table.Td>
+                      <Group gap="xs">
+                        <Tooltip label="View Details">
+                          <ActionIcon
+                            variant="subtle"
+                            color="blue"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onInvoiceClick?.(displayId);
+                            }}
+                          >
+                            <IconEye size={18} />
+                          </ActionIcon>
+                        </Tooltip>
+                        <Tooltip label="Download PDF">
+                          <ActionIcon
+                            variant="subtle"
+                            color="green"
+                            onClick={(e) => handleDownload(displayId, e)}
+                            loading={downloadingId === displayId}
+                          >
+                            <IconFileDownload size={18} />
+                          </ActionIcon>
+                        </Tooltip>
+                      </Group>
+                    </Table.Td>
+                  </Table.Tr>
+                );
+              })}
             </Table.Tbody>
           </Table>
         </Table.ScrollContainer>

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useCallback, useEffect } from "react";
 import {
   Container,
   Paper,
@@ -6,301 +6,270 @@ import {
   Text,
   Stack,
   Group,
-  Badge,
-  Table,
   Button,
+  SimpleGrid,
   ActionIcon,
   Tooltip,
-  Modal,
+  ThemeIcon,
 } from "@mantine/core";
-import { IconEye, IconRefresh } from "@tabler/icons-react";
+import {
+  IconRefresh,
+  IconFileInvoice,
+  IconDownload,
+  IconCurrencyDollar,
+  IconFileExport,
+  IconCheck,
+} from "@tabler/icons-react";
 import { useAuth } from "../Context/useAuth";
 import { notifications } from "@mantine/notifications";
-import {
-  fetchInvoices,
-  fetchInvoiceDetails,
-} from "../Services/invoice-services";
-import { Invoice } from "../types/invoice.types";
+import { useInvoices } from "../hooks/useInvoices";
+import InvoiceList from "../Components/Invoice/InvoiceList";
+import InvoiceDetailsModal from "../Components/Invoice/InvoiceDetailsModal";
+import InvoiceExportModal from "../Components/Invoice/InvoiceExportModal";
 import MainLayout from "../layout/Main";
-import { getStatusColor } from "../utils/helperFunctions";
+import { downloadInvoiceDocument } from "../Services/invoice-services";
+import { getSubscriptionStatus } from "../Services/stripeService";
 
-// const getStatusColor = (status: string | undefined): string => {
-//     switch (status) {
-//         case 'Paid':
-//             return 'green';
-//         case 'Pending':
-//         case 'Unpaid':
-//             return 'orange';
-//         case 'Cancelled':
-//             return 'red';
-//         default:
-//             return 'gray';
-//     }
-// };
-
-const formatDate = (dateString: string | undefined): string => {
-  if (!dateString) return "N/A";
-  const date = new Date(dateString);
-  if (isNaN(date.getTime())) return "N/A";
-  return date.toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
-};
-
-const formatCurrency = (
-  amount: number | undefined,
-  currency: string | undefined,
-): string => {
-  if (amount === undefined) return "N/A";
-  return `${currency || ""} ${amount.toLocaleString("en-US", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })}`;
-};
+const LIMIT = 20;
 
 export default function InvoicesPage() {
   const { token } = useAuth();
-  const [invoices, setInvoices] = useState<Invoice[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
-  const [detailsModalOpened, setDetailsModalOpened] = useState(false);
-  const [detailsLoading, setDetailsLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | null>(
+    null,
+  );
+  const [detailsOpened, setDetailsOpened] = useState(false);
+  const [exportOpened, setExportOpened] = useState(false);
+  const [downloadingAll, setDownloadingAll] = useState(false);
+
+  // Subscription info — used to gate/configure the export modal
+  const [activePlan, setActivePlan] = useState<string | null>(null);
+  const [subLoading, setSubLoading] = useState(true);
 
   useEffect(() => {
-    loadInvoices();
+    if (!token) return;
+    setSubLoading(true);
+    getSubscriptionStatus()
+      .then((data) => {
+        // activePlans = ['starter', 'growth', ...]  — pick highest
+        const plans: string[] = data.activePlans || [];
+        const PLAN_RANK: Record<string, number> = {
+          free: 0,
+          starter: 1,
+          growth: 2,
+          scale: 3,
+          enterprise: 4,
+        };
+        const best = plans.reduce<string | null>((acc, p) => {
+          if (!acc) return p;
+          const currentPlan = p.toLowerCase();
+          const accPlan = acc.toLowerCase();
+          return (PLAN_RANK[currentPlan] ?? -1) > (PLAN_RANK[accPlan] ?? -1) ? p : acc;
+        }, null);
+        setActivePlan(best);
+      })
+      .catch(() => setActivePlan(null))
+      .finally(() => setSubLoading(false));
   }, [token]);
 
-  const loadInvoices = async () => {
-    if (!token) return;
+  const { invoices, loading, pagination, refetch } = useInvoices({
+    limit: LIMIT,
+    offset: (page - 1) * LIMIT,
+  });
 
+  const totalPages = pagination ? Math.ceil(pagination.total / LIMIT) : 1;
+
+  const handleInvoiceClick = useCallback((invoiceId: string) => {
+    setSelectedInvoiceId(invoiceId);
+    setDetailsOpened(true);
+  }, []);
+
+  const handleCloseDetails = useCallback(() => {
+    setDetailsOpened(false);
+    setSelectedInvoiceId(null);
+  }, []);
+
+  // ── Export button handler ────────────────────────────────────────────────
+  const handleOpenExport = () => {
+    const isFreeOrNone = !activePlan || activePlan.toLowerCase() === "free";
+    if (isFreeOrNone && !subLoading) {
+      // No plan at all or "Free" plan — open modal anyway so the gate screen shows
+      notifications.show({
+        title: "Subscription Required",
+        message:
+          "You need an active plan to export invoices. Choose a plan to get started.",
+        color: "orange",
+        icon: <IconFileExport size={16} />,
+        autoClose: 6000,
+      });
+    }
+    setExportOpened(true);
+  };
+
+  // ── Bulk download ────────────────────────────────────────────────────────
+  const handleDownloadAll = async () => {
+    if (!token || invoices.length === 0) return;
     try {
-      setLoading(true);
-      const response = await fetchInvoices(token);
-      setInvoices(response?.payload?.invoices || []);
-    } catch (error) {
+      setDownloadingAll(true);
+      for (const inv of invoices) {
+        const id = (inv as any).invoiceNumber ?? (inv as any).id;
+        await downloadInvoiceDocument(token, id);
+        await new Promise((r) => setTimeout(r, 600));
+      }
+      notifications.show({
+        title: "Download complete",
+        message: `${invoices.length} invoice(s) downloaded`,
+        color: "green",
+        icon: <IconCheck size={16} />,
+      });
+    } catch {
       notifications.show({
         title: "Error",
-        message: "Failed to load invoices",
+        message: "Some downloads failed — please try again",
         color: "red",
       });
     } finally {
-      setLoading(false);
+      setDownloadingAll(false);
     }
   };
 
-  const handleViewDetails = async (invoiceId: string) => {
-    if (!token) return;
-
-    try {
-      setDetailsLoading(true);
-      setDetailsModalOpened(true);
-      // Wait to ensure modal pops open showing loading state
-      const response = await fetchInvoiceDetails(token, invoiceId);
-      setSelectedInvoice(response.payload.invoice);
-    } catch (error) {
-      notifications.show({
-        title: "Error",
-        message: "Failed to load invoice details",
-        color: "red",
-      });
-      setDetailsModalOpened(false);
-    } finally {
-      setDetailsLoading(false);
-    }
-  };
+  // ── Quick stats ──────────────────────────────────────────────────────────
+  const totalRevenue = invoices.reduce(
+    (acc: number, inv: any) => acc + (inv.totalAmount?.amount || 0),
+    0,
+  );
+  const paidCount = invoices.filter(
+    (inv: any) => (inv.invoiceStatus || "").toLowerCase() === "paid",
+  ).length;
 
   return (
     <MainLayout>
       <Container fluid py="xl">
         <Stack gap="lg">
-          {/* Header */}
-          <Group justify="space-between">
+          {/* ── Header ──────────────────────────────────────────── */}
+          <Group justify="space-between" align="flex-start">
             <div>
               <Title order={2}>Invoices</Title>
-              <Text c="dimmed" size="sm">
-                View and manage your Amazon invoices
+              <Text c="dimmed" size="sm" mt={4}>
+                View, download, and manage your Amazon invoices
               </Text>
             </div>
-            <Button
-              leftSection={<IconRefresh size={16} />}
-              onClick={loadInvoices}
-              loading={loading}
-            >
-              Refresh
-            </Button>
+            <Group gap="sm">
+              <Tooltip label="Refresh invoices">
+                <ActionIcon
+                  variant="default"
+                  size="lg"
+                  onClick={refetch}
+                  loading={loading}
+                >
+                  <IconRefresh size={18} />
+                </ActionIcon>
+              </Tooltip>
+
+              <Button
+                leftSection={<IconDownload size={16} />}
+                variant="light"
+                color="green"
+                onClick={handleDownloadAll}
+                loading={downloadingAll}
+                disabled={invoices.length === 0}
+              >
+                Download All
+              </Button>
+
+              <Button
+                leftSection={<IconFileExport size={16} />}
+                variant="filled"
+                color="blue"
+                onClick={handleOpenExport}
+                loading={subLoading}
+              >
+                Export Invoices
+              </Button>
+            </Group>
           </Group>
 
-          {/* Invoices Table */}
-          <Paper radius="md" withBorder>
-            <Table.ScrollContainer minWidth={800}>
-              <Table striped highlightOnHover>
-                <Table.Thead>
-                  <Table.Tr>
-                    <Table.Th>Invoice ID</Table.Th>
-                    <Table.Th>Issue Date</Table.Th>
-                    <Table.Th>Amazon Order ID</Table.Th>
-                    <Table.Th>Status</Table.Th>
-                    <Table.Th>Subtotal</Table.Th>
-                    <Table.Th>Tax</Table.Th>
-                    <Table.Th>Actions</Table.Th>
-                  </Table.Tr>
-                </Table.Thead>
-                <Table.Tbody>
-                  {loading ? (
-                    <Table.Tr>
-                      <Table.Td colSpan={7}>
-                        <Text ta="center" py="xl">
-                          Loading invoices...
-                        </Text>
-                      </Table.Td>
-                    </Table.Tr>
-                  ) : invoices.length === 0 ? (
-                    <Table.Tr>
-                      <Table.Td colSpan={7}>
-                        <Text ta="center" py="xl" c="dimmed">
-                          No invoices found
-                        </Text>
-                      </Table.Td>
-                    </Table.Tr>
-                  ) : (
-                    invoices.map((invoice: any, idx: number) => {
-                      const displayId =
-                        invoice.invoiceNumber ??
-                        invoice.id ??
-                        invoice.amazonOrderId;
-                      return (
-                        <Table.Tr key={invoice.id || idx}>
-                          <Table.Td>
-                            <Text fw={600} size="sm">
-                              {displayId}
-                            </Text>
-                          </Table.Td>
-                          <Table.Td>
-                            <Text size="sm">
-                              {formatDate(invoice.issueDate)}
-                            </Text>
-                          </Table.Td>
-                          <Table.Td>
-                            <Text size="sm">
-                              {invoice.amazonOrderId || "N/A"}
-                            </Text>
-                          </Table.Td>
-                          <Table.Td>
-                            <Badge
-                              color={getStatusColor(invoice.invoiceStatus)}
-                              variant="filled"
-                            >
-                              {invoice.invoiceStatus || "Pending"}
-                            </Badge>
-                          </Table.Td>
-                          <Table.Td>
-                            <Text fw={600} size="sm">
-                              {formatCurrency(
-                                invoice.totalAmount?.amount,
-                                invoice.totalAmount?.currencyCode,
-                              )}
-                            </Text>
-                          </Table.Td>
-                          <Table.Td>
-                            <Text size="sm">
-                              {formatCurrency(
-                                invoice.taxAmount?.amount,
-                                invoice.taxAmount?.currencyCode,
-                              ) || "N/A"}
-                            </Text>
-                          </Table.Td>
-                          <Table.Td>
-                            <Tooltip label="View Details">
-                              <ActionIcon
-                                variant="subtle"
-                                color="blue"
-                                onClick={() => handleViewDetails(displayId)}
-                              >
-                                <IconEye size={18} />
-                              </ActionIcon>
-                            </Tooltip>
-                          </Table.Td>
-                        </Table.Tr>
-                      );
-                    })
-                  )}
-                </Table.Tbody>
-              </Table>
-            </Table.ScrollContainer>
-          </Paper>
+          {/* ── Quick Stats ──────────────────────────────────────── */}
+          <SimpleGrid cols={{ base: 1, sm: 3 }}>
+            <Paper p="md" radius="md" withBorder>
+              <Group>
+                <ThemeIcon size="xl" variant="light" color="blue" radius="md">
+                  <IconFileInvoice size={22} />
+                </ThemeIcon>
+                <div>
+                  <Text size="xs" c="dimmed" tt="uppercase" fw={600} lts={0.5}>
+                    Total Invoices
+                  </Text>
+                  <Text fw={700} size="xl" lh={1.2}>
+                    {pagination?.total ?? invoices.length}
+                  </Text>
+                </div>
+              </Group>
+            </Paper>
+
+            <Paper p="md" radius="md" withBorder>
+              <Group>
+                <ThemeIcon size="xl" variant="light" color="green" radius="md">
+                  <IconCurrencyDollar size={22} />
+                </ThemeIcon>
+                <div>
+                  <Text size="xs" c="dimmed" tt="uppercase" fw={600} lts={0.5}>
+                    Revenue (this page)
+                  </Text>
+                  <Text fw={700} size="xl" lh={1.2}>
+                    USD{" "}
+                    {totalRevenue.toLocaleString("en-US", {
+                      minimumFractionDigits: 2,
+                    })}
+                  </Text>
+                </div>
+              </Group>
+            </Paper>
+
+            <Paper p="md" radius="md" withBorder>
+              <Group>
+                <ThemeIcon size="xl" variant="light" color="teal" radius="md">
+                  <IconCheck size={22} />
+                </ThemeIcon>
+                <div>
+                  <Text size="xs" c="dimmed" tt="uppercase" fw={600} lts={0.5}>
+                    Paid Invoices
+                  </Text>
+                  <Text fw={700} size="xl" lh={1.2}>
+                    {paidCount}
+                    <Text component="span" size="sm" c="dimmed" ml={6}>
+                      / {invoices.length}
+                    </Text>
+                  </Text>
+                </div>
+              </Group>
+            </Paper>
+          </SimpleGrid>
+
+          {/* ── Invoice Table ────────────────────────────────────── */}
+          <InvoiceList
+            invoices={invoices as any}
+            loading={loading}
+            totalPages={totalPages}
+            currentPage={page}
+            onPageChange={setPage}
+            onInvoiceClick={handleInvoiceClick}
+          />
         </Stack>
       </Container>
 
-      {/* Invoice Details Modal */}
-      <Modal
-        opened={detailsModalOpened}
-        onClose={() => setDetailsModalOpened(false)}
-        title="Invoice Details"
-        size="lg"
-        padding="lg"
-      >
-        {detailsLoading || !selectedInvoice ? (
-          <Text>Loading invoice details...</Text>
-        ) : (
-          <Stack gap="lg">
-            <Paper p="md" withBorder>
-              <Group justify="space-between" mb="md">
-                <div>
-                  <Text fw={700} size="lg">
-                    {selectedInvoice.invoiceNumber || selectedInvoice.id}
-                  </Text>
-                  <Text size="sm" c="dimmed">
-                    Issued: {formatDate(selectedInvoice.issueDate)}
-                  </Text>
-                </div>
-                <Badge
-                  size="lg"
-                  color={getStatusColor(selectedInvoice.invoiceStatus)}
-                  variant="filled"
-                >
-                  {selectedInvoice.invoiceStatus || "Pending"}
-                </Badge>
-              </Group>
+      {/* ── Modals ───────────────────────────────────────────────── */}
+      <InvoiceDetailsModal
+        invoiceId={selectedInvoiceId}
+        opened={detailsOpened}
+        onClose={handleCloseDetails}
+      />
 
-              <Text size="sm" mb="xs">
-                <strong>Amazon Order ID:</strong>{" "}
-                {selectedInvoice.amazonOrderId || "N/A"}
-              </Text>
-              <Text size="sm">
-                <strong>Buyer:</strong> {selectedInvoice.buyerName || "N/A"}
-              </Text>
-            </Paper>
-
-            <Paper p="md" withBorder>
-              <Group justify="space-between" mb="xs">
-                <Text>Total Amount:</Text>
-                <Text fw={700}>
-                  {formatCurrency(
-                    selectedInvoice.totalAmount?.amount,
-                    selectedInvoice.totalAmount?.currencyCode,
-                  )}
-                </Text>
-              </Group>
-              <Group justify="space-between">
-                <Text>Tax Amount:</Text>
-                <Text>
-                  {formatCurrency(
-                    selectedInvoice.taxAmount?.amount,
-                    selectedInvoice.taxAmount?.currencyCode,
-                  )}
-                </Text>
-              </Group>
-            </Paper>
-
-            <Text size="sm" c="dimmed" ta="center">
-              Note: If connecting to Sandbox, Amazon SP-API mock invoices may be
-              sparse.
-            </Text>
-          </Stack>
-        )}
-      </Modal>
+      <InvoiceExportModal
+        opened={exportOpened}
+        onClose={() => setExportOpened(false)}
+        userPlan={activePlan}
+      />
     </MainLayout>
   );
 }

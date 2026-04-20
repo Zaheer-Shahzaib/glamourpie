@@ -21,7 +21,7 @@ import Surface from "../../Surface/Surface";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import SignInLayout from "./layout";
 import { PATH_APPS, PATH_AUTH, PATH_DASHBOARD } from "../../../routes";
-import { api } from "../../../Services/api";
+import { api, API_BASE_URL } from "../../../Services/api";
 import { notifications } from "@mantine/notifications";
 import { useAuth } from "../../../Context/useAuth";
 import { useState, useEffect } from "react";
@@ -40,17 +40,18 @@ function LoginPage() {
   const [amazonConnecting, setAmazonConnecting] = useState(false);
 
   useEffect(() => {
-    const code = searchParams.get('code');
-    const amzError = searchParams.get('error_description') || searchParams.get('error');
+    const code = searchParams.get("code");
+    const amzError =
+      searchParams.get("error_description") || searchParams.get("error");
 
     if (amzError) {
       setErrorMessage(amzError);
-      searchParams.delete('error');
-      searchParams.delete('error_description');
+      searchParams.delete("error");
+      searchParams.delete("error_description");
       setSearchParams(searchParams);
     } else if (code && !amazonConnecting) {
       setAmazonConnecting(true);
-      window.location.href = `http://localhost:5173/api/amazon/callback?code=${encodeURIComponent(code)}`;
+      window.location.href = `${API_BASE_URL}/api/amazon/callback?code=${encodeURIComponent(code)}`;
     }
   }, [searchParams]);
 
@@ -66,7 +67,11 @@ function LoginPage() {
         setErrorMessage("Failed to initiate Amazon SSO.");
       }
     } catch (err: any) {
-      setErrorMessage(err.response?.data?.message || JSON.stringify(err.response?.data) || "Could not connect to Amazon SSO.");
+      setErrorMessage(
+        err.response?.data?.message ||
+          JSON.stringify(err.response?.data) ||
+          "Could not connect to Amazon SSO.",
+      );
     } finally {
       setAmazonConnecting(false);
     }
@@ -187,9 +192,17 @@ function LoginPage() {
             <Button fullWidth mt="xl" type="submit">
               Sign in
             </Button>
-            
+            {/* 
             <Group justify="center" mt="md">
-              <a href="#" id="LoginWithAmazon" onClick={handleAmazonLogin} style={{ cursor: amazonConnecting ? 'wait' : 'pointer', opacity: amazonConnecting ? 0.7 : 1 }}>
+              <a
+                href="#"
+                id="LoginWithAmazon"
+                onClick={handleAmazonLogin}
+                style={{
+                  cursor: amazonConnecting ? "wait" : "pointer",
+                  opacity: amazonConnecting ? 0.7 : 1,
+                }}
+              >
                 <img
                   alt="Login with Amazon"
                   src="https://images-na.ssl-images-amazon.com/images/G/01/lwa/btnLWA_gold_156x32.png"
@@ -198,7 +211,7 @@ function LoginPage() {
                   style={{ border: 0 }}
                 />
               </a>
-            </Group>
+            </Group> */}
           </form>
           <Center mt="md">
             <Text

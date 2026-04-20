@@ -36,7 +36,7 @@ function SignupPage() {
   const { login } = useAuth();
   const [passwordFocused, setPasswordFocused] = useState(false);
 
-  const OTP_EXPIRY_SECONDS = 120;
+  const OTP_EXPIRY_SECONDS = 30;
   const form = useForm({
     initialValues: {
       firstname: "",
@@ -70,7 +70,7 @@ function SignupPage() {
       },
     },
   });
- const handleSubmit = async (values: typeof form.values) => {
+  const handleSubmit = async (values: typeof form.values) => {
     setSubmitting(true);
     setErrorMessage(null);
     try {
@@ -106,21 +106,18 @@ function SignupPage() {
       <>
         <title>Sign up</title>
         <meta
-          name='description'
-          content='Explore our versatile dashboard website template featuring a stunning array of themes and meticulously crafted components...'
+          name="description"
+          content="Explore our versatile dashboard website template featuring a stunning array of themes and meticulously crafted components..."
         />
       </>
       <SignUpLayout>
-        <Title ta='center'>Welcome!</Title>
-        <Text ta='center'>Create your account to continue</Text>
-        <Surface
-          component={Paper}
-          classNames={{ root: classes.card }}
-        >
+        <Title ta="center">Welcome!</Title>
+        <Text ta="center">Create your account to continue</Text>
+        <Surface component={Paper} classNames={{ root: classes.card }}>
           <ActionIcon
-            variant='filled'
+            variant="filled"
             // color="brand"
-            size='lg'
+            size="lg"
             onClick={() => navigate(-1)}
             style={{
               position: "absolute",
@@ -128,16 +125,16 @@ function SignupPage() {
               left: 16,
               zIndex: 10,
             }}
-            title='Go back'
+            title="Go back"
           >
             <IconArrowLeft size={20} />
           </ActionIcon>
           {errorMessage && (
             <Alert
-              variant='light'
+              variant="light"
               c={theme.colors.red[8]}
-              radius='lg'
-              title=''
+              radius="lg"
+              title=""
               icon={<IconInfoCircle />}
             >
               {errorMessage}
@@ -149,25 +146,25 @@ function SignupPage() {
               gap={{ base: "md" }}
             >
               <TextInput
-                key='firstname'
-                label='First Name'
-                placeholder='John'
+                key="firstname"
+                label="First Name"
+                placeholder="John"
                 {...form.getInputProps("firstname")}
                 required
               />
 
               <TextInput
-                key='lastname'
-                label='Last Name'
-                placeholder='Alex'
+                key="lastname"
+                label="Last Name"
+                placeholder="Alex"
                 {...form.getInputProps("lastname")}
                 required
               />
             </Flex>
 
             <TextInput
-              label='Email'
-              placeholder='john@example.com'
+              label="Email"
+              placeholder="john@example.com"
               {...form.getInputProps("email")}
               required
             />
@@ -181,9 +178,9 @@ function SignupPage() {
             /> */}
 
             <PasswordInput
-              label='Password'
-              placeholder='Your password'
-              mt='md'
+              label="Password"
+              placeholder="Your password"
+              mt="md"
               {...form.getInputProps("password")}
               onFocus={() => setPasswordFocused(true)}
               onBlur={() => setPasswordFocused(false)}
@@ -193,19 +190,14 @@ function SignupPage() {
               password={form.values.password}
               focused={passwordFocused}
             />
-            <Button
-              fullWidth
-              mt='xl'
-              type='submit'
-              loading={submitting}
-            >
+            <Button fullWidth mt="xl" type="submit" loading={submitting}>
               Create account
             </Button>
           </form>
 
-          <Center mt='md'>
+          <Center mt="md">
             <Text
-              size='sm'
+              size="sm"
               component={Link}
               to={PATH_AUTH.signin}
               className={classes.link}
