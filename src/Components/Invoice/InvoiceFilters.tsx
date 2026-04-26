@@ -32,8 +32,8 @@ export default function InvoiceFilters({
     if (status) filters.status = [status];
     if (type) filters.type = [type];
     if (marketplace) filters.marketplaceId = marketplace;
-    if (dateRange[0]) filters.dateFrom = dateRange[0].toISOString();
-    if (dateRange[1]) filters.dateTo = dateRange[1].toISOString();
+    if (dateRange[0]) filters.dateFrom = new Date(dateRange[0]).toISOString();
+    if (dateRange[1]) filters.dateTo = new Date(dateRange[1]).toISOString();
 
     onFilterChange(filters);
   };

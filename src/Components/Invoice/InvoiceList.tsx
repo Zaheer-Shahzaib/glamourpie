@@ -42,7 +42,7 @@ export default function InvoiceList({
 }: InvoiceListProps) {
   const { token } = useAuth();
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
-
+  console.log("Dashboard", invoices);
   const handleDownload = async (invoiceId: string, e: React.MouseEvent) => {
     e.stopPropagation();
 
@@ -136,8 +136,10 @@ export default function InvoiceList({
                         {displayId}
                       </Text>
                     </Table.Td>
-                    <Table.Td>{formatDate(invoice.issueDate)}</Table.Td>
-                    <Table.Td>{invoice.buyerName || "—"}</Table.Td>
+                    <Table.Td>{formatDate(invoice.invoiceDate)}</Table.Td>
+                    <Table.Td>
+                      {invoice.buyer?.name || invoice.buyerName || "—"}
+                    </Table.Td>
                     <Table.Td>
                       <Text size="sm" c="dimmed">
                         {invoice.amazonOrderId || "—"}
@@ -146,26 +148,34 @@ export default function InvoiceList({
                     <Table.Td>
                       <Badge
                         color={getStatusColor(
-                          (invoice.invoiceStatus || "").toUpperCase()
-                        )}
+                          invoice.status,
+                        ).toLocaleUpperCase()}
                         variant="filled"
                       >
-                        {invoice.invoiceStatus || "Pending"}
+                        {invoice.status || "Pending"}
                       </Badge>
                     </Table.Td>
                     <Table.Td>
                       <Text fw={500} size="sm">
                         {formatCurrency(
-                          invoice.totalAmount?.amount,
-                          invoice.totalAmount?.currencyCode
+                          typeof invoice.totalAmount === "object"
+                            ? invoice.totalAmount?.amount
+                            : invoice.totalAmount,
+                          typeof invoice.totalAmount === "object"
+                            ? invoice.totalAmount?.currencyCode
+                            : invoice.currency,
                         )}
                       </Text>
                     </Table.Td>
                     <Table.Td>
                       <Text size="sm">
                         {formatCurrency(
-                          invoice.taxAmount?.amount,
-                          invoice.taxAmount?.currencyCode
+                          typeof invoice.taxAmount === "object"
+                            ? invoice.taxAmount?.amount
+                            : invoice.taxAmount,
+                          typeof invoice.taxAmount === "object"
+                            ? invoice.taxAmount?.currencyCode
+                            : invoice.currency,
                         ) || "—"}
                       </Text>
                     </Table.Td>

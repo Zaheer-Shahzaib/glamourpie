@@ -51,6 +51,8 @@ export default function SettingsBillingPage() {
   // Aggregation state
   const [activePlans, setActivePlans] = useState<string[]>([]);
   const [totalAllowedInvoices, setTotalAllowedInvoices] = useState<number>(0);
+  const [invoicesGeneratedThisMonth, setInvoicesGeneratedThisMonth] =
+    useState<number>(0);
   const [hasPastDue, setHasPastDue] = useState(false);
 
   // Modal
@@ -85,6 +87,7 @@ export default function SettingsBillingPage() {
       setSubscriptions(subData.subscriptions || []);
       setActivePlans(subData.activePlans || []);
       setTotalAllowedInvoices(subData.totalAllowedInvoices || 0);
+      setInvoicesGeneratedThisMonth(subData.invoicesGeneratedThisMonth || 0);
       setHasPastDue(subData.hasPastDue || false);
       setInvoices(invData.data || []);
     } catch (error) {
@@ -242,13 +245,19 @@ export default function SettingsBillingPage() {
                 bg="var(--mantine-color-gray-0)"
               >
                 <Text c="dimmed" size="sm" fw={500} tt="uppercase">
-                  Combined Monthly Extracted Invoices
+                  Monthly Invoices Remaining
                 </Text>
                 <Text size="xl" fw={700} mt="xs" c="brand">
-                  {totalAllowedInvoices > 0
-                    ? totalAllowedInvoices.toLocaleString()
+                  {totalAllowedInvoices - invoicesGeneratedThisMonth > 0
+                    ? (
+                        totalAllowedInvoices - invoicesGeneratedThisMonth
+                      ).toLocaleString()
                     : "0"}{" "}
-                  Available
+                  Left
+                </Text>
+                <Text size="sm" c="dimmed" mt={4}>
+                  {invoicesGeneratedThisMonth.toLocaleString()} used out of{" "}
+                  {totalAllowedInvoices.toLocaleString()} limit
                 </Text>
               </Paper>
             </Group>

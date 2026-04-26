@@ -30,6 +30,18 @@ export const useInvoices = (initialFilters?: InvoiceQueryParams): UseInvoicesRet
     const [pagination, setPagination] = useState<PaginationInfo | null>(null);
     const [filters, setFilters] = useState<InvoiceQueryParams>(initialFilters || {});
 
+    // Sync filters when initialFilters prop changes (e.g. pagination offsets from parent)
+    useEffect(() => {
+        if (initialFilters) {
+            setFilters((prev) => {
+                if (JSON.stringify(prev) !== JSON.stringify(initialFilters)) {
+                    return initialFilters;
+                }
+                return prev;
+            });
+        }
+    }, [JSON.stringify(initialFilters)]);
+
     const fetchData = useCallback(async () => {
         if (!token) {
             setError(new Error('No authentication token'));
@@ -42,7 +54,7 @@ export const useInvoices = (initialFilters?: InvoiceQueryParams): UseInvoicesRet
             setError(null);
 
             const response = await fetchInvoices(token, filters);
-
+            console.log("Hook Response", response)
             setInvoices(response.payload.invoices);
             setPagination(response.payload.pagination ?? null);
         } catch (err) {
@@ -94,6 +106,7 @@ export const useInvoiceDetails = (invoiceId: string | null): UseInvoiceDetailsRe
             setError(null);
 
             const response = await fetchInvoiceDetails(token, invoiceId);
+            console.log(response)
             setInvoice(response.payload.invoice);
         } catch (err) {
             setError(err instanceof Error ? err : new Error('Failed to fetch invoice details'));

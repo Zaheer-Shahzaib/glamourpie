@@ -46,6 +46,7 @@ export default function InvoiceDetailsModal({
   const { token } = useAuth();
   const [downloading, setDownloading] = useState(false);
 
+  console.log("invoice", invoice);
   const handleDownload = async () => {
     if (!token || !invoiceId) return;
 
@@ -100,22 +101,24 @@ export default function InvoiceDetailsModal({
                   </Text>
                 </Group>
               </div>
-                <Stack gap="xs" align="flex-end">
+              <Stack gap="xs" align="flex-end">
                 <Badge
                   size="md"
-                  color={getStatusColor((invoice.invoiceStatus || 'PENDING').toUpperCase())}
+                  color={getStatusColor(
+                    (invoice.invoiceStatus || "PENDING").toUpperCase(),
+                  )}
                   variant="filled"
                 >
-                  {invoice.invoiceStatus || 'Pending'}
+                  {invoice.invoiceStatus || "Pending"}
                 </Badge>
                 {invoice.invoiceType && (
-                <Badge
-                  size="md"
-                  color={getTypeColor(invoice.invoiceType)}
-                  variant="light"
-                >
-                  {invoice.invoiceType}
-                </Badge>
+                  <Badge
+                    size="md"
+                    color={getTypeColor(invoice.invoiceType)}
+                    variant="light"
+                  >
+                    {invoice.invoiceType}
+                  </Badge>
                 )}
               </Stack>
             </Group>

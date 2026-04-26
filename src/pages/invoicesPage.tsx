@@ -45,6 +45,9 @@ export default function InvoicesPage() {
   // Subscription info — used to gate/configure the export modal
   const [activePlan, setActivePlan] = useState<string | null>(null);
   const [subLoading, setSubLoading] = useState(true);
+  
+  // Real stats from the backend (total amounts across all pages + usage limits)
+  const [stats, setStats] = useState<any>(null);
 
   useEffect(() => {
     if (!token) return;
@@ -70,6 +73,13 @@ export default function InvoicesPage() {
       })
       .catch(() => setActivePlan(null))
       .finally(() => setSubLoading(false));
+
+    // Fetch the real usage and revenue stats
+    import("../Services/invoice-services").then(({ fetchInvoiceStats }) => {
+      fetchInvoiceStats(token)
+        .then((res) => setStats(res.payload))
+        .catch(console.error);
+    });
   }, [token]);
 
   const { invoices, loading, pagination, refetch } = useInvoices({
@@ -133,14 +143,18 @@ export default function InvoicesPage() {
     }
   };
 
-  // ── Quick stats ──────────────────────────────────────────────────────────
-  const totalRevenue = invoices.reduce(
-    (acc: number, inv: any) => acc + (inv.totalAmount?.amount || 0),
+  // ── Stats fallback to page data if backend fails ────────────
+  const totalRevenue = stats?.totalRevenue ?? invoices.reduce(
+    (acc: number, inv: any) => acc + (inv.totalAmount?.amount || inv.totalAmount || 0),
     0,
   );
-  const paidCount = invoices.filter(
-    (inv: any) => (inv.invoiceStatus || "").toLowerCase() === "paid",
+  const paidCount = stats?.paidInvoices ?? invoices.filter(
+    (inv: any) => (inv.invoiceStatus || inv.status || "").toLowerCase() === "paid" || (inv.invoiceStatus || inv.status || "").toLowerCase() === "accepted",
   ).length;
+  
+  const usageLimit = stats?.usage?.limit || 20;
+  const usageGenerated = stats?.usage?.generatedThisMonth || 0;
+  const isLimitReached = usageGenerated >= usageLimit;
 
   return (
     <MainLayout>
@@ -214,10 +228,10 @@ export default function InvoicesPage() {
                 </ThemeIcon>
                 <div>
                   <Text size="xs" c="dimmed" tt="uppercase" fw={600} lts={0.5}>
-                    Revenue (this page)
+                    Total Revenue
                   </Text>
                   <Text fw={700} size="xl" lh={1.2}>
-                    USD{" "}
+                    {stats?.currencyCode || "USD"}{" "}
                     {totalRevenue.toLocaleString("en-US", {
                       minimumFractionDigits: 2,
                     })}
@@ -238,7 +252,26 @@ export default function InvoicesPage() {
                   <Text fw={700} size="xl" lh={1.2}>
                     {paidCount}
                     <Text component="span" size="sm" c="dimmed" ml={6}>
-                      / {invoices.length}
+                      / {stats?.totalInvoices ?? (pagination?.total || invoices.length)}
+                    </Text>
+                  </Text>
+                </div>
+              </Group>
+            </Paper>
+            
+            <Paper p="md" radius="md" withBorder>
+              <Group>
+                <ThemeIcon size="xl" variant="light" color={isLimitReached ? "red" : "orange"} radius="md">
+                  <IconFileExport size={22} />
+                </ThemeIcon>
+                <div>
+                  <Text size="xs" c="dimmed" tt="uppercase" fw={600} lts={0.5}>
+                    Current Plan Limit
+                  </Text>
+                  <Text fw={700} size="xl" lh={1.2} c={isLimitReached ? "red" : "inherit"}>
+                    {usageGenerated}
+                    <Text component="span" size="sm" c="dimmed" ml={6}>
+                      / {usageLimit !== 99999 ? usageLimit : '∞'} used
                     </Text>
                   </Text>
                 </div>

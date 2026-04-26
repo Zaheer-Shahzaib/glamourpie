@@ -35,6 +35,7 @@ export const createCheckoutSession = async (
 export const getSubscriptionStatus = async (): Promise<{
   activePlans: string[];
   totalAllowedInvoices: number;
+  invoicesGeneratedThisMonth: number;
   hasPastDue: boolean;
   portalAvailable: boolean;
   subscriptions: any[];

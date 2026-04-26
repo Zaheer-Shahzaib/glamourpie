@@ -91,9 +91,10 @@ export const formatDate = (dateString: string): string => {
   });
 };
 
-export const formatCurrency = (amount: number, currency: string): string => {
-  return `${currency} ${amount.toLocaleString("en-US", {
+export const formatCurrency = (amount: number | null | undefined, currency: string): string => {
+  const safeAmount = amount || 0;
+  return `${currency || ''} ${safeAmount.toLocaleString("en-US", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  })}`;
+  })}`.trim();
 };

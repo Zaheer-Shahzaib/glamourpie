@@ -34,6 +34,7 @@ export const fetchInvoiceDetails = async (
     const response = await api.get(`/api/aws/invoices/${invoiceId}`, {
         headers: { Authorization: `Bearer ${token}` },
     });
+    console.log("invoice details",response)
     return response.data;
 };
 
@@ -63,9 +64,9 @@ export const downloadInvoiceDocument = async (
     console.log(docResponse)
     const { documentUrl, generateUrl, isSandbox } = docResponse.payload;
 
-    if (isSandbox && generateUrl) {
-        // POST to generate endpoint — response is a PDF blob stream
-        const pdfRes = await api.post(generateUrl, {}, {
+
+        // GET from document endpoint — response is a PDF blob stream
+        const pdfRes = await api.get(documentUrl, {
             headers: { Authorization: `Bearer ${token}` },
             responseType: 'blob',
         });
@@ -77,10 +78,7 @@ export const downloadInvoiceDocument = async (
         document.body.appendChild(a);
         a.click();
         setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 2000);
-    } else {
-        // Production: open pre-signed URL in a new tab
-        window.open(documentUrl, '_blank');
-    }
+    
 };
 
 /**
@@ -112,6 +110,22 @@ export const downloadExportedFile = async (
         URL.revokeObjectURL(url); 
         a.remove(); 
     }, 2000);
+};
+
+/**
+ * Manually generate an invoice for a specific Amazon order
+ * Calls the backend to fetch SP-API data, generate PDF, save to DB, and return the PDF blob
+ */
+export const generateManualInvoice = async (
+    token: string,
+    orderId: string
+): Promise<void> => {
+    const res = await api.post(`/api/aws/invoices/generate/${orderId}`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+    });
+    
+    // Server now returns JSON, no longer streams the PDF.
+    return res.data;
 };
 
 /**
