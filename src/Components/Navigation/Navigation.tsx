@@ -44,15 +44,21 @@ const mockdata = [
     title: "Dashboard",
     links: [
       { label: "Home", icon: IconChartBar, link: PATH_DASHBOARD.default },
+      // {
+      //   label: "Analytics",
+      //   icon: IconChartInfographic,
+      //   link: PATH_APPS.analytics,
+      // },
+      { label: "Orders", icon: IconListDetails, link: PATH_APPS.orders },
       {
-        label: "Analytics",
-        icon: IconChartInfographic,
-        link: PATH_APPS.analytics,
+        label: "Invoices",
+        icon: IconFileInvoice,
+        link: PATH_APPS.invoices.root,
       },
     ],
   },
   {
-    title: "Apps",
+    title: "Settings",
     links: [
       {
         label: "Profile",
@@ -76,12 +82,7 @@ const mockdata = [
           { label: "Billing & Subscription", link: PATH_APPS.settings.billing },
         ],
       },
-      { label: "Orders", icon: IconListDetails, link: PATH_APPS.orders },
-      {
-        label: "Invoices",
-        icon: IconFileInvoice,
-        link: PATH_APPS.invoices.root,
-      },
+
       // { label: "Tasks", icon: IconListDetails, link: PATH_APPS.tasks },
       // { label: "Calendar", icon: IconCalendar, link: PATH_APPS.calendar },
       // { label: "File Manager", icon: IconFiles, link: PATH_APPS.fileManager },

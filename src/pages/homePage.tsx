@@ -81,49 +81,39 @@ export default function Home() {
       <>
         <title>Runanalytic Invoice</title>
         <meta
-          name='description'
-          content='Explore our versatile dashboard website template featuring a stunning array of themes and meticulously crafted components. Elevate your web project with seamless integration, customizable themes, and a rich variety of components for a dynamic user experience. Effortlessly bring your data to life with our intuitive dashboard template, designed to streamline development and captivate users. Discover endless possibilities in design and functionality today!'
+          name="description"
+          content="Explore our versatile dashboard website template featuring a stunning array of themes and meticulously crafted components. Elevate your web project with seamless integration, customizable themes, and a rich variety of components for a dynamic user experience. Effortlessly bring your data to life with our intuitive dashboard template, designed to streamline development and captivate users. Discover endless possibilities in design and functionality today!"
         />
-        <meta
-          name='viewport'
-          content='width=device-width, initial-scale=1'
-        />
-        <link
-          rel='icon'
-          href='/logo (2).jpg'
-        />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="icon" href="/logo (2).jpg" />
       </>
       <GuestLayout>
         <Box className={classes.hero}>
           <Grid
-            align='center'
-            justify='center'
+            align="center"
+            justify="center"
             gutter={{ base: 5, xs: "md", md: "xl", xl: 50 }}
           >
-            <Grid.Col
-              span={{ base: 12, md: 6 }}
-              order={{ base: 2, md: 1 }}
-            >
+            <Grid.Col span={{ base: 12, md: 6 }} order={{ base: 2, md: 1 }}>
               <Stack>
                 {/* <Text>Build like a Pro</Text> */}
                 <Title className={classes.title}>
                   Automate Your
-                  <Text
-                    component='span'
-                    inherit
-                    className={classes.highlight}
-                  >
+                  <Text component="span" inherit className={classes.highlight}>
                     &nbsp; Amazon &nbsp;
                   </Text>
                   Invoices with RunAnalytic Fast, Easy & Accurate
                 </Title>
                 <Text>
-                  RunAnalytic Technology helps Amazon sellers across the UAE and KSA stay compliant and grow. Our secure, data-driven platform delivers insights and automation that simplify invoicing and business operations.
+                  RunAnalytic Technology helps Amazon sellers across the UAE and
+                  KSA stay compliant and grow. Our secure, data-driven platform
+                  delivers insights and automation that simplify invoicing and
+                  business operations.
                 </Text>
-                <Group my='lg'>
+                <Group my="lg">
                   <Link to={PATH_AUTH.signin} className={classes.btn}>
                     <Button
-                      size='md'
+                      size="md"
                       radius={"md"}
                       className={classes.btn}
                       leftSection={<IconPlayerPlay size={18} />}
@@ -140,9 +130,9 @@ export default function Home() {
               style={{ justifyItems: "center" }}
             >
               <Image
-                src='/assets/img4.jpg'
-                alt='image'
-                radius='md'
+                src="/assets/img4.jpg"
+                alt="image"
+                radius="md"
                 h={tablet_match ? rem(200) : rem(400)}
                 w={tablet_match ? rem(300) : rem(600)}
               />
@@ -162,15 +152,8 @@ export default function Home() {
           <Text>v 2.0</Text>
           <Text>View changelog</Text>
         </Flex> */}
-        <Container
-          fluid
-          {...BOX_PROPS}
-        >
-          <Title
-            order={2}
-            ta='center'
-            mb='xl'
-          >
+        <Container fluid {...BOX_PROPS}>
+          <Title order={2} ta="center" mb="xl">
             Why Choose Us?
           </Title>
           <SimpleGrid
@@ -187,16 +170,16 @@ export default function Home() {
               >
                 <Text
                   className={classes.paperTitle}
-                  mt='md'
-                  ta='center'
-                  tt='capitalize'
-                  fz='lg'
+                  mt="md"
+                  ta="center"
+                  tt="capitalize"
+                  fz="lg"
                 >
                   {dashboard.title}
                 </Text>
                 <Text
                   className={classes.paperText}
-                  c='dimmed'
+                  c="dimmed"
                   ta={"center"}
                   mt={"xs"}
                   fz={"md"}
@@ -208,10 +191,10 @@ export default function Home() {
           </SimpleGrid>
         </Container>
         <Container
-          id='pricing'
+          id="pricing"
           fluid
           {...BOX_PROPS}
-          style={{ position: 'relative' }}
+          style={{ position: "relative" }}
         >
           <Pricing />
           {/* <button
@@ -235,27 +218,18 @@ export default function Home() {
         >
           <Services />
         </Container> */}
-        <Container
-          fluid
-          {...BOX_PROPS}
-        >
+        <Container fluid {...BOX_PROPS}>
           <Faqs />
         </Container>
-        <Box
-          {...BOX_PROPS}
-          id='support'
-        >
+        <Box {...BOX_PROPS} id="support">
           <Paper className={classes.contactPaper}>
-            <Title
-              order={3}
-              mb='md'
-            >
+            <Title order={3} mb="md">
               For any queries?
             </Title>
             <Button
-              variant='subtle'
-              component='a'
-              href='/contact-us'
+              variant="subtle"
+              component="a"
+              href="/contact-us"
               rightSection={<IconArrowRight size={16} />}
               className={classes.contactBtn}
             >
@@ -263,17 +237,14 @@ export default function Home() {
             </Button>
             <div className="my-3"></div>
             <Button
-              variant='subtle'
-              component='a'
-              href='/privacy-policy'
+              variant="subtle"
+              component="a"
+              href="/privacy-policy"
               rightSection={<IconArrowRight size={16} />}
               className={classes.contactBtn}
             >
               Privacy Policy
             </Button>
-
-
-
           </Paper>
         </Box>
       </GuestLayout>

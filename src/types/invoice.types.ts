@@ -31,7 +31,7 @@ export interface Invoice {
     id: string; // The amazon invoice ID or our DB id
     amazonOrderId: string;
     invoiceNumber: string;
-    invoiceStatus: InvoiceStatus;
+    status: InvoiceStatus;
     invoiceType: InvoiceType;
     issueDate: string;
     dueDate?: string;
@@ -56,7 +56,7 @@ export interface InvoiceListItem {
     id: string;
     amazonOrderId: string;
     invoiceNumber: string;
-    invoiceStatus: InvoiceStatus;
+    status: InvoiceStatus;
     invoiceType: InvoiceType;
     issueDate: string;
     totalAmount: CurrencyAmount;

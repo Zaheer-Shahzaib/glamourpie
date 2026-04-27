@@ -31,7 +31,7 @@ const ProtectedRoute = ({ requireSeller = true }: ProtectedRouteProps) => {
 
   // 3. Prevent landing on Connect Page if already connected
   if (!requireSeller && isSellerConnected === true) {
-    return <Navigate to="/dashboard" />;
+    return <Navigate to="/dashboard/default" />;
   }
 
   return <Outlet />;

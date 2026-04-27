@@ -37,6 +37,7 @@ import {
 import MainLayout from "../../layout/Main";
 import { Link } from "react-router-dom";
 import { getBillingStatusColor } from "../../utils/helperFunctions";
+import { useScroll } from "../../Context/scrollContext";
 
 export default function SettingsBillingPage() {
   const { token } = useAuth();
@@ -63,7 +64,7 @@ export default function SettingsBillingPage() {
   const [invoiceModalOpened, { open: openInvoice, close: closeInvoice }] =
     useDisclosure(false);
   const [selectedInvoice, setSelectedInvoice] = useState<any>(null);
-
+  const { navigateToSection } = useScroll();
   const handleViewInvoice = (inv: any) => {
     setSelectedInvoice(inv);
     openInvoice();
@@ -224,15 +225,15 @@ export default function SettingsBillingPage() {
                       <Text c="dimmed" size="sm" fw={500} tt="uppercase">
                         No active plans
                       </Text>
-                      <Link
-                        to={"/"}
+                      <Button
+                        onClick={() => navigateToSection("pricing", "/")}
+                        variant="transparent"
                         color="blue"
-                        style={{ textDecoration: "none" }}
                       >
                         <Badge size="lg" color="blue" variant="light">
                           Subscribe
                         </Badge>
-                      </Link>
+                      </Button>
                     </Group>
                   )}
                 </Group>

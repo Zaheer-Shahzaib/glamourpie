@@ -19,7 +19,7 @@ export const mockInvoices: Invoice[] = [
         invoiceNumber: 'JUNI-2025-000001',
         issueDate: '2025-12-17T00:00:00.000Z',
         invoiceType: 'INVOICE',
-        invoiceStatus: 'SUBMITTED',
+        status: 'SUBMITTED',
 
         seller: {
             name: 'RunAnalytic Technology LLC',
@@ -66,7 +66,7 @@ export const mockInvoices: Invoice[] = [
         invoiceNumber: 'JUNI-2025-000002',
         issueDate: '2025-12-18T00:00:00.000Z',
         invoiceType: 'INVOICE',
-        invoiceStatus: 'ACCEPTED',
+        status: 'ACCEPTED',
 
         seller: {
             name: 'RunAnalytic Technology LLC',
@@ -113,7 +113,7 @@ export const mockInvoices: Invoice[] = [
         invoiceNumber: 'JUNI-2025-000003',
         issueDate: '2025-12-19T00:00:00.000Z',
         invoiceType: 'INVOICE',
-        invoiceStatus: 'DRAFT',
+        status: 'DRAFT',
 
         seller: {
             name: 'RunAnalytic Brasil LTDA',
@@ -160,7 +160,7 @@ export const mockInvoices: Invoice[] = [
         invoiceNumber: 'JUNI-2025-000004',
         issueDate: '2025-12-20T00:00:00.000Z',
         invoiceType: 'INVOICE',
-        invoiceStatus: 'REJECTED',
+        status: 'REJECTED',
 
         seller: {
             name: 'RunAnalytic Technology LLC',
@@ -206,7 +206,7 @@ export const mockInvoices: Invoice[] = [
         invoiceNumber: 'JUNI-2025-000005',
         issueDate: '2025-12-21T00:00:00.000Z',
         invoiceType: 'CREDIT_NOTE',
-        invoiceStatus: 'ACCEPTED',
+        status: 'ACCEPTED',
 
         seller: {
             name: 'RunAnalytic India Pvt Ltd',
@@ -253,7 +253,7 @@ export const mockInvoiceListItems: InvoiceListItem[] = mockInvoices.map((inv) =>
     id: inv.id,
     invoiceNumber: inv.invoiceNumber,
     issueDate: inv.issueDate,
-    invoiceStatus: inv.invoiceStatus,
+    status: inv.status,
     invoiceType: inv.invoiceType,
     totalAmount: inv.totalAmount,
     taxAmount: inv.taxAmount,
@@ -303,7 +303,7 @@ export const mockInvoiceExports: InvoiceExport[] = [
         filters: {
             dateFrom: '2025-12-01',
             dateTo: '2025-12-31',
-            invoiceStatus: ['SUBMITTED', 'ACCEPTED'],
+            status: ['SUBMITTED', 'ACCEPTED'],
             invoiceTypes: ['INVOICE'],
         },
         totalRecords: 3,

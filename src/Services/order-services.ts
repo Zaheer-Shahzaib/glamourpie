@@ -142,11 +142,24 @@ export const fetchOrders = async (
         };
     }
 
+    // Serialize filter arrays as CSV strings so the backend receives them cleanly.
+    // Axios would otherwise encode them as repeated keys (orderStatuses[]=A&orderStatuses[]=B)
+    // which the SP-API backend param builder doesn't handle.
+    const serializedParams: Record<string, any> = { ...params };
+    if (Array.isArray(serializedParams.orderStatuses)) {
+        serializedParams.orderStatuses = serializedParams.orderStatuses.join(',');
+    }
+    if (Array.isArray(serializedParams.fulfillmentChannels)) {
+        serializedParams.fulfillmentChannels = serializedParams.fulfillmentChannels.join(',');
+    }
+    if (Array.isArray(serializedParams.marketplaceIds)) {
+        serializedParams.marketplaceIds = serializedParams.marketplaceIds.join(',');
+    }
+
     const response = await api.get('/api/aws/orders', {
         headers: { Authorization: `Bearer ${token}` },
-        params,
+        params: serializedParams,
     });
-    console.log('Orders response:', response.data);
     return response.data;
 };
 

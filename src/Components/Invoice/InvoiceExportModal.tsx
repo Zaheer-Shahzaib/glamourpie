@@ -46,6 +46,7 @@ import { InvoiceStatusOptions } from "../../utils/helperFunctions";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../Context/useAuth";
 import { downloadExportedFile } from "../../Services/invoice-services";
+import { useScroll } from "../../Context/scrollContext";
 
 interface InvoiceExportModalProps {
   opened: boolean;
@@ -117,7 +118,7 @@ export default function InvoiceExportModal({
   const [selectedType, setSelectedType] = useState<string | null>(null);
   const [format, setFormat] = useState<ExportFormat>("PDF");
   const [creating, setCreating] = useState(false);
-
+  const { navigateToSection } = useScroll();
   // Load export history when modal opens
   useEffect(() => {
     if (opened) {
@@ -227,7 +228,7 @@ export default function InvoiceExportModal({
             rightSection={<IconArrowRight size={16} />}
             onClick={() => {
               onClose();
-              navigate("/price");
+              navigateToSection("pricing", "/");
             }}
           >
             View Plans & Pricing

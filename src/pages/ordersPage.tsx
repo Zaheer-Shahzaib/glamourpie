@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useMemo } from "react";
 import {
   Container,
   Paper,
@@ -10,6 +10,7 @@ import {
   Table,
   Button,
   Select,
+  TextInput,
   Grid,
   ActionIcon,
   Tooltip,
@@ -27,6 +28,7 @@ import {
   IconFilter,
   IconFileInvoice,
   IconTruck,
+  IconSearch,
 } from "@tabler/icons-react";
 import { DatePickerInput } from "@mantine/dates";
 import { useAuth } from "../Context/useAuth";
@@ -38,7 +40,6 @@ import { generateManualInvoice } from "../Services/invoice-services";
 import {
   OrderQueryParams,
   OrderStatus,
-  FulfillmentChannel,
   Order,
   OrderItem,
 } from "../types/order.types";
@@ -85,15 +86,21 @@ export default function OrdersPage() {
   const queryClient = useQueryClient();
 
   // Filters & pagination state
-  const [queryParams, setQueryParams] = useState<OrderQueryParams>({});
-  const [nextToken, setNextToken] = useState<string | null>(null);
   const [tokenHistory, setTokenHistory] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [currentNextToken, setCurrentNextToken] = useState<string | undefined>(undefined);
 
-  // UI filter controls
-  const [statusFilter, setStatusFilter] = useState<OrderStatus | null>(null);
-  const [fulfillmentFilter, setFulfillmentFilter] = useState<FulfillmentChannel | null>(null);
-  const [dateRange, setDateRange] = useState<[Date | null, Date | null]>([null, null]);
+  // ── Filter controls (Inputs) ─────────────
+  const [statusInput, setStatusInput] = useState<OrderStatus | null>(null);
+  const [orderIdInput, setOrderIdInput] = useState<string>('');
+  const [dateRangeInput, setDateRangeInput] = useState<[Date | null, Date | null]>([null, null]);
+
+  // ── Applied Filters (Used by useMemo) ────
+  const [appliedFilters, setAppliedFilters] = useState({
+    status: null as OrderStatus | null,
+    orderId: '',
+    dateRange: [null, null] as [Date | null, Date | null]
+  });
 
   // Order details modal state
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
@@ -102,59 +109,78 @@ export default function OrdersPage() {
   const [detailsLoading, setDetailsLoading] = useState(false);
   const [generatingId, setGeneratingId] = useState<string | null>(null);
 
-  // ── React Query: cached fetching ──────────────────────────────────────────
-  const {
-    data: ordersData,
-    isFetching: loading,
-  } = useOrders(queryParams);
-
+  // ── React Query: fetch single page, only pass nextToken if present ────────
+  const { data: ordersData, isFetching: loading } = useOrders(
+    currentNextToken ? { nextToken: currentNextToken } : {}
+  );
   const { data: stats } = useOrderStats();
 
-  const orders = ordersData?.payload?.orders ?? [];
-
-  // Keep nextToken in sync whenever the query resolves a new page
+  const rawOrders = ordersData?.payload?.orders ?? [];
   const resolvedNextToken = ordersData?.payload?.nextToken ?? null;
 
-  // ── Helpers ──────────────────────────────────────────────────────────────
-  const buildFilters = useCallback((): OrderQueryParams => {
-    const f: OrderQueryParams = {};
-    if (statusFilter) f.orderStatuses = [statusFilter];
-    if (fulfillmentFilter) f.fulfillmentChannels = [fulfillmentFilter];
-    if (dateRange[0]) f.createdAfter = new Date(dateRange[0]).toISOString();
-    if (dateRange[1]) f.createdBefore = new Date(dateRange[1]).toISOString();
-    return f;
-  }, [statusFilter, fulfillmentFilter, dateRange]);
+  // ── Client-side filtering (no API call, instant on currently loaded page) ──
+  const filteredOrders = useMemo(() => {
+    let result = [...rawOrders];
 
+    if (appliedFilters.status) {
+      result = result.filter((o) => o.orderStatus === appliedFilters.status);
+    }
+
+    if (appliedFilters.orderId.trim()) {
+      const search = appliedFilters.orderId.trim().toLowerCase();
+      result = result.filter((o) =>
+        o.amazonOrderId?.toLowerCase().includes(search)
+      );
+    }
+
+    if (appliedFilters.dateRange[0]) {
+      const from = new Date(appliedFilters.dateRange[0]);
+      from.setHours(0, 0, 0, 0);
+      result = result.filter((o) => new Date(o.purchaseDate) >= from);
+    }
+
+    if (appliedFilters.dateRange[1]) {
+      const to = new Date(appliedFilters.dateRange[1]);
+      to.setHours(23, 59, 59, 999);
+      result = result.filter((o) => new Date(o.purchaseDate) <= to);
+    }
+
+    // Always sort descending (newest first)
+    result.sort((a, b) => new Date(b.purchaseDate).getTime() - new Date(a.purchaseDate).getTime());
+
+    return result;
+  }, [rawOrders, appliedFilters]);
+
+  // ── Handlers ─────────────────────────────────────────────────────────────
   const handleApplyFilters = () => {
-    setTokenHistory([]);
-    setCurrentPage(1);
-    setQueryParams(buildFilters());
+    setAppliedFilters({
+      status: statusInput,
+      orderId: orderIdInput,
+      dateRange: dateRangeInput
+    });
   };
 
   const handleClearFilters = () => {
-    setStatusFilter(null);
-    setFulfillmentFilter(null);
-    setDateRange([null, null]);
-    setTokenHistory([]);
-    setCurrentPage(1);
-    setQueryParams({});
+    setStatusInput(null);
+    setOrderIdInput('');
+    setDateRangeInput([null, null]);
+    setAppliedFilters({ status: null, orderId: '', dateRange: [null, null] });
   };
 
   const handleNextPage = () => {
     if (!resolvedNextToken) return;
-    setTokenHistory((h) => [...h, resolvedNextToken]);
+    setTokenHistory((h) => [...h, currentNextToken || '']);
     setCurrentPage((p) => p + 1);
-    setQueryParams({ ...buildFilters(), nextToken: resolvedNextToken });
+    setCurrentNextToken(resolvedNextToken);
   };
 
   const handlePrevPage = () => {
     if (tokenHistory.length === 0) return;
     const newHistory = [...tokenHistory];
-    newHistory.pop();
-    const prevToken = newHistory[newHistory.length - 1];
+    const prevToken = newHistory.pop();
     setTokenHistory(newHistory);
     setCurrentPage((p) => p - 1);
-    setQueryParams({ ...buildFilters(), nextToken: prevToken });
+    setCurrentNextToken(prevToken === '' ? undefined : prevToken);
   };
 
   const handleViewDetails = async (orderId: string) => {
@@ -341,10 +367,11 @@ export default function OrdersPage() {
                   <Select
                     label="Order Status"
                     placeholder="All statuses"
-                    value={statusFilter}
-                    onChange={(value) => setStatusFilter(value as OrderStatus)}
+                    value={statusInput}
+                    onChange={(value) => setStatusInput(value as OrderStatus)}
                     data={[
                       { value: "Pending", label: "Pending" },
+                      { value: "Unshipped", label: "Unshipped" },
                       { value: "Shipped", label: "Shipped" },
                       { value: "Delivered", label: "Delivered" },
                       { value: "Cancelled", label: "Cancelled" },
@@ -354,18 +381,13 @@ export default function OrdersPage() {
                 </Grid.Col>
 
                 <Grid.Col span={{ base: 12, sm: 6, md: 3 }}>
-                  <Select
-                    label="Fulfillment"
-                    placeholder="All channels"
-                    value={fulfillmentFilter}
-                    onChange={(value) =>
-                      setFulfillmentFilter(value as FulfillmentChannel)
-                    }
-                    data={[
-                      { value: "FBA", label: "FBA (Fulfilled by Amazon)" },
-                      { value: "MFN", label: "MFN (Merchant Fulfilled)" },
-                    ]}
-                    clearable
+                  <TextInput
+                    label="Order ID"
+                    placeholder="Search by Amazon Order ID"
+                    value={orderIdInput}
+                    onChange={(e) => setOrderIdInput(e.currentTarget.value)}
+                    leftSection={<IconSearch size={16} />}
+                    onKeyDown={(e) => e.key === 'Enter' && handleApplyFilters()}
                   />
                 </Grid.Col>
 
@@ -374,8 +396,8 @@ export default function OrdersPage() {
                     type="range"
                     label="Purchase Date Range"
                     placeholder="Select date range"
-                    value={dateRange}
-                    onChange={(val) => setDateRange(val as [Date | null, Date | null])}
+                    value={dateRangeInput}
+                    onChange={(val) => setDateRangeInput(val as [Date | null, Date | null])}
                     clearable
                   />
                 </Grid.Col>
@@ -421,16 +443,16 @@ export default function OrdersPage() {
                         </Text>
                       </Table.Td>
                     </Table.Tr>
-                  ) : orders.length === 0 ? (
+                  ) : filteredOrders.length === 0 ? (
                     <Table.Tr>
                       <Table.Td colSpan={9}>
                         <Text ta="center" py="xl" c="dimmed">
-                          No orders found
+                          {rawOrders.length > 0 ? 'No orders match your filters' : 'No orders found'}
                         </Text>
                       </Table.Td>
                     </Table.Tr>
                   ) : (
-                    orders.map((order) => (
+                    filteredOrders.map((order) => (
                       <Table.Tr key={order.amazonOrderId}>
                         <Table.Td>
                           <Group>

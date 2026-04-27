@@ -104,12 +104,10 @@ export default function InvoiceDetailsModal({
               <Stack gap="xs" align="flex-end">
                 <Badge
                   size="md"
-                  color={getStatusColor(
-                    (invoice.invoiceStatus || "PENDING").toUpperCase(),
-                  )}
+                  color={getStatusColor(invoice.status)}
                   variant="filled"
                 >
-                  {invoice.invoiceStatus || "Pending"}
+                  {invoice.status}
                 </Badge>
                 {invoice.invoiceType && (
                   <Badge
@@ -128,7 +126,7 @@ export default function InvoiceDetailsModal({
                 Order ID: {invoice.amazonOrderId}
               </Text>
               <Text size="xs" c="dimmed">
-                Marketplace: {invoice.marketplaceId}
+                Marketplace: {invoice?.marketplaceId}
               </Text>
             </Group>
           </Paper>
@@ -153,7 +151,7 @@ export default function InvoiceDetailsModal({
                   </Text>
                   {invoice.seller?.email && (
                     <Text size="xs" c="dimmed">
-                      {invoice.seller.email}
+                      {invoice.seller?.email}
                     </Text>
                   )}
                 </Stack>
@@ -229,9 +227,7 @@ export default function InvoiceDetailsModal({
                         </Text>
                       </Table.Td>
                       <Table.Td>
-                        <Text size="sm">
-                          {(item.taxRate * 100).toFixed(0)}%
-                        </Text>
+                        <Text size="sm">{item.taxRate.toFixed(0)}%</Text>
                       </Table.Td>
                       <Table.Td>
                         <Text size="sm">

@@ -120,6 +120,7 @@ export interface OrderQueryParams {
     paymentMethods?: PaymentMethod[];
     buyerEmail?: string;
     sellerOrderId?: string;
+    orderId?: string;
     maxResultsPerPage?: number; // max 100
     nextToken?: string; // for pagination
 }

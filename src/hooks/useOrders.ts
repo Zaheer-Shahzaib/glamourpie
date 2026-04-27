@@ -1,18 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "../Context/useAuth";
-import {
-  fetchOrders,
-  fetchOrderStats,
-} from "../Services/order-services";
+import { fetchOrders, fetchOrderStats } from "../Services/order-services";
+
 import { OrderQueryParams } from "../types/order.types";
 
 /**
- * Fetches a page of Amazon orders.
- *
- * Cache behaviour:
- *   - staleTime inherited from QueryClient (5 min by default)
- *   - Each unique combination of (token + params) gets its own cache entry
- *   - Navigating away and back within 5 min shows data instantly with NO API call
+ * Fetches a single page of orders from the backend.
+ * Uses query parameters for pagination and filtering.
  */
 export const useOrders = (params: OrderQueryParams = {}) => {
   const { token } = useAuth();
@@ -21,16 +15,13 @@ export const useOrders = (params: OrderQueryParams = {}) => {
     queryKey: ["orders", params],
     queryFn: () => fetchOrders(token!, params),
     enabled: !!token,
-    // Keep previous page data visible while loading next page (pagination UX)
-    placeholderData: (prev) => prev,
+    staleTime: 1000 * 60 * 60 * 2, // 2 hour
   });
 };
 
 /**
  * Fetches order statistics (totals, revenue, counts).
- *
- * Cached independently from the order list so that navigating to another
- * page and back does not trigger a fresh Amazon stats request.
+ * Derived from the same full order list so it stays consistent with the table.
  */
 export const useOrderStats = () => {
   const { token } = useAuth();
@@ -39,6 +30,6 @@ export const useOrderStats = () => {
     queryKey: ["orderStats"],
     queryFn: () => fetchOrderStats(token!),
     enabled: !!token,
-    staleTime: 1000 * 60 * 10, // Stats change less often — cache for 10 min
+    staleTime: 1000 * 60 * 60 * 2, // 2 hours
   });
 };
