@@ -98,7 +98,7 @@ export const downloadExportedFile = async (
     const filename = urlPath.split('/').pop() || 'export.pdf';
 
     // The backend uses correct content-type because of our previous fix
-    const blob = new Blob([res.data], { type: res.headers['content-type'] });
+    const blob = new Blob([res.data], { type: res.headers['content-type'] as string | undefined });
     const url  = URL.createObjectURL(blob);
 
     const a = document.createElement('a');

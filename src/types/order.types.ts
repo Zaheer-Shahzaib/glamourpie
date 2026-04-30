@@ -1,128 +1,98 @@
 // Amazon Orders API Types
+// Field names match the raw SP-API 2026-01-01 response (no backend remapping).
 
-export type OrderStatus = 'Pending' | 'Shipped' | 'Delivered' | 'Cancelled' | 'Unshipped' | 'PartiallyShipped';
+export type OrderStatus =
+    | 'PENDING'
+    | 'UNSHIPPED'
+    | 'PARTIALLY_SHIPPED'
+    | 'SHIPPED'
+    | 'DELIVERED'
+    | 'CANCELLED'
+    | 'UNFULFILLABLE'
+    | 'INVOICE_UNCONFIRMED'
+    | 'PENDING_AVAILABILITY';
+
 export type FulfillmentChannel = 'FBA' | 'MFN';
-export type PaymentMethod = 'COD' | 'CVS' | 'Other';
 
-// Order Address
-export interface OrderAddress {
-    name: string;
+// ─── Shared sub-objects ───────────────────────────────────────────────────────
+
+export interface MoneyAmount {
+    currencyCode: string;
+    amount: number;
+}
+
+export interface SalesChannel {
+    marketplaceId: string;
+    marketplaceName: string;  // e.g. "Amazon.ae", "Non-Amazon"
+    channelName: string;      // e.g. "AMAZON", "NON_AMAZON"
+}
+
+export interface RecipientAddress {
     addressLine1?: string;
     addressLine2?: string;
-    city: string;
+    city?: string;
     stateOrRegion?: string;
-    postalCode: string;
-    countryCode: string;
+    postalCode?: string;
+    countryCode?: string;
     phone?: string;
 }
 
-// Order Item
+export interface Recipient {
+    name?: string;
+    address?: RecipientAddress;
+}
+
+export interface Buyer {
+    name?: string;
+    email?: string;
+}
+
+// ─── Order list item (raw SP-API shape) ───────────────────────────────────────
+
+export interface OrderListItem {
+    orderId: string;            // e.g. "407-9680877-6709159"
+    createdTime: string;        // ISO 8601
+    lastUpdatedTime?: string;
+    orderStatus: OrderStatus;
+    fulfillmentChannel?: FulfillmentChannel;
+    salesChannel?: SalesChannel;
+    orderTotal?: MoneyAmount;
+    numberOfItemsShipped?: number;
+    numberOfItemsUnshipped?: number;
+    isPrime?: boolean;
+    buyer?: Buyer;
+}
+
+// ─── Order detail (raw SP-API shape from getOrder with includedData) ──────────
+
+export interface Order {
+    orderId: string;
+    createdTime: string;
+    lastUpdatedTime?: string;
+    orderStatus: OrderStatus;
+    fulfillmentChannel?: FulfillmentChannel;
+    salesChannel?: SalesChannel;
+    orderTotal?: MoneyAmount;
+    numberOfItemsShipped?: number;
+    numberOfItemsUnshipped?: number;
+    isPrime?: boolean;
+    isBusinessOrder?: boolean;
+    buyer?: Buyer;
+    recipient?: Recipient;
+    // includedData fields
+    orderItems?: OrderItem[];
+}
+
+// ─── Order item ───────────────────────────────────────────────────────────────
+
 export interface OrderItem {
     orderItemId: string;
     asin: string;
-    sku: string;
-    title: string;
+    sellerSku?: string;
+    title?: string;
+    productTitle?: string;
     quantityOrdered: number;
     quantityShipped?: number;
-    itemPrice: {
-        currencyCode: string;
-        amount: number;
-    };
-    itemTax?: {
-        currencyCode: string;
-        amount: number;
-    };
-    shippingPrice?: {
-        currencyCode: string;
-        amount: number;
-    };
-    promotionDiscount?: {
-        currencyCode: string;
-        amount: number;
-    };
-    conditionId?: string;
-    conditionSubtypeId?: string;
-}
-
-// Main Order
-export interface Order {
-    amazonOrderId: string;
-    sellerOrderId?: string;
-    purchaseDate: string;
-    lastUpdateDate: string;
-    orderStatus: OrderStatus;
-    fulfillmentChannel: FulfillmentChannel;
-    salesChannel?: string;
-    orderChannel?: string;
-    shipServiceLevel?: string;
-
-    // Buyer Information
-    buyerEmail?: string;
-    buyerName?: string;
-    shippingAddress?: OrderAddress;
-
-    // Financial
-    orderTotal?: {
-        currencyCode: string;
-        amount: number;
-    };
-    numberOfItemsShipped?: number;
-    numberOfItemsUnshipped?: number;
-
-    // Payment
-    paymentMethod?: PaymentMethod;
-    paymentMethodDetails?: string[];
-
-    // Marketplace
-    marketplaceId: string;
-
-    // Shipping
-    shipmentServiceLevelCategory?: string;
-    earliestShipDate?: string;
-    latestShipDate?: string;
-    earliestDeliveryDate?: string;
-    latestDeliveryDate?: string;
-
-    // Business
-    isBusinessOrder?: boolean;
-    isPrime?: boolean;
-    isPremiumOrder?: boolean;
-    isGlobalExpressEnabled?: boolean;
-
-    // Replacement
-    replacedOrderId?: string;
-    isReplacementOrder?: boolean;
-}
-
-// Order List Item (simplified for table view)
-export interface OrderListItem {
-    amazonOrderId: string;
-    purchaseDate: string;
-    orderStatus: OrderStatus;
-    buyerName?: string;
-    orderTotal: number;
-    currencyCode: string;
-    numberOfItems: number;
-    fulfillmentChannel: FulfillmentChannel;
-    marketplaceId: string;
-    isPrime?: boolean;
-}
-
-// Order Query Parameters
-export interface OrderQueryParams {
-    createdAfter?: string; // ISO 8601
-    createdBefore?: string; // ISO 8601
-    lastUpdatedAfter?: string;
-    lastUpdatedBefore?: string;
-    orderStatuses?: OrderStatus[];
-    marketplaceIds?: string[];
-    fulfillmentChannels?: FulfillmentChannel[];
-    paymentMethods?: PaymentMethod[];
-    buyerEmail?: string;
-    sellerOrderId?: string;
-    orderId?: string;
-    maxResultsPerPage?: number; // max 100
-    nextToken?: string; // for pagination
 }
 
 // Order List Response
