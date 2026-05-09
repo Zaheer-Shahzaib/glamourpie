@@ -35,6 +35,7 @@ import { useAuth } from "../Context/useAuth";
 import { notifications } from "@mantine/notifications";
 import { useQueryClient } from "@tanstack/react-query";
 import { useOrders, useOrderStats } from "../hooks/useOrders";
+import { useInvoices } from "../hooks/useInvoices";
 import { fetchOrderDetails } from "../Services/order-services";
 import { generateManualInvoice } from "../Services/invoice-services";
 import {
@@ -46,6 +47,16 @@ import {
 } from "../types/order.types";
 import MainLayout from "../layout/Main";
 import CountUp from "react-countup";
+
+// Statuses that are eligible for invoice generation
+const INVOICEABLE_STATUSES = new Set([
+  "SHIPPED",
+  "Shipped",
+  "DELIVERED",
+  "Delivered",
+  "PARTIALLY_SHIPPED",
+  "PartiallyShipped",
+]);
 
 const getStatusColor = (status: OrderStatus): string => {
   switch (status) {
@@ -115,9 +126,44 @@ export default function OrdersPage() {
   const [detailsLoading, setDetailsLoading] = useState(false);
   const [generatingId, setGeneratingId] = useState<string | null>(null);
 
-  // ── React Query: fetch all orders in one call ────────────────────────────
+  // ── React Query: fetch all orders + invoices in parallel ────────────────────
   const { data: ordersData, isFetching: loading } = useOrders({});
   const { data: stats } = useOrderStats();
+  // Fetch the full invoice list so we can know which orders already have invoices
+  const { invoices: existingInvoices } = useInvoices({ limit: 9999 });
+
+  // Build a Set of Amazon Order IDs that already have an invoice in the DB
+  const invoicedOrderIds = useMemo(
+    () =>
+      new Set(
+        existingInvoices.map((inv: any) => inv.amazonOrderId).filter(Boolean),
+      ),
+    [existingInvoices],
+  );
+
+  /**
+   * Returns true only when invoice generation is allowed:
+   *   1. Order status is Shipped / Delivered / PartiallyShipped
+   *   2. No invoice already exists for this order
+   */
+  const canGenerateInvoice = (
+    order: any,
+  ): { allowed: boolean; reason: string } => {
+    const status =
+      order.fulfillment?.fulfillmentStatus || order.orderStatus || "";
+    const orderId = order.orderId || order.amazonOrderId || "";
+
+    if (invoicedOrderIds.has(orderId)) {
+      return { allowed: false, reason: "Invoice already generated" };
+    }
+    if (!INVOICEABLE_STATUSES.has(status)) {
+      return {
+        allowed: false,
+        reason: `Cannot invoice ${status || "unknown"} orders`,
+      };
+    }
+    return { allowed: true, reason: "Generate Invoice" };
+  };
 
   const rawOrders = ordersData?.payload?.orders ?? [];
 
@@ -213,6 +259,8 @@ export default function OrdersPage() {
     try {
       setGeneratingId(orderId);
       await generateManualInvoice(token, orderId);
+      // Invalidate invoices cache so the button disables immediately after success
+      queryClient.invalidateQueries({ queryKey: ["invoices"] });
       notifications.show({
         title: "Success",
         message: "Invoice generated successfully",
@@ -223,7 +271,6 @@ export default function OrdersPage() {
       let message = "Failed to generate invoice";
 
       if (error.response?.data?.error === "Blob") {
-        // Since it's a blob, we have to read it carefully to parse the JSON error
         try {
           const text = await error.response.data.text();
           const parse = JSON.parse(text);
@@ -262,7 +309,7 @@ export default function OrdersPage() {
 
           {/* Statistics */}
           {stats && (
-            <SimpleGrid cols={{ base: 1, sm: 2, md: 3, lg: 5 }} spacing="md">
+            <SimpleGrid cols={{ base: 1, sm: 2, md: 3, lg: 4 }} spacing="md">
               <Paper p="md" radius="md" withBorder>
                 <Group justify="space-between">
                   <div>
@@ -312,27 +359,6 @@ export default function OrdersPage() {
                   </div>
                   <ThemeIcon color="blue" size={44} radius="md" variant="light">
                     <IconTruck size={24} stroke={1.5} />
-                  </ThemeIcon>
-                </Group>
-              </Paper>
-
-              <Paper p="md" radius="md" withBorder>
-                <Group justify="space-between">
-                  <div>
-                    <Text size="xs" c="dimmed" tt="uppercase" fw={700}>
-                      Delivered
-                    </Text>
-                    <Text fw={700} size="xl" mt="xs">
-                      <CountUp end={stats.deliveredOrders} duration={1.5} />
-                    </Text>
-                  </div>
-                  <ThemeIcon
-                    color="green"
-                    size={44}
-                    radius="md"
-                    variant="light"
-                  >
-                    <IconCheck size={24} stroke={1.5} />
                   </ThemeIcon>
                 </Group>
               </Paper>
@@ -560,18 +586,33 @@ export default function OrdersPage() {
                                 <IconEye size={18} />
                               </ActionIcon>
                             </Tooltip>
-                            <Tooltip label="Generate Invoice">
-                              <ActionIcon
-                                variant="subtle"
-                                color="green"
-                                loading={generatingId === order.orderId}
-                                onClick={() =>
-                                  handleGenerateInvoice(order.orderId)
-                                }
-                              >
-                                <IconFileInvoice size={18} />
-                              </ActionIcon>
-                            </Tooltip>
+                            {/* Generate Invoice — disabled if already invoiced or not a shippable status */}
+                            {(() => {
+                              const { allowed, reason } =
+                                canGenerateInvoice(order);
+                              return (
+                                <Tooltip label={reason}>
+                                  {/* span wrapper required — Mantine Tooltip needs a non-disabled child */}
+                                  <span>
+                                    <ActionIcon
+                                      variant="subtle"
+                                      color={allowed ? "green" : "gray"}
+                                      disabled={
+                                        !allowed ||
+                                        generatingId === order.orderId
+                                      }
+                                      loading={generatingId === order.orderId}
+                                      onClick={() =>
+                                        allowed &&
+                                        handleGenerateInvoice(order.orderId)
+                                      }
+                                    >
+                                      <IconFileInvoice size={18} />
+                                    </ActionIcon>
+                                  </span>
+                                </Tooltip>
+                              );
+                            })()}
                           </Group>
                         </Table.Td>
                       </Table.Tr>

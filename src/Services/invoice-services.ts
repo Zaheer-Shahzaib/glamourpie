@@ -70,7 +70,8 @@ export const downloadInvoiceDocument = async (
             headers: { Authorization: `Bearer ${token}` },
             responseType: 'blob',
         });
-        const blob = new Blob([pdfRes.data], { type: 'application/pdf' });
+        
+        const blob = new Blob([pdfRes.data], { type: 'application/pdf' as string });
         const url  = URL.createObjectURL(blob);
         const a    = document.createElement('a');
         a.href     = url;
