@@ -45,7 +45,7 @@ export default function InvoicesPage() {
   // Subscription info — used to gate/configure the export modal
   const [activePlan, setActivePlan] = useState<string | null>(null);
   const [subLoading, setSubLoading] = useState(true);
-  
+
   // Real stats from the backend (total amounts across all pages + usage limits)
   const [stats, setStats] = useState<any>(null);
 
@@ -67,7 +67,9 @@ export default function InvoicesPage() {
           if (!acc) return p;
           const currentPlan = p.toLowerCase();
           const accPlan = acc.toLowerCase();
-          return (PLAN_RANK[currentPlan] ?? -1) > (PLAN_RANK[accPlan] ?? -1) ? p : acc;
+          return (PLAN_RANK[currentPlan] ?? -1) > (PLAN_RANK[accPlan] ?? -1)
+            ? p
+            : acc;
         }, null);
         setActivePlan(best);
       })
@@ -144,14 +146,20 @@ export default function InvoicesPage() {
   };
 
   // ── Stats fallback to page data if backend fails ────────────
-  const totalRevenue = stats?.totalRevenue ?? invoices.reduce(
-    (acc: number, inv: any) => acc + (inv.totalAmount?.amount || inv.totalAmount || 0),
-    0,
-  );
-  const paidCount = stats?.paidInvoices ?? invoices.filter(
-    (inv: any) => (inv.invoiceStatus || inv.status || "").toLowerCase() === "paid" || (inv.invoiceStatus || inv.status || "").toLowerCase() === "accepted",
+  const totalRevenue =
+    stats?.totalRevenue ??
+    invoices.reduce(
+      (acc: number, inv: any) =>
+        acc + (inv.totalAmount?.amount || inv.totalAmount || 0),
+      0,
+    );
+  const paidCount = invoices.filter(
+    (inv: any) =>
+      (inv.invoiceStatus || inv.status || "") === "Paid" ||
+      (inv.invoiceStatus || inv.status || "") === "Submitted" ||
+      "SUBMITTED",
   ).length;
-  
+
   const usageLimit = stats?.usage?.limit || 20;
   const usageGenerated = stats?.usage?.generatedThisMonth || 0;
   const isLimitReached = usageGenerated >= usageLimit;
@@ -247,31 +255,43 @@ export default function InvoicesPage() {
                 </ThemeIcon>
                 <div>
                   <Text size="xs" c="dimmed" tt="uppercase" fw={600} lts={0.5}>
-                    Paid Invoices
+                    Submitted Invoices
                   </Text>
                   <Text fw={700} size="xl" lh={1.2}>
                     {paidCount}
                     <Text component="span" size="sm" c="dimmed" ml={6}>
-                      / {stats?.totalInvoices ?? (pagination?.total || invoices.length)}
+                      /{" "}
+                      {stats?.totalInvoices ??
+                        (pagination?.total || invoices.length)}
                     </Text>
                   </Text>
                 </div>
               </Group>
             </Paper>
-            
+
             <Paper p="md" radius="md" withBorder>
               <Group>
-                <ThemeIcon size="xl" variant="light" color={isLimitReached ? "red" : "orange"} radius="md">
+                <ThemeIcon
+                  size="xl"
+                  variant="light"
+                  color={isLimitReached ? "red" : "orange"}
+                  radius="md"
+                >
                   <IconFileExport size={22} />
                 </ThemeIcon>
                 <div>
                   <Text size="xs" c="dimmed" tt="uppercase" fw={600} lts={0.5}>
                     Current Plan Limit
                   </Text>
-                  <Text fw={700} size="xl" lh={1.2} c={isLimitReached ? "red" : "inherit"}>
+                  <Text
+                    fw={700}
+                    size="xl"
+                    lh={1.2}
+                    c={isLimitReached ? "red" : "inherit"}
+                  >
                     {usageGenerated}
                     <Text component="span" size="sm" c="dimmed" ml={6}>
-                      / {usageLimit !== 99999 ? usageLimit : '∞'} used
+                      / {usageLimit !== 99999 ? usageLimit : "∞"} used
                     </Text>
                   </Text>
                 </div>

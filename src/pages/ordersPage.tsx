@@ -35,29 +35,45 @@ import { useAuth } from "../Context/useAuth";
 import { notifications } from "@mantine/notifications";
 import { useQueryClient } from "@tanstack/react-query";
 import { useOrders, useOrderStats } from "../hooks/useOrders";
+import { useInvoices } from "../hooks/useInvoices";
 import { fetchOrderDetails } from "../Services/order-services";
 import { generateManualInvoice } from "../Services/invoice-services";
 import {
-  OrderQueryParams,
+  // OrderQueryParams,
   OrderStatus,
   Order,
   OrderItem,
+  OrderListItem,
 } from "../types/order.types";
 import MainLayout from "../layout/Main";
 import CountUp from "react-countup";
 
+// Statuses that are eligible for invoice generation
+const INVOICEABLE_STATUSES = new Set([
+  "SHIPPED",
+  "Shipped",
+  "DELIVERED",
+  "Delivered",
+  "PARTIALLY_SHIPPED",
+  "PartiallyShipped",
+]);
+
 const getStatusColor = (status: OrderStatus): string => {
   switch (status) {
-    case "Pending":
-    case "Unshipped":
+    case "PENDING":
+    case "UNSHIPPED":
+    case "PENDING_AVAILABILITY":
       return "orange";
-    case "Shipped":
-    case "PartiallyShipped":
+    case "SHIPPED":
+    case "PARTIALLY_SHIPPED":
       return "blue";
-    case "Delivered":
+    case "DELIVERED":
       return "green";
-    case "Cancelled":
+    case "CANCELLED":
+    case "UNFULFILLABLE":
       return "red";
+    case "INVOICE_UNCONFIRMED":
+      return "yellow";
     default:
       return "gray";
   }
@@ -85,102 +101,131 @@ export default function OrdersPage() {
   const { token } = useAuth();
   const queryClient = useQueryClient();
 
-  // Filters & pagination state
-  const [tokenHistory, setTokenHistory] = useState<string[]>([]);
+  // Client-side pagination
+  const PAGE_SIZE = 50;
   const [currentPage, setCurrentPage] = useState(1);
-  const [currentNextToken, setCurrentNextToken] = useState<string | undefined>(undefined);
 
   // ── Filter controls (Inputs) ─────────────
   const [statusInput, setStatusInput] = useState<OrderStatus | null>(null);
-  const [orderIdInput, setOrderIdInput] = useState<string>('');
-  const [dateRangeInput, setDateRangeInput] = useState<[Date | null, Date | null]>([null, null]);
+  const [orderIdInput, setOrderIdInput] = useState<string>("");
+  const [dateRangeInput, setDateRangeInput] = useState<
+    [Date | null, Date | null]
+  >([null, null]);
 
   // ── Applied Filters (Used by useMemo) ────
   const [appliedFilters, setAppliedFilters] = useState({
     status: null as OrderStatus | null,
-    orderId: '',
-    dateRange: [null, null] as [Date | null, Date | null]
+    orderId: "",
+    dateRange: [null, null] as [Date | null, Date | null],
   });
 
   // Order details modal state
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-  const [selectedOrderItems, setSelectedOrderItems] = useState<OrderItem[]>([]);
+  const [selectedOrder, setSelectedOrder] = useState<any>(null);
+  const [selectedOrderItems, setSelectedOrderItems] = useState<any[]>([]);
   const [detailsModalOpened, setDetailsModalOpened] = useState(false);
   const [detailsLoading, setDetailsLoading] = useState(false);
   const [generatingId, setGeneratingId] = useState<string | null>(null);
 
-  // ── React Query: fetch single page, only pass nextToken if present ────────
-  const { data: ordersData, isFetching: loading } = useOrders(
-    currentNextToken ? { nextToken: currentNextToken } : {}
-  );
+  // ── React Query: fetch all orders + invoices in parallel ────────────────────
+  const { data: ordersData, isFetching: loading } = useOrders({});
   const { data: stats } = useOrderStats();
+  // Fetch the full invoice list so we can know which orders already have invoices
+  const { invoices: existingInvoices } = useInvoices({ limit: 9999 });
+
+  // Build a Set of Amazon Order IDs that already have an invoice in the DB
+  const invoicedOrderIds = useMemo(
+    () =>
+      new Set(
+        existingInvoices.map((inv: any) => inv.amazonOrderId).filter(Boolean),
+      ),
+    [existingInvoices],
+  );
+
+  /**
+   * Returns true only when invoice generation is allowed:
+   *   1. Order status is Shipped / Delivered / PartiallyShipped
+   *   2. No invoice already exists for this order
+   */
+  const canGenerateInvoice = (
+    order: any,
+  ): { allowed: boolean; reason: string } => {
+    const status =
+      order.fulfillment?.fulfillmentStatus || order.orderStatus || "";
+    const orderId = order.orderId || order.amazonOrderId || "";
+
+    if (invoicedOrderIds.has(orderId)) {
+      return { allowed: false, reason: "Invoice already generated" };
+    }
+    if (!INVOICEABLE_STATUSES.has(status)) {
+      return {
+        allowed: false,
+        reason: `Cannot invoice ${status || "unknown"} orders`,
+      };
+    }
+    return { allowed: true, reason: "Generate Invoice" };
+  };
 
   const rawOrders = ordersData?.payload?.orders ?? [];
-  const resolvedNextToken = ordersData?.payload?.nextToken ?? null;
 
   // ── Client-side filtering (no API call, instant on currently loaded page) ──
   const filteredOrders = useMemo(() => {
     let result = [...rawOrders];
 
     if (appliedFilters.status) {
-      result = result.filter((o) => o.orderStatus === appliedFilters.status);
+      result = result.filter((o) => {
+        const status = o.fulfillment?.fulfillmentStatus || o.orderStatus;
+        return status === appliedFilters.status;
+      });
     }
 
     if (appliedFilters.orderId.trim()) {
       const search = appliedFilters.orderId.trim().toLowerCase();
-      result = result.filter((o) =>
-        o.amazonOrderId?.toLowerCase().includes(search)
-      );
+      result = result.filter((o) => o.orderId?.toLowerCase().includes(search));
     }
 
     if (appliedFilters.dateRange[0]) {
       const from = new Date(appliedFilters.dateRange[0]);
       from.setHours(0, 0, 0, 0);
-      result = result.filter((o) => new Date(o.purchaseDate) >= from);
+      result = result.filter((o) => new Date(o.createdTime) >= from);
     }
 
     if (appliedFilters.dateRange[1]) {
       const to = new Date(appliedFilters.dateRange[1]);
       to.setHours(23, 59, 59, 999);
-      result = result.filter((o) => new Date(o.purchaseDate) <= to);
+      result = result.filter((o) => new Date(o.createdTime) <= to);
     }
 
     // Always sort descending (newest first)
-    result.sort((a, b) => new Date(b.purchaseDate).getTime() - new Date(a.purchaseDate).getTime());
+    result.sort(
+      (a, b) =>
+        new Date(b.createdTime).getTime() - new Date(a.createdTime).getTime(),
+    );
 
     return result;
   }, [rawOrders, appliedFilters]);
+
+  // Slice filtered results to the current page
+  const pagedOrders = useMemo(() => {
+    const start = (currentPage - 1) * PAGE_SIZE;
+    return filteredOrders.slice(start, start + PAGE_SIZE);
+  }, [filteredOrders, currentPage, PAGE_SIZE]);
 
   // ── Handlers ─────────────────────────────────────────────────────────────
   const handleApplyFilters = () => {
     setAppliedFilters({
       status: statusInput,
       orderId: orderIdInput,
-      dateRange: dateRangeInput
+      dateRange: dateRangeInput,
     });
+    setCurrentPage(1); // reset to first page on new filter
   };
 
   const handleClearFilters = () => {
     setStatusInput(null);
-    setOrderIdInput('');
+    setOrderIdInput("");
     setDateRangeInput([null, null]);
-    setAppliedFilters({ status: null, orderId: '', dateRange: [null, null] });
-  };
-
-  const handleNextPage = () => {
-    if (!resolvedNextToken) return;
-    setTokenHistory((h) => [...h, currentNextToken || '']);
-    setCurrentPage((p) => p + 1);
-    setCurrentNextToken(resolvedNextToken);
-  };
-
-  const handlePrevPage = () => {
-    if (tokenHistory.length === 0) return;
-    const newHistory = [...tokenHistory];
-    const prevToken = newHistory.pop();
-    setTokenHistory(newHistory);
-    setCurrentPage((p) => p - 1);
-    setCurrentNextToken(prevToken === '' ? undefined : prevToken);
+    setAppliedFilters({ status: null, orderId: "", dateRange: [null, null] });
+    setCurrentPage(1);
   };
 
   const handleViewDetails = async (orderId: string) => {
@@ -190,8 +235,12 @@ export default function OrdersPage() {
       setDetailsLoading(true);
       setDetailsModalOpened(true);
       const response = await fetchOrderDetails(token, orderId);
-      setSelectedOrder(response.payload.order);
-      setSelectedOrderItems(response.payload.orderItems);
+      // SP-API 2026-01-01: payload.order contains the order; orderItems is nested inside it
+      const orderObj = response.payload?.order ?? response.payload;
+      // orderItems may be inside the order object itself
+      const items = orderObj?.orderItems || response.payload?.orderItems || [];
+      setSelectedOrder(orderObj);
+      setSelectedOrderItems(items);
     } catch (error) {
       notifications.show({
         title: "Error",
@@ -210,6 +259,8 @@ export default function OrdersPage() {
     try {
       setGeneratingId(orderId);
       await generateManualInvoice(token, orderId);
+      // Invalidate invoices cache so the button disables immediately after success
+      queryClient.invalidateQueries({ queryKey: ["invoices"] });
       notifications.show({
         title: "Success",
         message: "Invoice generated successfully",
@@ -220,7 +271,6 @@ export default function OrdersPage() {
       let message = "Failed to generate invoice";
 
       if (error.response?.data?.error === "Blob") {
-        // Since it's a blob, we have to read it carefully to parse the JSON error
         try {
           const text = await error.response.data.text();
           const parse = JSON.parse(text);
@@ -259,7 +309,7 @@ export default function OrdersPage() {
 
           {/* Statistics */}
           {stats && (
-            <SimpleGrid cols={{ base: 1, sm: 2, md: 3, lg: 5 }} spacing="md">
+            <SimpleGrid cols={{ base: 1, sm: 2, md: 3, lg: 4 }} spacing="md">
               <Paper p="md" radius="md" withBorder>
                 <Group justify="space-between">
                   <div>
@@ -317,27 +367,6 @@ export default function OrdersPage() {
                 <Group justify="space-between">
                   <div>
                     <Text size="xs" c="dimmed" tt="uppercase" fw={700}>
-                      Delivered
-                    </Text>
-                    <Text fw={700} size="xl" mt="xs">
-                      <CountUp end={stats.deliveredOrders} duration={1.5} />
-                    </Text>
-                  </div>
-                  <ThemeIcon
-                    color="green"
-                    size={44}
-                    radius="md"
-                    variant="light"
-                  >
-                    <IconCheck size={24} stroke={1.5} />
-                  </ThemeIcon>
-                </Group>
-              </Paper>
-
-              <Paper p="md" radius="md" withBorder>
-                <Group justify="space-between">
-                  <div>
-                    <Text size="xs" c="dimmed" tt="uppercase" fw={700}>
                       Total Revenue
                     </Text>
                     <Text fw={700} size="lg" mt="xs">
@@ -370,11 +399,20 @@ export default function OrdersPage() {
                     value={statusInput}
                     onChange={(value) => setStatusInput(value as OrderStatus)}
                     data={[
-                      { value: "Pending", label: "Pending" },
-                      { value: "Unshipped", label: "Unshipped" },
-                      { value: "Shipped", label: "Shipped" },
-                      { value: "Delivered", label: "Delivered" },
-                      { value: "Cancelled", label: "Cancelled" },
+                      { value: "PENDING", label: "Pending" },
+                      { value: "UNSHIPPED", label: "Unshipped" },
+                      {
+                        value: "PARTIALLY_SHIPPED",
+                        label: "Partially Shipped",
+                      },
+                      { value: "SHIPPED", label: "Shipped" },
+                      { value: "DELIVERED", label: "Delivered" },
+                      { value: "CANCELLED", label: "Cancelled" },
+                      { value: "UNFULFILLABLE", label: "Unfulfillable" },
+                      {
+                        value: "INVOICE_UNCONFIRMED",
+                        label: "Invoice Unconfirmed",
+                      },
                     ]}
                     clearable
                   />
@@ -387,7 +425,7 @@ export default function OrdersPage() {
                     value={orderIdInput}
                     onChange={(e) => setOrderIdInput(e.currentTarget.value)}
                     leftSection={<IconSearch size={16} />}
-                    onKeyDown={(e) => e.key === 'Enter' && handleApplyFilters()}
+                    onKeyDown={(e) => e.key === "Enter" && handleApplyFilters()}
                   />
                 </Grid.Col>
 
@@ -397,7 +435,9 @@ export default function OrdersPage() {
                     label="Purchase Date Range"
                     placeholder="Select date range"
                     value={dateRangeInput}
-                    onChange={(val) => setDateRangeInput(val as [Date | null, Date | null])}
+                    onChange={(val) =>
+                      setDateRangeInput(val as [Date | null, Date | null])
+                    }
                     clearable
                   />
                 </Grid.Col>
@@ -443,21 +483,23 @@ export default function OrdersPage() {
                         </Text>
                       </Table.Td>
                     </Table.Tr>
-                  ) : filteredOrders.length === 0 ? (
+                  ) : pagedOrders.length === 0 ? (
                     <Table.Tr>
                       <Table.Td colSpan={9}>
                         <Text ta="center" py="xl" c="dimmed">
-                          {rawOrders.length > 0 ? 'No orders match your filters' : 'No orders found'}
+                          {rawOrders.length > 0
+                            ? "No orders match your filters"
+                            : "No orders found"}
                         </Text>
                       </Table.Td>
                     </Table.Tr>
                   ) : (
-                    filteredOrders.map((order) => (
-                      <Table.Tr key={order.amazonOrderId}>
+                    pagedOrders.map((order) => (
+                      <Table.Tr key={order.orderId}>
                         <Table.Td>
                           <Group>
                             <Text fw={600} size="sm">
-                              {order.amazonOrderId}
+                              {order.orderId}
                             </Text>
                             {order.isPrime && (
                               <Badge size="xs" color="blue" mt={4}>
@@ -467,39 +509,71 @@ export default function OrdersPage() {
                           </Group>
                         </Table.Td>
                         <Table.Td>
+                          <Text size="sm">{formatDate(order.createdTime)}</Text>
+                        </Table.Td>
+                        <Table.Td>
                           <Text size="sm">
-                            {formatDate(order.purchaseDate)}
+                            {order.buyer?.buyerName || order.buyer?.name || "—"}
                           </Text>
                         </Table.Td>
                         <Table.Td>
-                          <Text size="sm">{order.buyerName || "N/A"}</Text>
+                          {/* SP-API list: status is at fulfillment.fulfillmentStatus */}
+                          {(() => {
+                            const status =
+                              order.fulfillment?.fulfillmentStatus ||
+                              order.orderStatus;
+                            return (
+                              <Badge
+                                color={getStatusColor(status as any)}
+                                variant="filled"
+                              >
+                                {status || "—"}
+                              </Badge>
+                            );
+                          })()}
                         </Table.Td>
                         <Table.Td>
-                          <Badge
-                            color={getStatusColor(order.orderStatus)}
-                            variant="filled"
-                          >
-                            {order.orderStatus}
-                          </Badge>
+                          {/* Item count: sum quantityOrdered across orderItems */}
+                          <Text size="sm">
+                            {order.orderItems
+                              ? order.orderItems.reduce(
+                                  (sum: number, i: any) =>
+                                    sum + (i.quantityOrdered || 1),
+                                  0,
+                                )
+                              : (order.numberOfItemsShipped ?? 0) +
+                                (order.numberOfItemsUnshipped ?? 0)}
+                          </Text>
                         </Table.Td>
                         <Table.Td>
-                          <Text size="sm">{order.numberOfItems}</Text>
-                        </Table.Td>
-                        <Table.Td>
+                          {/* SP-API list: total is at proceeds.grandTotal */}
                           <Text fw={600} size="sm">
-                            {formatCurrency(
-                              order.orderTotal,
-                              order.currencyCode,
-                            )}
+                            {(() => {
+                              const t =
+                                order.proceeds?.grandTotal || order.orderTotal;
+                              return t
+                                ? formatCurrency(
+                                    parseFloat(t.amount),
+                                    t.currencyCode,
+                                  )
+                                : "—";
+                            })()}
                           </Text>
                         </Table.Td>
                         <Table.Td>
+                          {/* SP-API list: fulfilledBy is at fulfillment.fulfilledBy */}
                           <Badge variant="outline">
-                            {order.fulfillmentChannel}
+                            {order.fulfillment?.fulfilledBy ||
+                              order.fulfillmentChannel ||
+                              "—"}
                           </Badge>
                         </Table.Td>
                         <Table.Td>
-                          <Badge variant="light">{order.marketplaceId}</Badge>
+                          <Badge variant="light">
+                            {order.salesChannel?.marketplaceName ||
+                              order.salesChannel?.marketplaceId ||
+                              "—"}
+                          </Badge>
                         </Table.Td>
                         <Table.Td>
                           <Group gap="xs">
@@ -507,25 +581,38 @@ export default function OrdersPage() {
                               <ActionIcon
                                 variant="subtle"
                                 color="blue"
-                                onClick={() =>
-                                  handleViewDetails(order.amazonOrderId)
-                                }
+                                onClick={() => handleViewDetails(order.orderId)}
                               >
                                 <IconEye size={18} />
                               </ActionIcon>
                             </Tooltip>
-                            <Tooltip label="Generate Invoice">
-                              <ActionIcon
-                                variant="subtle"
-                                color="green"
-                                loading={generatingId === order.amazonOrderId}
-                                onClick={() =>
-                                  handleGenerateInvoice(order.amazonOrderId)
-                                }
-                              >
-                                <IconFileInvoice size={18} />
-                              </ActionIcon>
-                            </Tooltip>
+                            {/* Generate Invoice — disabled if already invoiced or not a shippable status */}
+                            {(() => {
+                              const { allowed, reason } =
+                                canGenerateInvoice(order);
+                              return (
+                                <Tooltip label={reason}>
+                                  {/* span wrapper required — Mantine Tooltip needs a non-disabled child */}
+                                  <span>
+                                    <ActionIcon
+                                      variant="subtle"
+                                      color={allowed ? "green" : "gray"}
+                                      disabled={
+                                        !allowed ||
+                                        generatingId === order.orderId
+                                      }
+                                      loading={generatingId === order.orderId}
+                                      onClick={() =>
+                                        allowed &&
+                                        handleGenerateInvoice(order.orderId)
+                                      }
+                                    >
+                                      <IconFileInvoice size={18} />
+                                    </ActionIcon>
+                                  </span>
+                                </Tooltip>
+                              );
+                            })()}
                           </Group>
                         </Table.Td>
                       </Table.Tr>
@@ -537,27 +624,33 @@ export default function OrdersPage() {
           </Paper>
 
           {/* Pagination Controls */}
-          <Group justify="space-between" mt="md">
-            <Text size="sm" c="dimmed">
-              Page {currentPage}
-            </Text>
-            <Group>
-              <Button
-                variant="default"
-                disabled={tokenHistory.length === 0 || loading}
-                onClick={handlePrevPage}
-              >
-                Previous
-              </Button>
-              <Button
-                variant="default"
-                disabled={!resolvedNextToken || loading}
-                onClick={handleNextPage}
-              >
-                Next
-              </Button>
-            </Group>
-          </Group>
+          {(() => {
+            const totalPages = Math.ceil(filteredOrders.length / PAGE_SIZE);
+            return totalPages > 1 ? (
+              <Group justify="space-between" mt="md">
+                <Text size="sm" c="dimmed">
+                  Page {currentPage} of {totalPages} &nbsp;·&nbsp;{" "}
+                  {filteredOrders.length} orders
+                </Text>
+                <Group>
+                  <Button
+                    variant="default"
+                    disabled={currentPage <= 1 || loading}
+                    onClick={() => setCurrentPage((p) => p - 1)}
+                  >
+                    Previous
+                  </Button>
+                  <Button
+                    variant="default"
+                    disabled={currentPage >= totalPages || loading}
+                    onClick={() => setCurrentPage((p) => p + 1)}
+                  >
+                    Next
+                  </Button>
+                </Group>
+              </Group>
+            ) : null;
+          })()}
         </Stack>
       </Container>
 
@@ -578,60 +671,144 @@ export default function OrdersPage() {
               <Group justify="space-between" mb="md">
                 <div>
                   <Text fw={700} size="lg">
-                    {selectedOrder.amazonOrderId}
+                    {selectedOrder.orderId}
                   </Text>
                   <Text size="sm" c="dimmed">
-                    Purchased: {formatDate(selectedOrder.purchaseDate)}
+                    Purchased: {formatDate(selectedOrder.createdTime)}
                   </Text>
+                  {selectedOrder.lastUpdatedTime && (
+                    <Text size="sm" c="dimmed">
+                      Last Updated: {formatDate(selectedOrder.lastUpdatedTime)}
+                    </Text>
+                  )}
+                  {(selectedOrder.buyer?.buyerName ||
+                    selectedOrder.buyer?.name) && (
+                    <Text size="sm" c="dimmed">
+                      Buyer:{" "}
+                      {selectedOrder.buyer?.buyerName ||
+                        selectedOrder.buyer?.name}
+                    </Text>
+                  )}
                 </div>
-                <Badge
-                  size="lg"
-                  color={getStatusColor(selectedOrder.orderStatus)}
-                  variant="filled"
-                >
-                  {selectedOrder.orderStatus}
-                </Badge>
+                {/* SP-API detail: status lives at fulfillment.fulfillmentStatus */}
+                {(() => {
+                  const status =
+                    selectedOrder.orderStatus ||
+                    selectedOrder.fulfillment?.fulfillmentStatus;
+                  return status ? (
+                    <Badge
+                      size="lg"
+                      color={getStatusColor(status as any)}
+                      variant="filled"
+                    >
+                      {status}
+                    </Badge>
+                  ) : null;
+                })()}
               </Group>
 
-              <Grid>
+              <Grid mt="xs" gutter="sm">
+                {/* Sales Channel */}
                 <Grid.Col span={6}>
-                  <Text size="sm" c="dimmed">
-                    Fulfillment Channel
+                  <Text size="xs" c="dimmed" tt="uppercase" fw={600}>
+                    Marketplace
                   </Text>
-                  <Badge variant="outline">
-                    {selectedOrder.fulfillmentChannel}
+                  <Badge variant="light" color="blue" mt={4}>
+                    {selectedOrder.salesChannel?.marketplaceName || "—"}
                   </Badge>
                 </Grid.Col>
                 <Grid.Col span={6}>
-                  <Text size="sm" c="dimmed">
-                    Marketplace
+                  <Text size="xs" c="dimmed" tt="uppercase" fw={600}>
+                    Channel
                   </Text>
-                  <Badge variant="light">{selectedOrder.marketplaceId}</Badge>
+                  <Badge variant="dot" color="green" mt={4}>
+                    {selectedOrder.salesChannel?.channelName || "—"}
+                  </Badge>
                 </Grid.Col>
+                <Grid.Col span={6}>
+                  <Text size="xs" c="dimmed" tt="uppercase" fw={600}>
+                    Marketplace ID
+                  </Text>
+                  <Text size="sm" ff="monospace" mt={4}>
+                    {selectedOrder.salesChannel?.marketplaceId || "—"}
+                  </Text>
+                </Grid.Col>
+
+                {/* Fulfillment */}
+                <Grid.Col span={6}>
+                  <Text size="xs" c="dimmed" tt="uppercase" fw={600}>
+                    Fulfilled By
+                  </Text>
+                  <Badge variant="outline" mt={4}>
+                    {selectedOrder.fulfillment?.fulfilledBy ||
+                      selectedOrder.fulfillmentChannel ||
+                      "—"}
+                  </Badge>
+                </Grid.Col>
+                {selectedOrder.fulfillment?.fulfillmentServiceLevel && (
+                  <Grid.Col span={6}>
+                    <Text size="xs" c="dimmed" tt="uppercase" fw={600}>
+                      Service Level
+                    </Text>
+                    <Badge variant="outline" color="orange" mt={4}>
+                      {selectedOrder.fulfillment.fulfillmentServiceLevel}
+                    </Badge>
+                  </Grid.Col>
+                )}
+                {selectedOrder.fulfillment?.shipByWindow?.latestDateTime && (
+                  <Grid.Col span={6}>
+                    <Text size="xs" c="dimmed" tt="uppercase" fw={600}>
+                      Ship By
+                    </Text>
+                    <Text size="sm" mt={4}>
+                      {formatDate(
+                        selectedOrder.fulfillment.shipByWindow.latestDateTime,
+                      )}
+                    </Text>
+                  </Grid.Col>
+                )}
               </Grid>
             </Paper>
 
-            {/* Customer Information */}
-            {selectedOrder.shippingAddress && (
+            {/* Recipient / Shipping Address */}
+            {selectedOrder.recipient && (
               <Paper p="md" withBorder>
                 <Text fw={600} mb="sm">
                   Shipping Address
                 </Text>
-                <Stack gap="xs">
-                  <Text size="sm">{selectedOrder.shippingAddress.name}</Text>
-                  {selectedOrder.shippingAddress.addressLine1 && (
-                    <Text size="sm">
-                      {selectedOrder.shippingAddress.addressLine1}
-                    </Text>
-                  )}
-                  <Text size="sm">
-                    {selectedOrder.shippingAddress.city},{" "}
-                    {selectedOrder.shippingAddress.postalCode}
-                  </Text>
-                  <Text size="sm">
-                    {selectedOrder.shippingAddress.countryCode}
-                  </Text>
-                </Stack>
+                {/* SP-API 2026-01-01: address is under deliveryAddress */}
+                {(() => {
+                  const addr =
+                    selectedOrder.recipient.deliveryAddress ||
+                    selectedOrder.recipient.address;
+                  return (
+                    <Stack gap="xs">
+                      {addr?.name && (
+                        <Text size="sm" fw={500}>
+                          {addr.name}
+                        </Text>
+                      )}
+                      {addr?.addressLine1 && (
+                        <Text size="sm">{addr.addressLine1}</Text>
+                      )}
+                      {(addr?.city || addr?.postalCode) && (
+                        <Text size="sm">
+                          {[addr?.city, addr?.postalCode]
+                            .filter(Boolean)
+                            .join(", ")}
+                        </Text>
+                      )}
+                      {addr?.districtOrCounty && (
+                        <Text size="sm" c="dimmed">
+                          {addr.districtOrCounty}
+                        </Text>
+                      )}
+                      {addr?.countryCode && (
+                        <Text size="sm">{addr.countryCode}</Text>
+                      )}
+                    </Stack>
+                  );
+                })()}
               </Paper>
             )}
 
@@ -650,52 +827,176 @@ export default function OrdersPage() {
                   </Table.Tr>
                 </Table.Thead>
                 <Table.Tbody>
-                  {selectedOrderItems.map((item) => (
-                    <Table.Tr key={item.orderItemId}>
-                      <Table.Td>
-                        <Text size="sm" fw={500}>
-                          {item.title}
-                        </Text>
-                        <Text size="xs" c="dimmed">
-                          ASIN: {item.asin}
-                        </Text>
-                      </Table.Td>
-                      <Table.Td>
-                        <Text size="sm">{item.sku}</Text>
-                      </Table.Td>
-                      <Table.Td>
-                        <Text size="sm">{item.quantityOrdered}</Text>
-                      </Table.Td>
-                      <Table.Td>
-                        <Text size="sm" fw={600}>
-                          {formatCurrency(
-                            item.itemPrice.amount,
-                            item.itemPrice.currencyCode,
-                          )}
-                        </Text>
-                      </Table.Td>
-                    </Table.Tr>
-                  ))}
+                  {selectedOrderItems.map((item) => {
+                    // SP-API 2026-01-01: product info is nested under item.product
+                    const product = item.product || item;
+                    const price =
+                      product.price?.unitPrice ||
+                      item.proceeds?.proceedsTotal ||
+                      item.itemPrice;
+                    const title =
+                      product.title ||
+                      item.title ||
+                      item.productTitle ||
+                      product.asin;
+                    const asin = product.asin || item.asin;
+                    const sku = product.sellerSku || item.sellerSku || item.sku;
+
+                    return (
+                      <Table.Tr key={item.orderItemId}>
+                        <Table.Td>
+                          <Text size="sm" fw={500}>
+                            {title}
+                          </Text>
+                          <Text size="xs" c="dimmed">
+                            ASIN: {asin}
+                          </Text>
+                        </Table.Td>
+                        <Table.Td>
+                          <Text size="sm">{sku || "—"}</Text>
+                        </Table.Td>
+                        <Table.Td>
+                          <Text size="sm">{item.quantityOrdered}</Text>
+                        </Table.Td>
+                        <Table.Td>
+                          <Text size="sm" fw={600}>
+                            {price
+                              ? formatCurrency(
+                                  parseFloat(price.amount),
+                                  price.currencyCode,
+                                )
+                              : "—"}
+                          </Text>
+                        </Table.Td>
+                      </Table.Tr>
+                    );
+                  })}
                 </Table.Tbody>
               </Table>
             </Paper>
 
-            {/* Order Total */}
-            {selectedOrder.orderTotal && (
-              <Paper p="md" withBorder>
-                <Group justify="space-between">
-                  <Text fw={700} size="lg">
-                    Order Total:
+            {/* Price Breakdown — SP-API 2026-01-01 proceeds.breakdowns */}
+            {(() => {
+              // Collect all breakdowns: prefer item-level, fall back to order-level
+              const allBreakdowns: any[] = [];
+              selectedOrderItems.forEach((item) => {
+                if (item.proceeds?.breakdowns?.length) {
+                  item.proceeds.breakdowns.forEach((b: any) => {
+                    allBreakdowns.push({ ...b, _itemId: item.orderItemId });
+                  });
+                }
+              });
+              // If no item-level breakdowns, try order-level
+              const breakdowns =
+                allBreakdowns.length > 0
+                  ? allBreakdowns
+                  : selectedOrder.proceeds?.breakdowns || [];
+
+              const grandTotal =
+                selectedOrder.proceeds?.grandTotal || selectedOrder.orderTotal;
+
+              if (!breakdowns.length && !grandTotal) return null;
+
+              const isDeduction = (type: string) =>
+                ["DISCOUNT", "PROMOTION", "COUPON"].includes(
+                  type?.toUpperCase(),
+                );
+
+              const typeLabel: Record<string, string> = {
+                ITEM: "Items Subtotal",
+                SHIPPING: "Shipping",
+                GIFT_WRAP: "Gift Wrap",
+                DISCOUNT: "Discount",
+                PROMOTION: "Promotion",
+                COUPON: "Coupon",
+                TAX: "Tax",
+                FEE: "Fee",
+              };
+
+              return (
+                <Paper p="md" withBorder>
+                  <Text fw={600} mb="sm">
+                    Price Breakdown
                   </Text>
-                  <Text fw={700} size="lg">
-                    {formatCurrency(
-                      selectedOrder.orderTotal.amount,
-                      selectedOrder.orderTotal.currencyCode,
+                  <Stack gap={6}>
+                    {breakdowns.map((b: any, i: number) => {
+                      const deduction = isDeduction(b.type);
+                      const label = typeLabel[b.type?.toUpperCase()] || b.type;
+                      const amt = parseFloat(b.subtotal?.amount || "0");
+                      const currency = b.subtotal?.currencyCode || "";
+
+                      return (
+                        <div key={i}>
+                          <Group justify="space-between">
+                            <Group gap={6}>
+                              <Text size="sm" c={deduction ? "red" : "inherit"}>
+                                {label}
+                              </Text>
+                              {deduction && (
+                                <Badge size="xs" color="red" variant="light">
+                                  deduction
+                                </Badge>
+                              )}
+                            </Group>
+                            <Text
+                              size="sm"
+                              fw={500}
+                              c={deduction ? "red" : "inherit"}
+                            >
+                              {deduction ? "−" : ""}
+                              {formatCurrency(amt, currency)}
+                            </Text>
+                          </Group>
+                          {/* Detailed sub-breakdowns (e.g. DISCOUNT → SHIPPING) */}
+                          {b.detailedBreakdowns?.map((d: any, j: number) => (
+                            <Group
+                              key={j}
+                              justify="space-between"
+                              pl="md"
+                              mt={2}
+                            >
+                              <Text size="xs" c="dimmed">
+                                └ {d.subtype}
+                              </Text>
+                              <Text size="xs" c="dimmed">
+                                {formatCurrency(
+                                  parseFloat(d.value?.amount || "0"),
+                                  d.value?.currencyCode || currency,
+                                )}
+                              </Text>
+                            </Group>
+                          ))}
+                        </div>
+                      );
+                    })}
+
+                    {/* Divider + grand total */}
+                    {grandTotal && (
+                      <>
+                        <div
+                          style={{
+                            borderTop:
+                              "1px solid var(--mantine-color-default-border)",
+                            margin: "4px 0",
+                          }}
+                        />
+                        <Group justify="space-between">
+                          <Text fw={700} size="sm">
+                            Order Total
+                          </Text>
+                          <Text fw={700} size="sm">
+                            {formatCurrency(
+                              parseFloat(grandTotal.amount),
+                              grandTotal.currencyCode,
+                            )}
+                          </Text>
+                        </Group>
+                      </>
                     )}
-                  </Text>
-                </Group>
-              </Paper>
-            )}
+                  </Stack>
+                </Paper>
+              );
+            })()}
           </Stack>
         )}
       </Modal>

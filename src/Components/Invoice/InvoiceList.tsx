@@ -16,7 +16,7 @@ import { IconEye, IconFileDownload } from "@tabler/icons-react";
 import { useAuth } from "../../Context/useAuth";
 import { downloadInvoiceDocument } from "../../Services/invoice-services";
 import { notifications } from "@mantine/notifications";
-import { Invoice } from "../../types/invoice.types";
+import { Invoice, InvoiceListItem } from "../../types/invoice.types";
 import {
   formatCurrency,
   formatDate,
@@ -24,7 +24,7 @@ import {
 } from "../../utils/helperFunctions";
 
 interface InvoiceListProps {
-  invoices: Invoice[];
+  invoices: InvoiceListItem[];
   loading?: boolean;
   totalPages?: number;
   currentPage?: number;
@@ -122,12 +122,15 @@ export default function InvoiceList({
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
-              {invoices.map((invoice: any) => {
+              {invoices.map((invoice: InvoiceListItem) => {
+                // Serializer returns invoiceId (string ID like GP-2026-0027); fall back to amazonOrderId
                 const displayId =
-                  invoice.invoiceNumber ?? invoice.id ?? invoice.amazonOrderId;
+                  invoice.invoiceNumber ??
+                  invoice.invoiceId ??
+                  invoice.amazonOrderId;
                 return (
                   <Table.Tr
-                    key={invoice.id || displayId}
+                    key={invoice.invoiceId || displayId}
                     style={{ cursor: "pointer" }}
                     onClick={() => onInvoiceClick?.(displayId)}
                   >
@@ -137,9 +140,7 @@ export default function InvoiceList({
                       </Text>
                     </Table.Td>
                     <Table.Td>{formatDate(invoice.invoiceDate)}</Table.Td>
-                    <Table.Td>
-                      {invoice.buyer?.name || invoice.buyerName || "—"}
-                    </Table.Td>
+                    <Table.Td>{invoice.buyerName || "—"}</Table.Td>
                     <Table.Td>
                       <Text size="sm" c="dimmed">
                         {invoice.amazonOrderId || "—"}
@@ -157,26 +158,13 @@ export default function InvoiceList({
                     </Table.Td>
                     <Table.Td>
                       <Text fw={500} size="sm">
-                        {formatCurrency(
-                          typeof invoice.totalAmount === "object"
-                            ? invoice.totalAmount?.amount
-                            : invoice.totalAmount,
-                          typeof invoice.totalAmount === "object"
-                            ? invoice.totalAmount?.currencyCode
-                            : invoice.currency,
-                        )}
+                        {formatCurrency(invoice.totalAmount, invoice.currency)}
                       </Text>
                     </Table.Td>
                     <Table.Td>
                       <Text size="sm">
-                        {formatCurrency(
-                          typeof invoice.taxAmount === "object"
-                            ? invoice.taxAmount?.amount
-                            : invoice.taxAmount,
-                          typeof invoice.taxAmount === "object"
-                            ? invoice.taxAmount?.currencyCode
-                            : invoice.currency,
-                        ) || "—"}
+                        {formatCurrency(invoice.taxAmount, invoice.currency) ||
+                          "—"}
                       </Text>
                     </Table.Td>
                     <Table.Td>

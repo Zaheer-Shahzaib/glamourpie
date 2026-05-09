@@ -119,18 +119,10 @@ export default function InvoiceStatsGrid({
       prefix: stats?.currency || "AED" + " ",
       decimals: 2,
     },
-    {
-      title: "Avg Invoice",
-      value: stats.averageInvoiceValue,
-      icon: <IconChartLine size={24} stroke={1.5} />,
-      color: "violet",
-      //   prefix: stats?.currency || "AED",
-      decimals: 2,
-    },
   ];
 
   return (
-    <SimpleGrid cols={{ base: 1, sm: 2, md: 3, lg: 6 }} spacing="md">
+    <SimpleGrid cols={{ base: 1, sm: 2, md: 3, lg: 5 }} spacing="md">
       {statCards.map((stat, index) => (
         <StatCard key={index} {...stat} />
       ))}

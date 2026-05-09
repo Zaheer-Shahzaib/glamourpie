@@ -2,13 +2,13 @@ import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "../Context/useAuth";
 import { fetchOrders, fetchOrderStats } from "../Services/order-services";
 
-import { OrderQueryParams } from "../types/order.types";
+// import { OrderQueryParams } from "../types/order.types";
 
 /**
  * Fetches a single page of orders from the backend.
  * Uses query parameters for pagination and filtering.
  */
-export const useOrders = (params: OrderQueryParams = {}) => {
+export const useOrders = (params: any = {}) => {
   const { token } = useAuth();
 
   return useQuery({
