@@ -1,27 +1,26 @@
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "../Context/useAuth";
 import { fetchOrders, fetchOrderStats } from "../Services/order-services";
-
-// import { OrderQueryParams } from "../types/order.types";
+import { OrderQueryParams } from "../types/order.types";
 
 /**
- * Fetches a single page of orders from the backend.
- * Uses query parameters for pagination and filtering.
+ * Fetches a single SP-API page of orders.
+ * Pass nextToken for subsequent pages; date window is handled by the backend.
  */
-export const useOrders = (params: any = {}) => {
+export const useOrders = (params: OrderQueryParams = {}) => {
   const { token } = useAuth();
 
   return useQuery({
     queryKey: ["orders", params],
     queryFn: () => fetchOrders(token!, params),
     enabled: !!token,
-    staleTime: 1000 * 60 * 60 * 2, // 2 hour
+    staleTime: 1000 * 60 * 60 * 2, // 2 hours
+    placeholderData: (previousData) => previousData,
   });
 };
 
 /**
  * Fetches order statistics (totals, revenue, counts).
- * Derived from the same full order list so it stays consistent with the table.
  */
 export const useOrderStats = () => {
   const { token } = useAuth();

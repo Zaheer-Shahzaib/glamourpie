@@ -38,13 +38,7 @@ import { useOrders, useOrderStats } from "../hooks/useOrders";
 import { useInvoices } from "../hooks/useInvoices";
 import { fetchOrderDetails } from "../Services/order-services";
 import { generateManualInvoice } from "../Services/invoice-services";
-import {
-  // OrderQueryParams,
-  OrderStatus,
-  Order,
-  OrderItem,
-  OrderListItem,
-} from "../types/order.types";
+import { OrderStatus, OrderQueryParams } from "../types/order.types";
 import MainLayout from "../layout/Main";
 import CountUp from "react-countup";
 
@@ -101,9 +95,12 @@ export default function OrdersPage() {
   const { token } = useAuth();
   const queryClient = useQueryClient();
 
-  // Client-side pagination
-  const PAGE_SIZE = 50;
-  const [currentPage, setCurrentPage] = useState(1);
+  // ── SP-API page-by-page pagination (nextToken) ───────────────────────────
+  // tokens[0] = undefined (first page); tokens[n] = nextToken used to fetch page n+1
+  const [pageTokens, setPageTokens] = useState<(string | undefined)[]>([
+    undefined,
+  ]);
+  const [pageIndex, setPageIndex] = useState(0);
 
   // ── Filter controls (Inputs) ─────────────
   const [statusInput, setStatusInput] = useState<OrderStatus | null>(null);
@@ -126,13 +123,17 @@ export default function OrdersPage() {
   const [detailsLoading, setDetailsLoading] = useState(false);
   const [generatingId, setGeneratingId] = useState<string | null>(null);
 
-  // ── React Query: fetch all orders + invoices in parallel ────────────────────
-  const { data: ordersData, isFetching: loading } = useOrders({});
+  // Client only sends nextToken; backend owns createdAfter/createdBefore
+  const orderQueryParams = useMemo<OrderQueryParams>(() => {
+    const nextToken = pageTokens[pageIndex];
+    return nextToken ? { nextToken } : {};
+  }, [pageTokens, pageIndex]);
+
+  // ── React Query: one SP-API page + invoices in parallel ──────────────────
+  const { data: ordersData, isFetching: loading } = useOrders(orderQueryParams);
   const { data: stats } = useOrderStats();
-  // Fetch the full invoice list so we can know which orders already have invoices
   const { invoices: existingInvoices } = useInvoices({ limit: 9999 });
 
-  // Build a Set of Amazon Order IDs that already have an invoice in the DB
   const invoicedOrderIds = useMemo(
     () =>
       new Set(
@@ -165,9 +166,13 @@ export default function OrdersPage() {
     return { allowed: true, reason: "Generate Invoice" };
   };
 
+  // Raw SP-API order objects — unchanged from backend payload
   const rawOrders = ordersData?.payload?.orders ?? [];
+  const hasMore = Boolean(
+    ordersData?.payload?.hasMore ?? ordersData?.payload?.nextToken,
+  );
 
-  // ── Client-side filtering (no API call, instant on currently loaded page) ──
+  // ── Client-side filtering on the current SP-API page only ───────────────
   const filteredOrders = useMemo(() => {
     let result = [...rawOrders];
 
@@ -204,12 +209,6 @@ export default function OrdersPage() {
     return result;
   }, [rawOrders, appliedFilters]);
 
-  // Slice filtered results to the current page
-  const pagedOrders = useMemo(() => {
-    const start = (currentPage - 1) * PAGE_SIZE;
-    return filteredOrders.slice(start, start + PAGE_SIZE);
-  }, [filteredOrders, currentPage, PAGE_SIZE]);
-
   // ── Handlers ─────────────────────────────────────────────────────────────
   const handleApplyFilters = () => {
     setAppliedFilters({
@@ -217,7 +216,6 @@ export default function OrdersPage() {
       orderId: orderIdInput,
       dateRange: dateRangeInput,
     });
-    setCurrentPage(1); // reset to first page on new filter
   };
 
   const handleClearFilters = () => {
@@ -225,7 +223,21 @@ export default function OrdersPage() {
     setOrderIdInput("");
     setDateRangeInput([null, null]);
     setAppliedFilters({ status: null, orderId: "", dateRange: [null, null] });
-    setCurrentPage(1);
+  };
+
+  const handleNextPage = () => {
+    const nextToken = ordersData?.payload?.nextToken;
+    if (!nextToken) return;
+
+    setPageTokens((prev) => {
+      const trimmed = prev.slice(0, pageIndex + 1);
+      return [...trimmed, nextToken];
+    });
+    setPageIndex((i) => i + 1);
+  };
+
+  const handlePrevPage = () => {
+    setPageIndex((i) => Math.max(0, i - 1));
   };
 
   const handleViewDetails = async (orderId: string) => {
@@ -483,7 +495,7 @@ export default function OrdersPage() {
                         </Text>
                       </Table.Td>
                     </Table.Tr>
-                  ) : pagedOrders.length === 0 ? (
+                  ) : filteredOrders.length === 0 ? (
                     <Table.Tr>
                       <Table.Td colSpan={9}>
                         <Text ta="center" py="xl" c="dimmed">
@@ -494,7 +506,7 @@ export default function OrdersPage() {
                       </Table.Td>
                     </Table.Tr>
                   ) : (
-                    pagedOrders.map((order) => (
+                    filteredOrders.map((order) => (
                       <Table.Tr key={order.orderId}>
                         <Table.Td>
                           <Group>
@@ -553,7 +565,7 @@ export default function OrdersPage() {
                                 order.proceeds?.grandTotal || order.orderTotal;
                               return t
                                 ? formatCurrency(
-                                    parseFloat(t.amount),
+                                    Number(t.amount),
                                     t.currencyCode,
                                   )
                                 : "—";
@@ -623,34 +635,33 @@ export default function OrdersPage() {
             </Table.ScrollContainer>
           </Paper>
 
-          {/* Pagination Controls */}
-          {(() => {
-            const totalPages = Math.ceil(filteredOrders.length / PAGE_SIZE);
-            return totalPages > 1 ? (
-              <Group justify="space-between" mt="md">
-                <Text size="sm" c="dimmed">
-                  Page {currentPage} of {totalPages} &nbsp;·&nbsp;{" "}
-                  {filteredOrders.length} orders
-                </Text>
-                <Group>
-                  <Button
-                    variant="default"
-                    disabled={currentPage <= 1 || loading}
-                    onClick={() => setCurrentPage((p) => p - 1)}
-                  >
-                    Previous
-                  </Button>
-                  <Button
-                    variant="default"
-                    disabled={currentPage >= totalPages || loading}
-                    onClick={() => setCurrentPage((p) => p + 1)}
-                  >
-                    Next
-                  </Button>
-                </Group>
+          {/* SP-API nextToken pagination */}
+          {(pageIndex > 0 || hasMore) && (
+            <Group justify="space-between" mt="md">
+              <Text size="sm" c="dimmed">
+                Page {pageIndex + 1}
+                {filteredOrders.length > 0 &&
+                  ` · ${filteredOrders.length} orders`}
+                {hasMore ? " · more available" : ""}
+              </Text>
+              <Group>
+                <Button
+                  variant="default"
+                  disabled={pageIndex <= 0 || loading}
+                  onClick={handlePrevPage}
+                >
+                  Previous
+                </Button>
+                <Button
+                  variant="default"
+                  disabled={!hasMore || loading}
+                  onClick={handleNextPage}
+                >
+                  Next
+                </Button>
               </Group>
-            ) : null;
-          })()}
+            </Group>
+          )}
         </Stack>
       </Container>
 

@@ -60,7 +60,19 @@ export interface OrderListItem {
     numberOfItemsShipped?: number;
     numberOfItemsUnshipped?: number;
     isPrime?: boolean;
-    buyer?: Buyer;
+    buyer?: Buyer & { buyerName?: string };
+    // Raw SP-API nested fields (passed through unchanged from backend)
+    fulfillment?: {
+        fulfillmentStatus?: string;
+        fulfilledBy?: string;
+        fulfillmentServiceLevel?: string;
+        shipByWindow?: { latestDateTime?: string };
+    };
+    proceeds?: {
+        grandTotal?: MoneyAmount;
+        breakdowns?: any[];
+    };
+    orderItems?: any[];
 }
 
 // ─── Order detail (raw SP-API shape from getOrder with includedData) ──────────
@@ -95,12 +107,20 @@ export interface OrderItem {
     quantityShipped?: number;
 }
 
+/** Query params for GET /api/aws/orders — client only sends nextToken. */
+export interface OrderQueryParams {
+    nextToken?: string;
+}
+
 // Order List Response
 export interface OrderListResponse {
+    success?: boolean;
+    sandbox?: boolean;
     payload: {
         orders: OrderListItem[];
-        nextToken?: string;
-        createdBefore?: string;
+        totalCount?: number;
+        nextToken?: string | null;
+        hasMore?: boolean;
     };
 }
 

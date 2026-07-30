@@ -3,7 +3,7 @@
 
 import { api } from './api';
 import {
-    // OrderQueryParams,
+    OrderQueryParams,
     OrderListResponse,
     OrderDetailsResponse,
     OrderStats,
@@ -88,74 +88,22 @@ const mockOrderStats: OrderStats = {
 };
 
 /**
- * Fetch orders with filters and pagination
+ * Fetch one page of orders from SP-API via the backend.
+ *
+ * Page 1: omit nextToken (backend builds createdAfter/createdBefore).
+ * Page 2+: pass nextToken + the same createdAfter/createdBefore from page 1.
  */
 export const fetchOrders = async (
     token: string,
-    params?: any
-): Promise<any> => {
-    if (USE_MOCK_DATA) {
-        // Simulate API delay
-        await new Promise((resolve) => setTimeout(resolve, 500));
-
-        let filteredOrders = [...mockOrders];
-
-        // Apply filters
-        if (params?.orderStatuses && params.orderStatuses.length > 0) {
-            filteredOrders = filteredOrders.filter((order) =>
-                params.orderStatuses!.includes(order.orderStatus)
-            );
-        }
-
-        if (params?.fulfillmentChannels && params.fulfillmentChannels.length > 0) {
-            filteredOrders = filteredOrders.filter((order) =>
-                params.fulfillmentChannels!.includes(order.fulfillmentChannel)
-            );
-        }
-
-        if (params?.marketplaceIds && params.marketplaceIds.length > 0) {
-            filteredOrders = filteredOrders.filter((order) =>
-                params.marketplaceIds!.includes(order.marketplaceId)
-            );
-        }
-
-        if (params?.createdAfter) {
-            filteredOrders = filteredOrders.filter(
-                (order) => new Date(order.purchaseDate) >= new Date(params.createdAfter!)
-            );
-        }
-
-        if (params?.createdBefore) {
-            filteredOrders = filteredOrders.filter(
-                (order) => new Date(order.purchaseDate) <= new Date(params.createdBefore!)
-            );
-        }
-
-        return {
-            payload: {
-                orders: filteredOrders,
-                nextToken: undefined,
-            },
-        };
-    }
-
-    // Serialize filter arrays as CSV strings so the backend receives them cleanly.
-    // Axios would otherwise encode them as repeated keys (orderStatuses[]=A&orderStatuses[]=B)
-    // which the SP-API backend param builder doesn't handle.
-    const serializedParams: Record<string, any> = { ...params };
-    if (Array.isArray(serializedParams.orderStatuses)) {
-        serializedParams.orderStatuses = serializedParams.orderStatuses.join(',');
-    }
-    if (Array.isArray(serializedParams.fulfillmentChannels)) {
-        serializedParams.fulfillmentChannels = serializedParams.fulfillmentChannels.join(',');
-    }
-    if (Array.isArray(serializedParams.marketplaceIds)) {
-        serializedParams.marketplaceIds = serializedParams.marketplaceIds.join(',');
-    }
+    params: OrderQueryParams = {},
+): Promise<OrderListResponse> => {
+    // Only forward SP-API pagination / window params the backend expects.
+    const queryParams: OrderQueryParams = {};
+    if (params.nextToken) queryParams.nextToken = params.nextToken
 
     const response = await api.get('/api/aws/orders', {
         headers: { Authorization: `Bearer ${token}` },
-        params: serializedParams,
+        params: queryParams,
     });
     return response.data;
 };
