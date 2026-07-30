@@ -7,75 +7,72 @@ import {
     OrderListResponse,
     OrderDetailsResponse,
     OrderStats,
-    Order,
-    OrderListItem,
-    OrderItem,
 } from '../types/order.types';
 
 // Environment flag to use mock data
 const USE_MOCK_DATA = false; // Set to false since backend is ready
 
-// Mock Orders Data
-const mockOrders: OrderListItem[] = [
+// Mock Orders Data (matches raw SP-API 2026-01-01 field names)
+const mockOrders: any[] = [
     {
-        amazonOrderId: '405-8967478-6005135',
-        purchaseDate: '2025-01-20T10:30:00.000Z',
-        orderStatus: 'Shipped',
-        buyerName: 'EYMAN',
-        orderTotal: 40.95,
-        currencyCode: 'AED',
-        numberOfItems: 1,
+        orderId: '405-8967478-6005135',
+        createdTime: '2025-01-20T10:30:00.000Z',
+        orderStatus: 'SHIPPED',
+        orderTotal: { currencyCode: 'AED', amount: 40.95 },
+        numberOfItemsShipped: 1,
+        numberOfItemsUnshipped: 0,
         fulfillmentChannel: 'FBA',
-        marketplaceId: 'amazon.ae',
+        salesChannel: { marketplaceId: 'A2VIGQ35RCS4UG', marketplaceName: 'Amazon.ae', channelName: 'AMAZON' },
         isPrime: true,
+        buyer: { name: 'EYMAN' },
     },
     {
-        amazonOrderId: '408-5078436-9053930',
-        purchaseDate: '2025-01-21T14:15:00.000Z',
-        orderStatus: 'Delivered',
-        buyerName: 'Audrey',
-        orderTotal: 95.55,
-        currencyCode: 'AED',
-        numberOfItems: 2,
+        orderId: '408-5078436-9053930',
+        createdTime: '2025-01-21T14:15:00.000Z',
+        orderStatus: 'SHIPPED',
+        orderTotal: { currencyCode: 'AED', amount: 95.55 },
+        numberOfItemsShipped: 2,
+        numberOfItemsUnshipped: 0,
         fulfillmentChannel: 'FBA',
-        marketplaceId: 'amazon.ae',
+        salesChannel: { marketplaceId: 'A2VIGQ35RCS4UG', marketplaceName: 'Amazon.ae', channelName: 'AMAZON' },
         isPrime: false,
+        buyer: { name: 'Audrey' },
     },
     {
-        amazonOrderId: '409-1234567-8901234',
-        purchaseDate: '2025-01-22T09:00:00.000Z',
-        orderStatus: 'Pending',
-        buyerName: 'Carlos Silva',
-        orderTotal: 1750.00,
-        currencyCode: 'BRL',
-        numberOfItems: 1,
+        orderId: '409-1234567-8901234',
+        createdTime: '2025-01-22T09:00:00.000Z',
+        orderStatus: 'PENDING',
+        orderTotal: { currencyCode: 'BRL', amount: 1750.00 },
+        numberOfItemsShipped: 0,
+        numberOfItemsUnshipped: 1,
         fulfillmentChannel: 'MFN',
-        marketplaceId: 'amazon.com.br',
+        salesChannel: { marketplaceId: 'A21TJRUUN4KGV', marketplaceName: 'Amazon.com.br', channelName: 'AMAZON' },
         isPrime: false,
+        buyer: { name: 'Carlos Silva' },
     },
     {
-        amazonOrderId: '410-9876543-2109876',
-        purchaseDate: '2025-01-23T16:45:00.000Z',
-        orderStatus: 'Cancelled',
-        buyerName: 'Mohammed Ahmed',
-        orderTotal: 136.00,
-        currencyCode: 'AED',
-        numberOfItems: 1,
+        orderId: '410-9876543-2109876',
+        createdTime: '2025-01-23T16:45:00.000Z',
+        orderStatus: 'CANCELLED',
+        orderTotal: { currencyCode: 'AED', amount: 136.00 },
+        numberOfItemsShipped: 0,
+        numberOfItemsUnshipped: 1,
         fulfillmentChannel: 'FBA',
-        marketplaceId: 'amazon.ae',
+        salesChannel: { marketplaceId: 'A2VIGQ35RCS4UG', marketplaceName: 'Amazon.ae', channelName: 'AMAZON' },
         isPrime: true,
+        buyer: { name: 'Mohammed Ahmed' },
     },
     {
-        amazonOrderId: '411-5555666-7778888',
-        purchaseDate: '2025-01-24T11:20:00.000Z',
-        orderStatus: 'Shipped',
-        buyerName: 'Priya Sharma',
-        orderTotal: 2500.00,
-        currencyCode: 'INR',
-        numberOfItems: 3,
+        orderId: '411-5555666-7778888',
+        createdTime: '2025-01-24T11:20:00.000Z',
+        orderStatus: 'SHIPPED',
+        orderTotal: { currencyCode: 'INR', amount: 2500.00 },
+        numberOfItemsShipped: 3,
+        numberOfItemsUnshipped: 0,
         fulfillmentChannel: 'FBA',
-        marketplaceId: 'amazon.in',
+        salesChannel: { marketplaceId: 'A21TJRUUN4KGV', marketplaceName: 'Amazon.in', channelName: 'AMAZON' },
         isPrime: true,
+        buyer: { name: 'Priya Sharma' },
     },
 ];
 
@@ -91,74 +88,22 @@ const mockOrderStats: OrderStats = {
 };
 
 /**
- * Fetch orders with filters and pagination
+ * Fetch one page of orders from SP-API via the backend.
+ *
+ * Page 1: omit nextToken (backend builds createdAfter/createdBefore).
+ * Page 2+: pass nextToken + the same createdAfter/createdBefore from page 1.
  */
 export const fetchOrders = async (
     token: string,
-    params?: OrderQueryParams
+    params: OrderQueryParams = {},
 ): Promise<OrderListResponse> => {
-    if (USE_MOCK_DATA) {
-        // Simulate API delay
-        await new Promise((resolve) => setTimeout(resolve, 500));
-
-        let filteredOrders = [...mockOrders];
-
-        // Apply filters
-        if (params?.orderStatuses && params.orderStatuses.length > 0) {
-            filteredOrders = filteredOrders.filter((order) =>
-                params.orderStatuses!.includes(order.orderStatus)
-            );
-        }
-
-        if (params?.fulfillmentChannels && params.fulfillmentChannels.length > 0) {
-            filteredOrders = filteredOrders.filter((order) =>
-                params.fulfillmentChannels!.includes(order.fulfillmentChannel)
-            );
-        }
-
-        if (params?.marketplaceIds && params.marketplaceIds.length > 0) {
-            filteredOrders = filteredOrders.filter((order) =>
-                params.marketplaceIds!.includes(order.marketplaceId)
-            );
-        }
-
-        if (params?.createdAfter) {
-            filteredOrders = filteredOrders.filter(
-                (order) => new Date(order.purchaseDate) >= new Date(params.createdAfter!)
-            );
-        }
-
-        if (params?.createdBefore) {
-            filteredOrders = filteredOrders.filter(
-                (order) => new Date(order.purchaseDate) <= new Date(params.createdBefore!)
-            );
-        }
-
-        return {
-            payload: {
-                orders: filteredOrders,
-                nextToken: undefined,
-            },
-        };
-    }
-
-    // Serialize filter arrays as CSV strings so the backend receives them cleanly.
-    // Axios would otherwise encode them as repeated keys (orderStatuses[]=A&orderStatuses[]=B)
-    // which the SP-API backend param builder doesn't handle.
-    const serializedParams: Record<string, any> = { ...params };
-    if (Array.isArray(serializedParams.orderStatuses)) {
-        serializedParams.orderStatuses = serializedParams.orderStatuses.join(',');
-    }
-    if (Array.isArray(serializedParams.fulfillmentChannels)) {
-        serializedParams.fulfillmentChannels = serializedParams.fulfillmentChannels.join(',');
-    }
-    if (Array.isArray(serializedParams.marketplaceIds)) {
-        serializedParams.marketplaceIds = serializedParams.marketplaceIds.join(',');
-    }
+    // Only forward SP-API pagination / window params the backend expects.
+    const queryParams: OrderQueryParams = {};
+    if (params.nextToken) queryParams.nextToken = params.nextToken
 
     const response = await api.get('/api/aws/orders', {
         headers: { Authorization: `Bearer ${token}` },
-        params: serializedParams,
+        params: queryParams,
     });
     return response.data;
 };
@@ -180,7 +125,7 @@ export const fetchOrderDetails = async (
         }
 
         // Create full order details
-        const order: Order = {
+        const order: any = {
             amazonOrderId: orderListItem.amazonOrderId,
             purchaseDate: orderListItem.purchaseDate,
             lastUpdateDate: orderListItem.purchaseDate,
@@ -191,26 +136,22 @@ export const fetchOrderDetails = async (
                 currencyCode: orderListItem.currencyCode,
                 amount: orderListItem.orderTotal,
             },
-            numberOfItemsShipped: orderListItem.orderStatus === 'Shipped' ? orderListItem.numberOfItems : 0,
-            numberOfItemsUnshipped: orderListItem.orderStatus === 'Pending' ? orderListItem.numberOfItems : 0,
+            numberOfItemsShipped: orderListItem.orderStatus === 'SHIPPED' ? orderListItem.numberOfItems : 0,
+            numberOfItemsUnshipped: orderListItem.orderStatus === 'PENDING' || orderListItem.orderStatus === 'UNSHIPPED' ? orderListItem.numberOfItems : 0,
             marketplaceId: orderListItem.marketplaceId,
             isPrime: orderListItem.isPrime,
-            shippingAddress: {
-                name: orderListItem.buyerName || 'Customer',
-                city: 'Dubai',
-                postalCode: '12345',
-                countryCode: 'AE',
-            },
+            // shippingAddress is not available in mock list items;
+            // real data comes from the backend SP-API call
         };
 
-        const orderItems: OrderItem[] = [
+        const orderItems: any[] = [
             {
                 orderItemId: 'ITEM-001',
                 asin: 'B08XYZ1234',
                 sku: 'TENT-4P-WP-001',
                 title: 'Camping Tent - 4 Person Waterproof',
                 quantityOrdered: orderListItem.numberOfItems,
-                quantityShipped: orderListItem.orderStatus === 'Shipped' ? orderListItem.numberOfItems : 0,
+                quantityShipped: orderListItem.orderStatus === 'SHIPPED' ? orderListItem.numberOfItems : 0,
                 itemPrice: {
                     currencyCode: orderListItem.currencyCode,
                     amount: orderListItem.orderTotal,
@@ -255,7 +196,7 @@ export const fetchOrderStats = async (
 export const fetchOrderItems = async (
     token: string,
     orderId: string
-): Promise<OrderItem[]> => {
+): Promise<any[]> => {
     if (USE_MOCK_DATA) {
         await new Promise((resolve) => setTimeout(resolve, 300));
 

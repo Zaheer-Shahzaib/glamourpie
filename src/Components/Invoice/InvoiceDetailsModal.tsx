@@ -220,29 +220,20 @@ export default function InvoiceDetailsModal({
                       </Table.Td>
                       <Table.Td>
                         <Text size="sm">
-                          {formatCurrency(
-                            item.unitPrice,
-                            invoice.totalAmount.currencyCode,
-                          )}
+                          {formatCurrency(item.unitPrice, invoice.currency)}
                         </Text>
                       </Table.Td>
                       <Table.Td>
-                        <Text size="sm">{item.taxRate.toFixed(0)}%</Text>
+                        <Text size="sm">{(item.taxRate ?? 5).toFixed(0)}%</Text>
                       </Table.Td>
                       <Table.Td>
                         <Text size="sm">
-                          {formatCurrency(
-                            item.taxAmount,
-                            invoice.totalAmount.currencyCode,
-                          )}
+                          {formatCurrency(item.taxAmount, invoice.currency)}
                         </Text>
                       </Table.Td>
                       <Table.Td>
                         <Text size="sm" fw={600}>
-                          {formatCurrency(
-                            item.lineTotal,
-                            invoice.totalAmount.currencyCode,
-                          )}
+                          {formatCurrency(item.lineTotal, invoice.currency)}
                         </Text>
                       </Table.Td>
                     </Table.Tr>
@@ -261,31 +252,21 @@ export default function InvoiceDetailsModal({
               <Group justify="space-between">
                 <Text size="sm">Subtotal:</Text>
                 <Text size="sm" fw={600}>
-                  {formatCurrency(
-                    invoice.subtotal || 0,
-                    invoice.totalAmount.currencyCode,
-                  )}
+                  {formatCurrency(invoice.subtotal || 0, invoice.currency)}
                 </Text>
               </Group>
               {(invoice.discounts ?? 0) > 0 && (
                 <Group justify="space-between">
                   <Text size="sm">Discounts:</Text>
                   <Text size="sm" c="red">
-                    -
-                    {formatCurrency(
-                      invoice.discounts || 0,
-                      invoice.totalAmount.currencyCode,
-                    )}
+                    -{formatCurrency(invoice.discounts || 0, invoice.currency)}
                   </Text>
                 </Group>
               )}
               <Group justify="space-between">
-                <Text size="sm">Tax Amount:</Text>
+                <Text size="sm">Tax Amount ({invoice.taxRate ?? 5}%):</Text>
                 <Text size="sm" fw={600}>
-                  {formatCurrency(
-                    invoice.taxAmount.amount,
-                    invoice.totalAmount.currencyCode,
-                  )}
+                  {formatCurrency(invoice.taxAmount ?? 0, invoice.currency)}
                 </Text>
               </Group>
               {(invoice.shippingCharges ?? 0) > 0 && (
@@ -294,7 +275,7 @@ export default function InvoiceDetailsModal({
                   <Text size="sm" fw={600}>
                     {formatCurrency(
                       invoice.shippingCharges || 0,
-                      invoice.totalAmount.currencyCode,
+                      invoice.currency,
                     )}
                   </Text>
                 </Group>
@@ -305,10 +286,7 @@ export default function InvoiceDetailsModal({
                   Total Amount:
                 </Text>
                 <Text fw={600} size="md">
-                  {formatCurrency(
-                    invoice.totalAmount.amount,
-                    invoice.totalAmount.currencyCode,
-                  )}
+                  {formatCurrency(invoice.totalAmount ?? 0, invoice.currency)}
                 </Text>
               </Group>
             </Stack>

@@ -12,7 +12,7 @@ import {
 } from '../types/invoice.types';
 
 // Mock Invoices - Full Details
-export const mockInvoices: Invoice[] = [
+export const mockInvoices: any[] = [
     {
         id: 'INV-2025-001-AE',
         amazonOrderId: '405-8967478-6005135',
@@ -249,7 +249,7 @@ export const mockInvoices: Invoice[] = [
 ];
 
 // Mock Invoice List Items (Simplified)
-export const mockInvoiceListItems: InvoiceListItem[] = mockInvoices.map((inv) => ({
+export const mockInvoiceListItems: any[] = mockInvoices.map((inv) => ({
     id: inv.id,
     invoiceNumber: inv.invoiceNumber,
     issueDate: inv.issueDate,
