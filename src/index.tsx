@@ -13,6 +13,13 @@ import { BrowserRouter as Router } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import "./styles/index.css";
 import "./styles/globals.scss";
+import TagManager from 'react-gtm-module';
+
+const tagManagerArgs = {
+  gtmId: 'GTM-5C7BHDBZ' // your container ID
+};
+
+TagManager.initialize(tagManagerArgs);
 
 const queryClient = new QueryClient({
   defaultOptions: {

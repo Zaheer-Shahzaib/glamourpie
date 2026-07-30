@@ -42,6 +42,7 @@ import PaymentCancelled from "./pages/PaymentCancelled";
 import ConnectSellerPage from "./pages/ConnectSellerPage";
 import SsoCallbackPage from "./Components/authentication/ssoCallback/page";
 import SettingsPage from "./pages/settingsPage";
+import TagManager from 'react-gtm-module';
 
 // --- Auth Simulation ---
 // export const useAuth = () => {
@@ -99,6 +100,16 @@ export default function App() {
   //     document.removeEventListener('keydown', handleKeyDown);
   //   };
   // }, []);
+
+
+  useEffect(() => {
+    TagManager.dataLayer({
+      dataLayer: {
+        event: 'pageview',
+        page: location.pathname,
+      },
+    });
+  }, [location]);
 
   return (
     <Routes>
