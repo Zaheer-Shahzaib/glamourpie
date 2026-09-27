@@ -59,9 +59,10 @@ export default function InvoicesPage() {
         const PLAN_RANK: Record<string, number> = {
           free: 0,
           starter: 1,
-          growth: 2,
-          scale: 3,
-          enterprise: 4,
+          pro: 2,
+          growth: 3,
+          scale: 4,
+          enterprise: 5,
         };
         const best = plans.reduce<string | null>((acc, p) => {
           if (!acc) return p;
