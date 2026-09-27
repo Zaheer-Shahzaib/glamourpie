@@ -129,7 +129,7 @@ export default function InvoiceExportModal({
   // Ensure the plan name is lowercased for safe comparison (e.g., 'Starter' -> 'starter')
   const normalizedPlan = (userPlan || "").toLowerCase();
 
-  // Decide if PDF/export is available at all: Must be 'starter', 'growth', 'scale', or 'enterprise'.
+  // Decide if PDF/export is available at all: Must be 'starter', 'pro', 'growth', 'scale', or 'enterprise'.
   // 'free' or empty means NO export access.
   const hasSubscription = !!normalizedPlan && normalizedPlan !== "free";
   const noSubscription = !hasSubscription;

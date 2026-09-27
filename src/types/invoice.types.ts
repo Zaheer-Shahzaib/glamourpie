@@ -28,42 +28,59 @@ export interface InvoiceLineItem {
 }
 
 export interface Invoice {
-    id: string; // The amazon invoice ID or our DB id
+    id: string;                  // DB row id
+    invoiceId: string;           // Invoice string ID (e.g. GP-2026-0027)
+    sellerId?: number;
     amazonOrderId: string;
     invoiceNumber: string;
+    invoiceDate: string;         // Raw date from DB
+    issueDate: string;           // Alias of invoiceDate (used by modal)
     status: InvoiceStatus;
     invoiceType: InvoiceType;
-    issueDate: string;
     dueDate?: string;
-    totalAmount: CurrencyAmount;
-    taxAmount: CurrencyAmount;
-    buyerName?: string;
-    marketplaceId: string;
-    
-    // Additional details for Modal
+
+    // Financial — plain numbers; use `currency` for the currency code
+    subtotal: number;
+    taxAmount: number;
+    taxRate: number;
+    discounts: number;
+    shippingCharges: number;
+    totalAmount: number;
+    currency: string;
+
+    // Decrypted relational info
     seller?: InvoiceHeader;
     buyer?: InvoiceHeader;
+    buyerName?: string;
     lineItems?: InvoiceLineItem[];
-    subtotal?: number;
-    discounts?: number;
-    shippingCharges?: number;
+
+    marketplaceId?: string;
     paymentMethod?: string;
     paymentDueDate?: string;
-    currency?: string; // For backward compatibility
+    invoiceURI?: string;
+    createdAt?: string;
+    updatedAt?: string;
+    submittedAt?: string;
 }
 
 export interface InvoiceListItem {
-    id: string;
-    amazonOrderId: string;
+    invoiceId: string;
     invoiceNumber: string;
+    invoiceDate: string;
     status: InvoiceStatus;
     invoiceType: InvoiceType;
-    issueDate: string;
-    totalAmount: CurrencyAmount;
-    taxAmount: CurrencyAmount;
-    buyerName?: string;
-    marketplaceId: string;
-    currency?: string; // For backward compatibility
+    // Financial — plain numbers from the list serializer
+    totalAmount: number;
+    taxAmount: number;
+    subtotal: number;
+    currency: string;
+    amazonOrderId: string;
+    buyerName?: string;          // Decrypted buyer name for the Customer column
+    createdAt?: string;
+    // Keep legacy optional fields so existing code doesn't break
+    id?: string;
+    issueDate?: string;
+    marketplaceId?: string;
 }
 
 // Invoice List Response

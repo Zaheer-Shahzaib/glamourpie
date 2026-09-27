@@ -80,6 +80,23 @@ const PRICING: PricingTier[] = [
     description: "",
   },
   {
+    tier: "Pro",
+    planKey: "pro",
+    price: { month: 149 },
+    customPrice: false,
+    features: [
+      "Up to 1,000 invoices / month",
+      "Automatic order data sync",
+      "Instant PDF invoice generation",
+      "Auto-upload invoices to Amazon",
+      "Everything in Starter plan",
+      "Email support",
+    ],
+    preferred: false,
+    actionText: "Get Pro Plan",
+    description: "",
+  },
+  {
     tier: "Growth",
     planKey: "growth",
     price: { month: 249 },
@@ -112,24 +129,26 @@ const PRICING: PricingTier[] = [
     actionText: "Get Scale Plan",
     description: "",
   },
-  {
-    tier: "Enterprise",
-    planKey: "enterprise",
-    price: { month: 0 },
-    customPrice: true,
-    features: [
-      "High-volume or unlimited invoicing",
-      "Custom integrations",
-      "White-label invoice branding",
-      "Dedicated account manager",
-      "SLA & priority support",
-      "Custom compliance workflows",
-    ],
-    preferred: false,
-    actionText: "Contact Sales",
-    actionUrl: PATH_PAGES.contact,
-    description: "",
-  },
+  // Enterprise is temporarily disabled. Re-enable by uncommenting this entry —
+  // the "Contact Sales" handling in handlePlanAction is still in place.
+  // {
+  //   tier: "Enterprise",
+  //   planKey: "enterprise",
+  //   price: { month: 0 },
+  //   customPrice: true,
+  //   features: [
+  //     "High-volume or unlimited invoicing",
+  //     "Custom integrations",
+  //     "White-label invoice branding",
+  //     "Dedicated account manager",
+  //     "SLA & priority support",
+  //     "Custom compliance workflows",
+  //   ],
+  //   preferred: false,
+  //   actionText: "Contact Sales",
+  //   actionUrl: PATH_PAGES.contact,
+  //   description: "",
+  // },
 ];
 
 function Pricing() {

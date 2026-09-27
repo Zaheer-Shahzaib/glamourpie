@@ -14,6 +14,8 @@ import { useAuth } from "../../Context/useAuth";
 import { notifications } from "@mantine/notifications";
 import MainLayout from "../../layout/Main";
 import { AMAZON_MARKETPLACES, CURRENCIES } from "../../constants/marketplaces";
+import { fetchSellerSettings, updateSellerSettings } from '../../Services/settings-services';
+import { useEffect } from "react";
 
 export default function SettingsMarketplacePage() {
   const { token } = useAuth();
@@ -25,19 +27,42 @@ export default function SettingsMarketplacePage() {
     defaultLanguage: "en",
   });
 
+  useEffect(() => {
+    if (!token) return;
+    fetchSellerSettings(token)
+      .then((data: any) => {
+        const mp = data?.data?.marketplaceSettings || {};
+        setSettings(prev => ({
+          ...prev,
+          primaryMarketplace: mp.primaryMarketplace ?? "amazon.ae",
+          defaultCurrency: mp.defaultCurrency ?? "AED",
+          defaultLanguage: mp.defaultLanguage ?? "en",
+        }));
+      })
+      .catch((err: any) => {
+        console.warn('Could not load marketplace settings:', err?.message);
+      });
+  }, [token]);
+
   const handleSave = async () => {
     try {
       setSaving(true);
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await updateSellerSettings(token!, {
+        marketplaceSettings: {
+          primaryMarketplace: settings.primaryMarketplace,
+          defaultCurrency: settings.defaultCurrency,
+          defaultLanguage: settings.defaultLanguage,
+        },
+      });
       notifications.show({
         title: "Success",
         message: "Marketplace settings saved",
         color: "green",
       });
-    } catch (error) {
+    } catch (error: any) {
       notifications.show({
         title: "Error",
-        message: "Failed to save settings",
+        message: error?.response?.data?.message || "Failed to save settings",
         color: "red",
       });
     } finally {
@@ -67,7 +92,7 @@ export default function SettingsMarketplacePage() {
                 setSettings({ ...settings, primaryMarketplace: value || "" })
               }
               data={AMAZON_MARKETPLACES.map((marketplace) => ({
-                value: marketplace.id,
+                value: marketplace.domain,
                 label: marketplace.name,
               }))}
               size="sm"

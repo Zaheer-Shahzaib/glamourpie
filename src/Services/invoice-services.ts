@@ -70,7 +70,8 @@ export const downloadInvoiceDocument = async (
             headers: { Authorization: `Bearer ${token}` },
             responseType: 'blob',
         });
-        const blob = new Blob([pdfRes.data], { type: 'application/pdf' });
+        
+        const blob = new Blob([pdfRes.data], { type: 'application/pdf' as string });
         const url  = URL.createObjectURL(blob);
         const a    = document.createElement('a');
         a.href     = url;
@@ -98,7 +99,7 @@ export const downloadExportedFile = async (
     const filename = urlPath.split('/').pop() || 'export.pdf';
 
     // The backend uses correct content-type because of our previous fix
-    const blob = new Blob([res.data], { type: res.headers['content-type'] });
+    const blob = new Blob([res.data], { type: res.headers['content-type'] as string | undefined });
     const url  = URL.createObjectURL(blob);
 
     const a = document.createElement('a');

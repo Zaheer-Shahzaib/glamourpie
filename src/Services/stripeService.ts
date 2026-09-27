@@ -14,7 +14,7 @@ const getAuthHeader = () => {
  * For free plan: backend activates immediately and returns a local redirect URL.
  * For paid plans: returns a Stripe-hosted checkout URL.
  *
- * @param plan - 'free' | 'starter' | 'growth' | 'scale'
+ * @param plan - 'free' | 'starter' | 'pro' | 'growth' | 'scale'
  * @returns { url: string, free?: boolean, sessionId?: string }
  */
 export const createCheckoutSession = async (

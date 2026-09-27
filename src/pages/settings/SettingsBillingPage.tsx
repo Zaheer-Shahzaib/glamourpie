@@ -213,11 +213,23 @@ export default function SettingsBillingPage() {
                         ["active", "trialing", "past_due"].includes(s.status),
                       )
                       .map((sub: any) => (
-                        <Stack gap={4} key={`active-${sub.id}`}>
-                          <Badge size="lg" color="blue" variant="light">
+                        <Stack gap={4} key={`active-${sub.id}`} justify="space-between">
+                          <Group gap="xs" justify="space-between">
+                            <Badge size="lg" color="blue" variant="light">
                             {sub.plan.charAt(0).toUpperCase() +
                               sub.plan.slice(1)}
                           </Badge>
+                          {sub.plan.toLowerCase() === "free" && (
+                            <Button
+                              size="xs"
+                              onClick={() => navigateToSection("pricing", "/")}
+                              variant="light"
+                              color="green"
+                            >
+                              Upgrade Plan
+                            </Button>
+                          )}
+                            </Group>
                         </Stack>
                       ))
                   ) : (
