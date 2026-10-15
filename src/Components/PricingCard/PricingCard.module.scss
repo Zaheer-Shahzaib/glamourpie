@@ -1,0 +1,164 @@
+@use "../../styles/public-site" as ps;
+
+// Mantine Button parts are targeted through `.card .part` (two classes) so
+// they out-rank Mantine's single-class rules, which load after this module.
+
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 30px 24px 24px;
+  overflow: hidden;
+  border-radius: var(--ra-radius-lg);
+  background-color: var(--ra-color-surface-white);
+  font-family: var(--ra-font-body);
+  color: var(--ra-color-text-primary);
+}
+
+.strip {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 6px;
+  border-radius: 3px;
+  background-color: var(--ra-color-brand);
+}
+
+.price {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: center;
+  gap: 0 6px;
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 44px;
+  text-align: center;
+  color: var(--ra-color-surface-inverse);
+}
+
+.currency {
+  font-size: inherit;
+}
+
+.unit {
+  margin-left: 2px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ra-color-text-secondary);
+}
+
+.tier {
+  margin: 8px 0 0;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 26px;
+  text-align: center;
+  text-transform: capitalize;
+  color: var(--ra-color-text-primary);
+}
+
+.description {
+  margin: 8px 0 0;
+  font-size: 13px;
+  line-height: 18px;
+  text-align: center;
+  color: var(--ra-color-text-secondary);
+}
+
+.features {
+  display: grid;
+  gap: 20px;
+  margin: 36px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.feature {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--ra-color-text-primary);
+}
+
+.check {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--ra-radius-full);
+  background-color: var(--ra-color-surface-inverse);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ra-color-surface-white);
+}
+
+.card[data-featured] .check {
+  background-color: var(--ra-color-brand);
+}
+
+.actions {
+  margin-top: auto;
+  padding-top: 40px;
+}
+
+.card .button {
+  height: auto;
+  min-height: 44px;
+  padding: 10px 14px;
+  border: 1px solid var(--ra-color-surface-inverse);
+  border-radius: var(--ra-radius-sm);
+  background-color: var(--ra-color-surface-white);
+  font-family: var(--ra-font-body);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ra-color-surface-inverse);
+  transition: background-color 0.15s ease;
+
+  &:hover:not(:disabled) {
+    background-color: var(--ra-color-surface-low);
+  }
+
+  &[data-featured] {
+    border-color: var(--ra-color-brand);
+    background-color: var(--ra-color-brand);
+    color: var(--ra-color-surface-white);
+
+    &:hover:not(:disabled) {
+      background-color: var(--ra-color-brand-container);
+    }
+  }
+
+  &[data-current] {
+    border-color: var(--ra-color-brand);
+    background-color: var(--ra-color-surface-low);
+    color: var(--ra-color-brand);
+    cursor: default;
+  }
+
+  @include ps.focus-ring;
+}
+
+.card .buttonLabel {
+  white-space: normal;
+  text-align: center;
+  line-height: 18px;
+}
+
+.footnote {
+  margin: 12px 0 0;
+  font-size: 12px;
+  line-height: 16px;
+  text-align: center;
+  color: var(--ra-color-text-secondary);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card .button {
+    transition: none;
+  }
+}

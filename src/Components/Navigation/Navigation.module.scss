@@ -1,126 +1,111 @@
+// Seller Center sidebar — Figma "01 Product UI" (232px navy rail).
+
 .navbar {
-  background-color: var(--mantine-primary-color-filled);
-  min-height: 100vh;
-  padding: var(--mantine-spacing-md);
-  padding-bottom: 0;
   display: flex;
   flex-direction: column;
-  border-right: 1px solid var(--mantine-color-gray-3);
-
-  &[data-sidebar-state="full"] {
-    width: 300px;
-
-    @media (max-width: 992px) {
-      width: 100%;
-    }
-
-    @media (max-width: 768px) {
-      width: 100%;
-    }
-  }
-
-  &[data-sidebar-state="mini"] {
-    width: 60px;
-    padding: var(--mantine-spacing-xs);
-
-    .linkLabel,
-    .chevron {
-      display: none;
-    }
-
-    .link {
-      padding: var(--mantine-spacing-xs);
-      border-radius: var(--mantine-radius-sm);
-      margin-bottom: var(--mantine-spacing-xs);
-    }
-
-    .icon {
-      margin-right: 0;
-    }
-  }
-
-  &[data-sidebar-state="hidden"] {
-    width: 0;
-    padding: 0;
-    overflow: hidden;
-  }
-
-  @media (max-width: 992px) {
-    width: 100%;
-  }
+  min-height: 100vh;
+  height: 100%;
+  background-color: var(--ra-color-surface-inverse);
+  color: var(--ra-color-surface-white);
+  font-family: var(--ra-font-body);
 }
 
 .header {
-  padding: 0 var(--mantine-spacing-md) var(--mantine-spacing-sm) var(--mantine-spacing-md);
-  margin-left: calc(var(--mantine-spacing-md) * -1);
-  margin-right: calc(var(--mantine-spacing-md) * -1);
-  border-bottom: 1px solid var(--mantine-color-gray-3);
-  color: var(--mantine-color-white);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 23px 24px 0 26px;
+  border-bottom: 1px solid var(--ra-color-cta-secondary);
+  min-height: 89px;
 }
 
-.logo {
-  display: block;
+.brand {
+  display: flex;
+  flex-direction: column;
+  color: inherit;
+  text-decoration: none;
+}
+
+.brandName {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 31px;
+  color: var(--ra-color-surface-white);
+}
+
+.brandSub {
+  margin-left: 2px;
+  color: var(--ra-color-brand-tertiary-fixed-dim);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  line-height: 14px;
+  text-transform: uppercase;
+}
+
+.closeButton {
+  flex-shrink: 0;
+  color: var(--ra-color-surface-variant);
 }
 
 .links {
   flex: 1;
-  margin-left: calc(var(--mantine-spacing-md) * -1);
-  margin-right: calc(var(--mantine-spacing-md) * -1);
+  min-height: 0;
+  overflow-y: auto;
+  padding: 24px 12px 24px;
 }
 
-.linksInner {
-  padding-top: var(--mantine-spacing-xl);
-  padding-bottom: var(--mantine-spacing-xl);
-
-  &[data-sidebar-state="mini"] {
-    padding-top: 0;
-  }
+.group + .group {
+  margin-top: 28px;
 }
 
-.linkHeader {
+.groupLabel {
+  margin: 0 0 10px;
+  padding-left: 12px;
+  color: var(--ra-color-text-muted);
+  font-size: 10px;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.5);
-  letter-spacing: 0.5px;
+  letter-spacing: 0.08em;
+  line-height: 20px;
+  text-transform: uppercase;
 }
 
 .footer {
-  margin-left: calc(var(--mantine-spacing-md) * -1);
-  margin-right: calc(var(--mantine-spacing-md) * -1);
-  border-top: 1px solid var(--mantine-color-gray-3);
-  color: var(--mantine-color-white);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 24px;
+  padding: 24px 0 26px;
+  border-top: 1px solid var(--ra-color-cta-secondary);
+  color: inherit;
+  text-decoration: none;
 }
 
-// Theme overrides
-html[data-mantine-color-scheme="light"] {
-  .navbar {
-    background-color: var(--mantine-primary-color-filled);
-    border-right-color: var(--mantine-primary-color-filled-hover);
-  }
-
-  .header,
-  .footer {
-    color: var(--mantine-color-black);
-    border-color: var(--mantine-color-gray-2);
-  }
-
-  .linkHeader {
-    color: rgba(255, 255, 255, 0.6);
-  }
+.avatar {
+  flex-shrink: 0;
+  background-color: var(--ra-color-surface-inverse-deep);
+  color: var(--ra-color-surface-white);
+  font-size: 12px;
+  font-weight: 600;
 }
 
-html[data-mantine-color-scheme="dark"] {
-  .navbar {
-    background-color: var(--mantine-color-dark-7);
-    border-right-color: var(--mantine-color-dark-4);
-  }
+.userName {
+  overflow: hidden;
+  color: var(--ra-color-surface-white);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 20px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 
-  .header,
-  .footer {
-    color: var(--mantine-color-white);
-    border-color: var(--mantine-color-dark-4);
-  }
+.userPlan {
+  color: var(--ra-color-text-muted);
+  font-size: 11px;
+  line-height: 16px;
+  text-transform: capitalize;
+}
 
-  .linkHeader {
-    color: var(--mantine-primary-color-light-color);
-  }
+.userText {
+  min-width: 0;
 }

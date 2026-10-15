@@ -1,0 +1,98 @@
+// Export invoices modal — Figma "04 Auth & Modals › Export Invoices Modal".
+
+.formatLabel {
+  margin-bottom: 6px;
+  color: var(--ra-color-text-muted);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 20px;
+}
+
+.formats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+
+  @media (max-width: 480px) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.format {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+  min-height: 72px;
+  padding: 12px 20px;
+  border: 0;
+  border-radius: 10px;
+  background-color: var(--ra-color-surface);
+  color: var(--ra-color-text-muted);
+  font-family: var(--ra-font-body);
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 120ms ease;
+
+  &:hover:not(.formatSelected):not(.formatDisabled) {
+    background-color: var(--ra-color-surface-low);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--ra-color-brand);
+    outline-offset: 2px;
+  }
+}
+
+.formatSelected {
+  background-color: var(--ra-color-surface-inverse);
+  color: var(--ra-color-surface-white);
+}
+
+.formatDisabled {
+  cursor: not-allowed;
+}
+
+.formatHead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.formatName {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 21px;
+}
+
+.selectedTag {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  margin-left: auto;
+  padding: 0 12px;
+  border-radius: var(--ra-radius-full);
+  background-color: var(--ra-color-brand-tertiary);
+  color: var(--ra-color-surface-white);
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.formatNote {
+  font-size: 10px;
+  line-height: 14px;
+}
+
+.historyHeading {
+  padding-top: 16px;
+  border-top: 1px solid var(--ra-color-surface-variant);
+  color: var(--ra-color-text-muted);
+  font-size: 11px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.history {
+  border-radius: 8px;
+  background-color: var(--ra-color-surface);
+}

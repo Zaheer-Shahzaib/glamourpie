@@ -1,5 +1,5 @@
 
-import { Accordion, Box, BoxProps, Title, List } from "@mantine/core";
+import { Accordion, Box, BoxProps, List } from "@mantine/core";
 import classes from "./Faqs.module.scss";
 
 const FaqData = [
@@ -161,21 +161,22 @@ type FaqsProps = BoxProps;
 
 const Faqs = ({ ...others }: FaqsProps) => {
   return (
-    <Box {...others}>
-      <Title
-        order={3}
-        my='md'
-        ta='center'
-      >
-        Frequently Asked Questions
-      </Title>
+    <Box {...others} className={classes.wrapper}>
+      <h2 id="faq-title" className={classes.title}>
+        Frequently asked questions
+      </h2>
 
       <Accordion
-        radius='md'
+        radius={0}
+        variant="default"
+        aria-labelledby="faq-title"
         classNames={{
           root: classes.root,
           item: classes.item,
+          control: classes.control,
+          label: classes.label,
           panel: classes.panel,
+          content: classes.content,
           chevron: classes.chevron,
         }}
       >

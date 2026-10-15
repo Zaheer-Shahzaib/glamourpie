@@ -1,45 +1,23 @@
 "use client";
 
-import React, { use } from "react";
-
-import {
-  Button,
-  Alert,
-  Group,
-  Paper,
-  Text,
-  TextInput,
-  Title,
-  UnstyledButton,
-  rem,
-  useMantineTheme,
-} from "@mantine/core";
-import { useMediaQuery } from "@mantine/hooks";
-import { IconChevronLeft, IconInfoCircle } from "@tabler/icons-react";
-
-import { PATH_AUTH, PATH_DASHBOARD } from "../../../routes/index";
-
-import classes from "./page.module.scss";
-import Surface from "../../Surface/Surface";
-import { Link } from "react-router-dom";
-import PasswordLayout from "./layout";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { Alert, Button, PasswordInput, useMantineTheme } from "@mantine/core";
+import { IconInfoCircle, IconLock } from "@tabler/icons-react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useState } from "react";
-import { api } from "../../../Services/api";
 import { notifications } from "@mantine/notifications";
-import { set } from "lodash";
 import { useForm } from "@mantine/form";
+import { PATH_AUTH } from "../../../routes/index";
+import { api } from "../../../Services/api";
 import PasswordRules from "../../CustomComponent/passwordRules";
+import AuthShell, { authUi } from "../AuthShell";
 
 function ResetPassword() {
-  const mobile_match = useMediaQuery("(max-width: 425px)");
   const theme = useMantineTheme();
   const navigate = useNavigate();
 
-  const [newPassword, setNewPassword] = useState<string | "">("");
-  const [confirmPassword, setConfirmPassword] = useState<string | "">("");
   const [SearchParams] = useSearchParams();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
   const token = SearchParams.get("token");
   const email = SearchParams.get("email");
   const [passwordFocused, setPasswordFocused] = useState(false);
@@ -54,20 +32,19 @@ function ResetPassword() {
       newPassword: (value: string) =>
         value.length < 12 ? "Password must be at least 12 characters" : null,
 
-      confirmPassword: (value: any, values: any) =>
+      confirmPassword: (
+        value: string,
+        values: { newPassword: string; confirmPassword: string },
+      ) =>
         value !== values.newPassword ? "Passwords do not match" : null,
     },
   });
 
   const handleClick = async (values: typeof form.values) => {
-    console.log(token, email, newPassword, confirmPassword);
+    setSubmitting(true);
+    setErrorMessage(null);
     try {
-      if (newPassword !== confirmPassword) {
-        setErrorMessage("Passwords do not match");
-        return;
-      }
-      setErrorMessage(null);
-      const resp = await api.post("/api/reset-password", {
+      await api.post("/api/reset-password", {
         newPassword: values.newPassword,
         token,
         email,
@@ -87,75 +64,79 @@ function ResetPassword() {
       form.setErrors({
         newPassword: message,
       });
+    } finally {
+      setSubmitting(false);
     }
   };
 
   return (
     <>
-      <>
-        <title>Password Reset</title>
-        <meta
-          name='description'
-          content='Explore our versatile dashboard website template featuring a stunning array of themes and meticulously crafted components. Elevate your web project with seamless integration, customizable themes, and a rich variety of components for a dynamic user experience. Effortlessly bring your data to life with our intuitive dashboard template, designed to streamline development and captivate users. Discover endless possibilities in design and functionality today!'
-        />
-      </>
-      <PasswordLayout>
-        <Title ta='center'>Reset your password?</Title>
-        <Text ta='center'>Enter your new password to reset!</Text>
-
-        <Surface
-          component={Paper}
-          className={classes.card}
+      <title>Password Reset</title>
+      <meta
+        name="description"
+        content="Choose a new password for your RunAnalytic account."
+      />
+      <AuthShell
+        eyebrow="Secure your SellerCenter account"
+        headline="Choose a new password"
+        title="Choose a new password"
+        subtitle="Enter your new password to reset!"
+      >
+        <form
+          className={authUi.form}
+          onSubmit={form.onSubmit((values) => handleClick(values))}
         >
-          <form onSubmit={form.onSubmit((values) => handleClick(values))}>
-            {errorMessage && (
-              <Alert
-                variant='light'
-                c={theme.colors.red[8]}
-                radius='lg'
-                title=''
-                icon={<IconInfoCircle />}
-              >
-                {errorMessage}
-              </Alert>
-            )}
-            <TextInput
-              label='New Password'
-              type='password'
-              placeholder='Enter new password'
-              {...form.getInputProps("newPassword")}
+          {errorMessage && (
+            <Alert
+              variant="light"
+              color="red"
+              radius="md"
+              icon={<IconInfoCircle />}
+            >
+              {errorMessage}
+            </Alert>
+          )}
+
+          <div>
+            <PasswordInput
+              label="New password"
+              placeholder="Enter new password"
+              autoComplete="new-password"
+              leftSection={<IconLock size={16} />}
               required
+              {...form.getInputProps("newPassword")}
               onFocus={() => setPasswordFocused(true)}
               onBlur={() => setPasswordFocused(false)}
             />
-
             <PasswordRules
               password={form.values.newPassword}
               focused={passwordFocused}
             />
-            <TextInput
-              label='Confirm Password'
-              type='password'
-              placeholder='Confirm your password'
-              mt='md'
-              {...form.getInputProps("confirmPassword")}
-              required
-            />
-            <Group
-              justify='center'
-              mt='lg'
-              className={classes.controls}
-            >
-              <Button
-                type='submit'
-                fullWidth={mobile_match}
-              >
-                Reset password
-              </Button>
-            </Group>
-          </form>
-        </Surface>
-      </PasswordLayout>
+          </div>
+
+          <PasswordInput
+            label="Confirm password"
+            placeholder="Confirm your password"
+            autoComplete="new-password"
+            leftSection={<IconLock size={16} />}
+            required
+            {...form.getInputProps("confirmPassword")}
+          />
+
+          <Button
+            type="submit"
+            fullWidth
+            loading={submitting}
+            className={authUi.submit}
+          >
+            Reset password
+          </Button>
+
+          <Link to={PATH_AUTH.signin} className={authUi.back}>
+            ← Back to sign in
+          </Link>
+        </form>
+      </AuthShell>
     </>
   );
 }

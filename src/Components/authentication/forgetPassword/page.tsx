@@ -1,126 +1,105 @@
 "use client";
 
 import React from "react";
-
-import {
-  Button,
-  Group,
-  Paper,
-  Text,
-  TextInput,
-  Title,
-  UnstyledButton,
-  rem,
-  useMantineTheme,
-} from "@mantine/core";
-import { useMediaQuery } from "@mantine/hooks";
-import { IconChevronLeft } from "@tabler/icons-react";
-
-import { PATH_AUTH, PATH_DASHBOARD } from "../../../routes/index";
-
-import classes from "./page.module.scss";
-import Surface from "../../Surface/Surface";
+import { Alert, Button, TextInput, useMantineTheme } from "@mantine/core";
+import { useForm } from "@mantine/form";
+import { IconAt, IconInfoCircle } from "@tabler/icons-react";
 import { Link, useNavigate } from "react-router-dom";
-import PasswordLayout from "./layout";
-import { log } from "console";
-import { api } from "../../../Services/api";
 import { notifications } from "@mantine/notifications";
-
-
-
+import { PATH_AUTH } from "../../../routes/index";
+import { api } from "../../../Services/api";
+import AuthShell, { authUi } from "../AuthShell";
 
 function ForgetPassword() {
-
   const navigate = useNavigate();
   const theme = useMantineTheme();
-  const mobile_match = useMediaQuery("(max-width: 425px)");
-  const [email, setEmail] = React.useState<string | null>(null);
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
-  
-  const handleclick = async () => {
-    
+  const [submitting, setSubmitting] = React.useState(false);
+
+  const form = useForm({
+    initialValues: { email: "" },
+    validate: {
+      email: (value: string) =>
+        /^\S+@\S+\.\S+$/.test(value)
+          ? null
+          : "Please enter a valid email address",
+    },
+  });
+
+  const handleSubmit = async ({ email }: typeof form.values) => {
+    setSubmitting(true);
+    setErrorMessage(null);
     try {
-    const respo = await api.post("/api/forgot-password", { email });
-    console.log(respo);
-    if (respo.status === 200) {
-     notifications.show({
+      const respo = await api.post("/api/forgot-password", { email });
+      if (respo.status === 200) {
+        notifications.show({
           title: "Success",
           message: "A reset link has been sent to your email!",
           color: theme.colors.green[4],
           position: "top-right",
         });
-    }
-    navigate(PATH_AUTH.signin);
+      }
+      navigate(PATH_AUTH.signin);
     } catch (error: any) {
       const message = error.response?.data?.message;
-      setErrorMessage(message || "An error occurred during login.");
+      setErrorMessage(message || "An error occurred. Please try again.");
+    } finally {
+      setSubmitting(false);
     }
-    
-    
-
-  }
-
+  };
 
   return (
     <>
-      <>
-        <title>Forgot your password</title>
-        <meta
-          name='description'
-          content='Explore our versatile dashboard website template featuring a stunning array of themes and meticulously crafted components. Elevate your web project with seamless integration, customizable themes, and a rich variety of components for a dynamic user experience. Effortlessly bring your data to life with our intuitive dashboard template, designed to streamline development and captivate users. Discover endless possibilities in design and functionality today!'
-        />
-      </>
-      <PasswordLayout>
-        <Title ta='center'>Forgot your password?</Title>
-        <Text ta='center'>Enter your email to get a reset link</Text>
+      <title>Forgot your password</title>
+      <meta
+        name="description"
+        content="Request a password-reset link for your RunAnalytic account."
+      />
+      <AuthShell
+        eyebrow="Enter your email and we will help you get back in."
+        headline="Reset your password"
+        title="Reset your password"
+        subtitle="Enter your email and we will help you get back in."
+      >
+        <form className={authUi.form} onSubmit={form.onSubmit(handleSubmit)}>
+          {errorMessage && (
+            <Alert
+              variant="light"
+              color="red"
+              radius="md"
+              icon={<IconInfoCircle />}
+            >
+              {errorMessage}
+            </Alert>
+          )}
 
-        <Surface
-          component={Paper}
-          className={classes.card}
-        >
           <TextInput
-            label='Your email'
-            placeholder='me@email.com'
+            label="Email address"
+            placeholder="alex@example.com"
             required
-            onChange={(e) => setEmail(e.target.value)}
+            autoComplete="email"
+            leftSection={<IconAt size={16} />}
+            {...form.getInputProps("email")}
           />
-          <Group
-            justify='space-between'
-            mt='lg'
-            className={classes.controls}
+
+          <Button
+            type="submit"
+            fullWidth
+            loading={submitting}
+            className={authUi.submit}
           >
-            <UnstyledButton
-              component={Link}
-              to={PATH_AUTH.signin}
-              color='dimmed'
-              className={classes.control}
-            >
-              <Group
-                gap={2}
-                align='center'
-              >
-                <IconChevronLeft
-                  stroke={1.5}
-                  style={{ width: rem(14), height: rem(14) }}
-                />
-                <Text
-                  size='sm'
-                  ml={5}
-                >
-                  Back to the login page
-                </Text>
-              </Group>
-            </UnstyledButton>
-            <Button
-              
-              fullWidth={mobile_match}
-              onClick={handleclick}
-            >
-              Reset password
-            </Button>
-          </Group>
-        </Surface>
-      </PasswordLayout>
+            Send reset link
+          </Button>
+
+          <p className={authUi.note}>
+            We will send a secure password-reset link to your email.
+          </p>
+
+          <Link to={PATH_AUTH.signin} className={authUi.back}>
+            ← Back to sign in
+          </Link>
+        </form>
+      </AuthShell>
     </>
   );
 }

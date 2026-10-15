@@ -1,26 +1,32 @@
 import { useState, useEffect } from "react";
 import {
-  Container,
-  Paper,
-  Title,
-  Text,
-  Stack,
-  Group,
   Button,
   TextInput,
   Select,
   Switch,
   NumberInput,
-  Divider,
   Skeleton,
 } from "@mantine/core";
 import { useAuth } from "../../Context/useAuth";
 import { notifications } from "@mantine/notifications";
 import MainLayout from "../../layout/Main";
 import {
+  AppCard,
+  PageHeader,
+  StatusPill,
+  appButton,
+} from "../../Components/AppUi";
+import {
   fetchSellerSettings,
   updateSellerSettings,
 } from "../../Services/settings-services";
+import classes from "./Settings.module.scss";
+
+const switchClassNames = {
+  root: classes.switchRoot,
+  body: classes.switchBody,
+  labelWrapper: classes.switchLabelWrap,
+};
 
 export default function SettingsInvoicesPage() {
   const { token } = useAuth();
@@ -87,32 +93,36 @@ export default function SettingsInvoicesPage() {
     }
   };
 
+  const prefix = settings.invoicePrefix || "INV";
+  const sampleNumber = `${prefix}-${new Date().getFullYear()}-0001`;
+
   return (
     <MainLayout>
-      <Container size="lg" py="xl">
-        <Paper p="xl" radius="md" withBorder>
-          <Stack gap="md">
-            <div>
-              <Title order={3}>Invoice Settings</Title>
-              <Text size="sm" c="dimmed">
-                Configure invoice generation preferences
-              </Text>
-            </div>
+      <PageHeader
+        title="Invoice settings"
+        subtitle="Configure invoice generation, VAT, and Amazon submission preferences."
+      />
 
-            <Divider />
+      <div className={classes.twoCol}>
+        <AppCard className={classes.panel}>
+          {loading ? (
+            <>
+              <Skeleton height={24} radius="sm" mb="md" />
+              <Skeleton height={48} radius="sm" mb="md" />
+              <Skeleton height={48} radius="sm" mb="md" />
+              <Skeleton height={42} radius="sm" mb="md" />
+              <Skeleton height={42} radius="sm" />
+            </>
+          ) : (
+            <>
+              <h2 className={classes.sectionTitle}>Automation</h2>
 
-            {loading ? (
-              <>
-                <Skeleton height={24} radius="sm" />
-                <Skeleton height={24} radius="sm" />
-                <Skeleton height={36} radius="sm" />
-                <Skeleton height={36} radius="sm" />
-              </>
-            ) : (
-              <>
+              <div className={classes.switchRow}>
                 <Switch
+                  classNames={switchClassNames}
+                  labelPosition="left"
                   label="Auto-generate invoices for new orders"
-                  description="Automatically create PDFs every 30 minutes for newly shipped orders"
+                  description="Create PDF invoices automatically after an order ships (checked every 30 minutes)."
                   checked={settings.autoGenerateInvoices}
                   onChange={(e) =>
                     setSettings({
@@ -121,10 +131,14 @@ export default function SettingsInvoicesPage() {
                     })
                   }
                 />
+              </div>
 
+              <div className={classes.switchRow}>
                 <Switch
+                  classNames={switchClassNames}
+                  labelPosition="left"
                   label="Auto-upload invoices to Amazon"
-                  description="Automatically submit generated invoices to Amazon via the Feeds API"
+                  description="Submit generated invoices through the Feeds API."
                   checked={settings.autoUploadToAmazon}
                   onChange={(e) =>
                     setSettings({
@@ -133,21 +147,24 @@ export default function SettingsInvoicesPage() {
                     })
                   }
                 />
+              </div>
 
+              <h2 className={`${classes.sectionTitle} ${classes.sectionGap}`}>
+                Invoice identity
+              </h2>
+
+              <div className={classes.fieldGrid}>
                 <TextInput
-                  label="Invoice Prefix"
-                  description={`Invoice numbers will be formatted as: ${settings.invoicePrefix || "INV"}-2026-0001`}
+                  label="Invoice prefix"
                   placeholder="e.g., GP or INV"
                   value={settings.invoicePrefix}
                   onChange={(e) =>
                     setSettings({ ...settings, invoicePrefix: e.target.value })
                   }
-                  size="sm"
                   maxLength={20}
                 />
-
                 <Select
-                  label="Invoice Template"
+                  label="Invoice template"
                   value={settings.invoiceTemplate}
                   onChange={(value) =>
                     setSettings({
@@ -156,30 +173,34 @@ export default function SettingsInvoicesPage() {
                     })
                   }
                   data={[
-                    { value: "simple", label: "Simple Template" },
+                    { value: "simple", label: "Simple template" },
                     {
                       value: "premium",
-                      label: "Premium Template",
+                      label: "Premium template",
                       disabled: true,
                     },
                   ]}
-                  size="sm"
+                  allowDeselect={false}
                 />
 
-                <Switch
-                  label="Include VAT in invoices"
-                  checked={settings.includeVAT}
-                  onChange={(e) =>
-                    setSettings({
-                      ...settings,
-                      includeVAT: e.currentTarget.checked,
-                    })
-                  }
-                />
+                <div className={classes.fullWidth}>
+                  <Switch
+                    classNames={switchClassNames}
+                    labelPosition="left"
+                    label="Include VAT in invoices"
+                    checked={settings.includeVAT}
+                    onChange={(e) =>
+                      setSettings({
+                        ...settings,
+                        includeVAT: e.currentTarget.checked,
+                      })
+                    }
+                  />
+                </div>
 
                 {settings.includeVAT && (
                   <NumberInput
-                    label="VAT Rate (%)"
+                    label="VAT rate (%)"
                     placeholder="Enter VAT rate"
                     value={settings.vatRate}
                     onChange={(value) =>
@@ -188,20 +209,69 @@ export default function SettingsInvoicesPage() {
                     min={0}
                     max={100}
                     step={0.1}
-                    size="sm"
+                    decimalScale={2}
+                    fixedDecimalScale
                   />
                 )}
-              </>
-            )}
+                <TextInput
+                  label="Currency"
+                  value="Per marketplace"
+                  description="Invoices use each order's marketplace currency"
+                  disabled
+                />
+              </div>
 
-            <Group justify="flex-end" mt="md">
-              <Button onClick={handleSave} loading={saving} disabled={loading}>
-                Save Settings
-              </Button>
-            </Group>
-          </Stack>
-        </Paper>
-      </Container>
+              <p className={classes.note}>
+                Invoice numbers will be formatted as {sampleNumber}.
+              </p>
+            </>
+          )}
+
+          <div className={classes.footer}>
+            <Button
+              className={appButton("primary")}
+              onClick={handleSave}
+              loading={saving}
+              disabled={loading}
+            >
+              Save settings
+            </Button>
+          </div>
+        </AppCard>
+
+        {/* ── Live preview ─────────────────────────────────── */}
+        <AppCard tone="dark" className={classes.preview}>
+          <h2 className={classes.previewTitle}>Live preview</h2>
+          <p className={classes.previewSub}>Generated invoice</p>
+
+          <div className={classes.sheet}>
+            <span className={classes.sheetBrand}>RUNANALYTIC</span>
+            <span className={classes.sheetTitle}>
+              {settings.includeVAT ? "TAX INVOICE" : "INVOICE"}
+            </span>
+            <div className={classes.sheetRow}>
+              <span>Invoice number</span>
+              <span>{sampleNumber}</span>
+            </div>
+            <div className={classes.sheetDivider} />
+            <div className={classes.sheetRow}>
+              <span>Order</span>
+              <span className={classes.sheetOrder}>#401-8821</span>
+            </div>
+            <div className={classes.sheetRow}>
+              <span>Total</span>
+              <span className={classes.sheetTotal}>249.00</span>
+            </div>
+            {settings.includeVAT && (
+              <div>
+                <StatusPill tone="info">
+                  {`VAT ${settings.vatRate ?? 0}% INCLUDED`}
+                </StatusPill>
+              </div>
+            )}
+          </div>
+        </AppCard>
+      </div>
     </MainLayout>
   );
 }

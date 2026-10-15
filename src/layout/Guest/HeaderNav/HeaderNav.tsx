@@ -1,202 +1,243 @@
-import {
-  Box,
-  Burger,
-  Button,
-  Container,
-  Drawer,
-  Group,
-  Menu,
-  rem,
-  ScrollArea,
-  Tooltip,
-  useMantineColorScheme,
-  useMantineTheme,
-  Image,
-  Text,
-} from "@mantine/core";
-import { useDisclosure, useMediaQuery } from "@mantine/hooks";
-import {
-  IconCircleHalf2,
-  IconLogin2,
-  IconMoonStars,
-  IconSunHigh,
-  IconUserCircle,
-} from "@tabler/icons-react";
+import { useEffect, useState } from "react";
+import { Burger, Drawer } from "@mantine/core";
+import { useDisclosure } from "@mantine/hooks";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import classes from "./HeaderNav.module.scss";
-import { Link, useNavigate } from "react-router-dom";
 import { PATH_AUTH, PATH_PAGES } from "../../../routes";
 import { useScroll } from "../../../Context/scrollContext";
 import { useAuth } from "../../../Context/useAuth";
+import Wordmark from "../../../Components/Brand/Wordmark";
 
-const logo = "/run-analytics.png";
+export type GuestVariant = "default" | "landing";
 
-const HeaderNav = () => {
+type HeaderNavProps = {
+  /**
+   * "default"  – navy header used by legal / informational pages.
+   * "landing"  – light header with announcement bar used by the home page.
+   */
+  variant?: GuestVariant;
+};
+
+type NavItem = {
+  link: string;
+  label: string;
+  sectionId?: string;
+  onClick?: () => void;
+};
+
+const LANDING_SECTIONS = [
+  { id: "features", label: "Product Features" },
+  { id: "how-it-works", label: "How It Works" },
+  { id: "compliance", label: "Compliance (UAE & KSA VAT)" },
+  { id: "case-studies", label: "Case Studies" },
+  { id: "pricing", label: "Pricing" },
+];
+
+/** Highlights the nav item whose section is currently in view on the landing page. */
+const useActiveSection = (ids: string[], enabled: boolean) => {
+  const [activeId, setActiveId] = useState<string>(ids[0]);
+
+  useEffect(() => {
+    if (!enabled || typeof IntersectionObserver === "undefined") return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+        if (visible) setActiveId(visible.target.id);
+      },
+      { rootMargin: "-30% 0px -55% 0px", threshold: [0, 0.25, 0.5, 1] },
+    );
+
+    ids.forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) observer.observe(el);
+    });
+
+    return () => observer.disconnect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [enabled, ids.join("|")]);
+
+  return activeId;
+};
+
+const HeaderNav = ({ variant = "default" }: HeaderNavProps) => {
+  const isLanding = variant === "landing";
   const { navigateToSection } = useScroll();
   const navigate = useNavigate();
-  const MOCK_DATA = [
+  const location = useLocation();
+  const { isAuthenticated, logout } = useAuth();
+  const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] =
+    useDisclosure(false);
+
+  const activeSectionId = useActiveSection(
+    LANDING_SECTIONS.map((section) => section.id),
+    isLanding,
+  );
+
+  const defaultItems: NavItem[] = [
     { link: PATH_PAGES.root, label: "Home" },
     { link: PATH_PAGES.about, label: "About Us" },
-    {
-      label: "Services",
-      link: PATH_PAGES.services,
-      // onClick: () => navigateToSection("services", "/"),
-    },
+    { link: PATH_PAGES.services, label: "Services" },
     {
       link: PATH_PAGES.root,
       label: "Pricing",
       onClick: () => navigateToSection("pricing", "/"),
     },
-    { link: PATH_PAGES.privacy, label: "Privacy Policy" },
-    { link: PATH_PAGES.terms, label: "Terms of Service" },
-
-    { link: PATH_PAGES.contact, label: "Contact Us" },
+    { link: PATH_PAGES.privacy, label: "Privacy" },
+    { link: PATH_PAGES.terms, label: "Terms" },
+    { link: PATH_PAGES.contact, label: "Contact" },
   ];
 
-  const ICON_SIZE = 20;
-  const theme = useMantineTheme();
-  const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] =
-    useDisclosure(false);
-  const { setColorScheme, colorScheme } = useMantineColorScheme();
-  const tablet_match = useMediaQuery("(max-width: 768px)");
-  const { isAuthenticated, logout } = useAuth();
-  const items = MOCK_DATA.map((link, index) => (
-    <a
-      key={`${link.label}-${index}`}
-      href={link.link || "#"}
-      className={classes.link}
-      onClick={(e) => {
-        e.preventDefault();
-        link.onClick ? link.onClick() : (window.location.href = link.link);
-      }}
-    >
-      {link.label}
-    </a>
-  ));
+  const landingItems: NavItem[] = LANDING_SECTIONS.map((section) => ({
+    link: PATH_PAGES.root,
+    label: section.label,
+    sectionId: section.id,
+    onClick: () => navigateToSection(section.id, PATH_PAGES.root),
+  }));
+
+  const items = isLanding ? landingItems : defaultItems;
+
+  const isActive = (item: NavItem) =>
+    item.sectionId
+      ? item.sectionId === activeSectionId
+      : !item.onClick && location.pathname === item.link;
 
   const handleLogout = () => {
     logout();
     navigate("/");
   };
-  return (
-    <Box>
-      <header className={classes.header}>
-        <Container
-          classNames={{ root: classes.inner }}
-          fluid
+
+  const renderLinks = (onNavigate?: () => void) =>
+    items.map((item, index) => (
+      <a
+        key={`${item.label}-${index}`}
+        href={item.link || "#"}
+        className={classes.link}
+        data-active={isActive(item) || undefined}
+        aria-current={isActive(item) && !item.sectionId ? "page" : undefined}
+        onClick={(e) => {
+          e.preventDefault();
+          onNavigate?.();
+          if (item.onClick) {
+            item.onClick();
+          } else {
+            window.location.href = item.link;
+          }
+        }}
+      >
+        {item.label}
+      </a>
+    ));
+
+  const renderActions = () => (
+    <>
+      {!isAuthenticated && (
+        <Link
+          to={PATH_AUTH.signin}
+          className={classes.signIn}
+          onClick={closeDrawer}
         >
-          <Group
-            gap='xs'
-            display={{ base: "none", sm: "flex" }}
-            className={classes.links}
-          >
-            <Link to={PATH_PAGES.root}>
-              <Image
-                className='logo'
-                src={`${process.env.PUBLIC_URL}/run-analytics.png`}
-                alt='logo'
-                style={{ height: 100 }}
-              />
-            </Link>
-            {items}
-          </Group>
+          {isLanding ? "Sign In" : "Sign in \u2192"}
+        </Link>
+      )}
+      {isAuthenticated && (
+        <button
+          type="button"
+          className={classes.signIn}
+          onClick={() => {
+            closeDrawer();
+            handleLogout();
+          }}
+        >
+          Logout
+        </button>
+      )}
+      {isLanding && (
+        <Link
+          to={PATH_AUTH.signup}
+          className={classes.cta}
+          onClick={closeDrawer}
+        >
+          Start Free Trial
+        </Link>
+      )}
+    </>
+  );
+
+  return (
+    <div className={`${classes.header} ${classes[variant]}`}>
+      {isLanding && (
+        <div className={classes.announcement}>
+          <div className={classes.announcementInner}>
+            <span className={classes.announcementBadge}>NEW</span>
+            <span className={classes.announcementText}>
+              Certified Amazon SP-API Partner for UAE (FTA) &amp; Saudi Arabia
+              (ZATCA Phase 2) &mdash; Explore New E-Invoicing Updates
+            </span>
+            <button
+              type="button"
+              className={classes.announcementArrow}
+              aria-label="Explore compliance details"
+              onClick={() => navigateToSection("compliance", PATH_PAGES.root)}
+            >
+              &rarr;
+            </button>
+          </div>
+        </div>
+      )}
+
+      <div className={classes.bar}>
+        <div className={classes.inner}>
+          <Wordmark
+            to={PATH_PAGES.root}
+            tone={isLanding ? "onLight" : "onDark"}
+            tagline={isLanding ? "MENA SP-API PARTNER" : "LEAD WITH INTELLIGENCE"}
+          />
+
+          <nav className={classes.nav} aria-label="Primary">
+            {renderLinks()}
+          </nav>
+
+          <div className={classes.actions}>{renderActions()}</div>
+
           <Burger
             opened={drawerOpened}
             onClick={toggleDrawer}
-            color='white'
-            size='sm'
-            className={classes.hiddenDesktop}
+            color={isLanding ? "var(--ra-color-surface-inverse)" : "white"}
+            size="sm"
+            className={classes.burger}
+            aria-label={drawerOpened ? "Close navigation" : "Open navigation"}
           />
-          <Group
-            gap='sm'
-            style={{ marginLeft: "auto" }}
-          >
-            {
-              !isAuthenticated && (
-                <Button
-                  component={Link}
-                  to={PATH_AUTH.signin}
-                  variant='transparent'
-                  c='white'
-                  leftSection={<IconLogin2 size={20} />}
-                  className={classes.link}
-                >
-                  Sign In
-                </Button>
-              )
-              // : loading ? (
-              //   <Text c='white'>Loading...</Text>
-              // ) : (
-              //   <Text c='white'>Hello, {profile?.username}</Text>
-              // )
-            }
-
-            {isAuthenticated && (
-              <Button
-                onClick={handleLogout}
-                variant='transparent'
-                c='white'
-                leftSection={<IconLogin2 size={20} />}
-                className={classes.link}
-              >
-                Logout
-              </Button>
-            )}
-          </Group>
-        </Container>
-      </header>
+        </div>
+      </div>
 
       <Drawer
         opened={drawerOpened}
         onClose={closeDrawer}
-        size='100%'
-        padding='md'
-        title={
-          <Link
-            to='/'
-            className={classes.logoLink}
-            style={{ marginLeft: "30px" }}
-          >
-            <Image
-              src={logo}
-              height={15}
-              width={60}
-              // fit="contain"
-              alt='Company Logo'
-              // className={classes.logo}
-              style={{
-                width: 100,
-                height: 24,
-              }}
-            />
-          </Link>
-        }
-        className={classes.hiddenDesktop}
+        size="100%"
+        padding="md"
         zIndex={1000}
-        transitionProps={{
-          transition: tablet_match ? "slide-up" : "slide-left",
-        }}
+        title={
+          <Wordmark
+            to={PATH_PAGES.root}
+            tone={isLanding ? "onLight" : "onDark"}
+            tagline={isLanding ? "MENA SP-API PARTNER" : "LEAD WITH INTELLIGENCE"}
+          />
+        }
         classNames={{
-          content: classes.drawerContent,
+          content: `${classes.drawerContent} ${classes[variant]}`,
           header: classes.drawerHeader,
-          body: classes.drawerBody,
+          close: classes.drawerClose,
         }}
       >
-        <ScrollArea
-          h={`calc(100vh - ${rem(60)})`}
-          mx='-md'
-          scrollbarSize={0}
-        >
-          <Group
-            display={{ base: "flex" }}
-            className={classes.links}
-            style={{ flexDirection: "column" }}
-            align='start'
-          >
-            {items}
-          </Group>
-        </ScrollArea>
+        <nav className={classes.drawerNav} aria-label="Mobile">
+          {renderLinks(closeDrawer)}
+          <div className={classes.drawerActions}>{renderActions()}</div>
+        </nav>
       </Drawer>
-    </Box>
+    </div>
   );
 };
 

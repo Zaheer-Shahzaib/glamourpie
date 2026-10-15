@@ -1,0 +1,13 @@
+.header {
+  background-color: transparent;
+}
+
+.main {
+  background-color: var(--ra-color-page-bg);
+  font-family: var(--ra-font-body);
+  color: var(--ra-color-text-primary);
+
+  &.landing {
+    background-color: var(--ra-color-surface);
+  }
+}

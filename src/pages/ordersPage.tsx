@@ -1,34 +1,23 @@
 import { useState, useMemo } from "react";
 import {
-  Container,
-  Paper,
-  Title,
   Text,
-  Stack,
   Group,
-  Badge,
   Table,
   Button,
   Select,
   TextInput,
-  Grid,
   ActionIcon,
   Tooltip,
-  Modal,
-  SimpleGrid,
-  ThemeIcon,
 } from "@mantine/core";
 import {
   IconEye,
   IconCheck,
   IconX,
-  IconClock,
-  IconCurrencyDollar,
-  IconShoppingCart,
-  IconFilter,
   IconFileInvoice,
-  IconTruck,
   IconSearch,
+  IconArrowRight,
+  IconChevronLeft,
+  IconChevronRight,
 } from "@tabler/icons-react";
 import { DatePickerInput } from "@mantine/dates";
 import { useAuth } from "../Context/useAuth";
@@ -40,7 +29,26 @@ import { fetchOrderDetails } from "../Services/order-services";
 import { generateManualInvoice } from "../Services/invoice-services";
 import { OrderStatus, OrderQueryParams } from "../types/order.types";
 import MainLayout from "../layout/Main";
+import OrderDetailsModal from "../Components/Orders/OrderDetailsModal";
+import OrderRevenueCard from "../Components/Orders/OrderRevenueCard";
 import CountUp from "react-countup";
+import {
+  AppCard,
+  CardHeader,
+  PageHeader,
+  StatusPill,
+  appButton,
+  cx,
+  orderStatusTone,
+} from "../Components/AppUi";
+import {
+  formatCurrency,
+  formatStatusLabel,
+  getBuyerName,
+  getOrderStatus,
+  getOrderTotal,
+} from "../utils/orderFields";
+import classes from "./OrdersPage.module.scss";
 
 // Statuses that are eligible for invoice generation
 const INVOICEABLE_STATUSES = new Set([
@@ -51,27 +59,6 @@ const INVOICEABLE_STATUSES = new Set([
   "PARTIALLY_SHIPPED",
   "PartiallyShipped",
 ]);
-
-const getStatusColor = (status: OrderStatus): string => {
-  switch (status) {
-    case "PENDING":
-    case "UNSHIPPED":
-    case "PENDING_AVAILABILITY":
-      return "orange";
-    case "SHIPPED":
-    case "PARTIALLY_SHIPPED":
-      return "blue";
-    case "DELIVERED":
-      return "green";
-    case "CANCELLED":
-    case "UNFULFILLABLE":
-      return "red";
-    case "INVOICE_UNCONFIRMED":
-      return "yellow";
-    default:
-      return "gray";
-  }
-};
 
 const formatDate = (dateString: string): string => {
   const date = new Date(dateString);
@@ -84,11 +71,78 @@ const formatDate = (dateString: string): string => {
   });
 };
 
-const formatCurrency = (amount: number, currency: string): string => {
-  return `${currency} ${amount.toLocaleString("en-US", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })}`;
+/** Item count: sum quantityOrdered across orderItems */
+const getItemCount = (order: any): number =>
+  order.orderItems
+    ? order.orderItems.reduce(
+        (sum: number, i: any) => sum + (i.quantityOrdered || 1),
+        0,
+      )
+    : (order.numberOfItemsShipped ?? 0) + (order.numberOfItemsUnshipped ?? 0);
+
+const formatTime = (dateString?: string): string =>
+  dateString
+    ? new Date(dateString).toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    : "";
+
+type OrdersView = "cards" | "table";
+
+/** Mantine 8 date pickers use "YYYY-MM-DD" strings */
+type DateRange = [string | null, string | null];
+const EMPTY_RANGE: DateRange = [null, null];
+
+const toDateString = (d: Date): string =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(
+    d.getDate(),
+  ).padStart(2, "0")}`;
+
+/** Parse "YYYY-MM-DD" (or a Date) as a LOCAL date, avoiding UTC shifts */
+const parseLocalDate = (value: string | Date | null): Date | null => {
+  if (!value) return null;
+  if (value instanceof Date) return new Date(value);
+  const [y, m, d] = value.split("-").map(Number);
+  return new Date(y, (m || 1) - 1, d || 1);
+};
+
+const daysAgo = (n: number): string => {
+  const d = new Date();
+  d.setDate(d.getDate() - n);
+  return toDateString(d);
+};
+
+const DATE_PRESETS: { label: string; range: () => DateRange }[] = [
+  { label: "Today", range: () => [daysAgo(0), daysAgo(0)] },
+  { label: "Last 7 days", range: () => [daysAgo(6), daysAgo(0)] },
+  { label: "Last 30 days", range: () => [daysAgo(29), daysAgo(0)] },
+  {
+    label: "This month",
+    range: () => {
+      const now = new Date();
+      return [toDateString(new Date(now.getFullYear(), now.getMonth(), 1)), daysAgo(0)];
+    },
+  },
+];
+
+const formatRangeLabel = (range: DateRange): string => {
+  const fmt = (d: Date, withYear: boolean) =>
+    d.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      ...(withYear ? { year: "numeric" } : {}),
+    });
+  const from = parseLocalDate(range[0]);
+  const to = parseLocalDate(range[1]);
+  if (from && to) {
+    return from.getTime() === to.getTime()
+      ? fmt(from, true)
+      : `${fmt(from, false)} – ${fmt(to, true)}`;
+  }
+  if (from) return `From ${fmt(from, true)}`;
+  if (to) return `Until ${fmt(to, true)}`;
+  return "Loaded orders";
 };
 
 export default function OrdersPage() {
@@ -105,15 +159,13 @@ export default function OrdersPage() {
   // ── Filter controls (Inputs) ─────────────
   const [statusInput, setStatusInput] = useState<OrderStatus | null>(null);
   const [orderIdInput, setOrderIdInput] = useState<string>("");
-  const [dateRangeInput, setDateRangeInput] = useState<
-    [Date | null, Date | null]
-  >([null, null]);
+  const [dateRangeInput, setDateRangeInput] = useState<DateRange>(EMPTY_RANGE);
 
   // ── Applied Filters (Used by useMemo) ────
   const [appliedFilters, setAppliedFilters] = useState({
     status: null as OrderStatus | null,
     orderId: "",
-    dateRange: [null, null] as [Date | null, Date | null],
+    dateRange: EMPTY_RANGE,
   });
 
   // Order details modal state
@@ -122,6 +174,7 @@ export default function OrdersPage() {
   const [detailsModalOpened, setDetailsModalOpened] = useState(false);
   const [detailsLoading, setDetailsLoading] = useState(false);
   const [generatingId, setGeneratingId] = useState<string | null>(null);
+  const [view, setView] = useState<OrdersView>("cards");
 
   // Client only sends nextToken; backend owns createdAfter/createdBefore
   const orderQueryParams = useMemo<OrderQueryParams>(() => {
@@ -167,7 +220,10 @@ export default function OrdersPage() {
   };
 
   // Raw SP-API order objects — unchanged from backend payload
-  const rawOrders = ordersData?.payload?.orders ?? [];
+  const rawOrders = useMemo(
+    () => ordersData?.payload?.orders ?? [],
+    [ordersData],
+  );
   const hasMore = Boolean(
     ordersData?.payload?.hasMore ?? ordersData?.payload?.nextToken,
   );
@@ -183,19 +239,29 @@ export default function OrdersPage() {
       });
     }
 
+    // Search matches the order ID, the buyer name or any item SKU
     if (appliedFilters.orderId.trim()) {
       const search = appliedFilters.orderId.trim().toLowerCase();
-      result = result.filter((o) => o.orderId?.toLowerCase().includes(search));
+      result = result.filter((o) => {
+        const skus = (o.orderItems || []).map((i: any) =>
+          String(i.product?.sellerSku || i.sellerSku || i.sku || "").toLowerCase(),
+        );
+        return (
+          o.orderId?.toLowerCase().includes(search) ||
+          getBuyerName(o).toLowerCase().includes(search) ||
+          skus.some((sku: string) => sku.includes(search))
+        );
+      });
     }
 
-    if (appliedFilters.dateRange[0]) {
-      const from = new Date(appliedFilters.dateRange[0]);
+    const from = parseLocalDate(appliedFilters.dateRange[0]);
+    if (from) {
       from.setHours(0, 0, 0, 0);
       result = result.filter((o) => new Date(o.createdTime) >= from);
     }
 
-    if (appliedFilters.dateRange[1]) {
-      const to = new Date(appliedFilters.dateRange[1]);
+    const to = parseLocalDate(appliedFilters.dateRange[1]);
+    if (to) {
       to.setHours(23, 59, 59, 999);
       result = result.filter((o) => new Date(o.createdTime) <= to);
     }
@@ -221,9 +287,34 @@ export default function OrdersPage() {
   const handleClearFilters = () => {
     setStatusInput(null);
     setOrderIdInput("");
-    setDateRangeInput([null, null]);
-    setAppliedFilters({ status: null, orderId: "", dateRange: [null, null] });
+    setDateRangeInput(EMPTY_RANGE);
+    setAppliedFilters({ status: null, orderId: "", dateRange: EMPTY_RANGE });
   };
+
+  /** Date range filters apply immediately (no need to press Apply) */
+  const handleDateRangeChange = (range: DateRange) => {
+    setDateRangeInput(range);
+    // wait until both ends are picked, or the range is cleared
+    if ((range[0] && range[1]) || (!range[0] && !range[1])) {
+      setAppliedFilters((prev) => ({ ...prev, dateRange: range }));
+    }
+  };
+
+  // Window covered by the currently loaded SP-API page
+  const loadedWindow = useMemo(() => {
+    const times = rawOrders
+      .map((o: any) => new Date(o.createdTime).getTime())
+      .filter((t: number) => Number.isFinite(t));
+    if (times.length === 0) return null;
+    return formatRangeLabel([
+      toDateString(new Date(Math.min(...times))),
+      toDateString(new Date(Math.max(...times))),
+    ]);
+  }, [rawOrders]);
+
+  const dateFilterActive = Boolean(
+    appliedFilters.dateRange[0] || appliedFilters.dateRange[1],
+  );
 
   const handleNextPage = () => {
     const nextToken = ordersData?.payload?.nextToken;
@@ -305,712 +396,486 @@ export default function OrdersPage() {
     }
   };
 
+  const totalCount = stats?.totalOrders ?? filteredOrders.length;
+  const pctOfOrders = (n: number) =>
+    stats && stats.totalOrders > 0
+      ? `${Math.round((n / stats.totalOrders) * 100)}% of orders`
+      : "—";
+  const summaryItems: {
+    label: string;
+    value: number;
+    meta: string;
+    accent: "brand" | "tertiary" | "danger";
+  }[] = stats
+    ? [
+        {
+          label: "Total orders",
+          value: stats.totalOrders,
+          meta: formatCurrency(stats.totalRevenue, stats.currencyCode),
+          accent: "brand",
+        },
+        {
+          label: "Shipped",
+          value: stats.shippedOrders,
+          meta: pctOfOrders(stats.shippedOrders),
+          accent: "tertiary",
+        },
+        {
+          label: "Processing",
+          value: stats.pendingOrders,
+          meta: pctOfOrders(stats.pendingOrders),
+          accent: "tertiary",
+        },
+        {
+          label: "Cancelled",
+          value: stats.cancelledOrders,
+          meta: pctOfOrders(stats.cancelledOrders),
+          accent: "danger",
+        },
+      ]
+    : [];
+
   return (
     <MainLayout>
-      <Container fluid py="xl">
-        <Stack gap="lg">
-          {/* Header */}
-          <Group justify="space-between">
-            <div>
-              <Title order={2}>Orders</Title>
-              <Text c="dimmed" size="sm">
-                View and manage your Amazon orders
-              </Text>
-            </div>
-          </Group>
+      <PageHeader
+        title="Orders"
+        subtitle="Track Amazon orders, fulfillment, buyers, and invoice actions in one view."
+      />
 
-          {/* Statistics */}
-          {stats && (
-            <SimpleGrid cols={{ base: 1, sm: 2, md: 3, lg: 4 }} spacing="md">
-              <Paper p="md" radius="md" withBorder>
-                <Group justify="space-between">
-                  <div>
-                    <Text size="xs" c="dimmed" tt="uppercase" fw={700}>
-                      Total Orders
-                    </Text>
-                    <Text fw={700} size="xl" mt="xs">
-                      <CountUp end={stats.totalOrders} duration={1.5} />
-                    </Text>
-                  </div>
-                  <ThemeIcon color="blue" size={44} radius="md" variant="light">
-                    <IconShoppingCart size={24} stroke={1.5} />
-                  </ThemeIcon>
-                </Group>
-              </Paper>
+      {/* Filters */}
+      <AppCard className={classes.filters}>
+        <div className={classes.filterGrid}>
+          <TextInput
+            label="Search orders"
+            placeholder="Search by order ID, buyer, or SKU"
+            value={orderIdInput}
+            onChange={(e) => setOrderIdInput(e.currentTarget.value)}
+            leftSection={<IconSearch size={16} />}
+            onKeyDown={(e) => e.key === "Enter" && handleApplyFilters()}
+          />
+          <Select
+            label="Status"
+            placeholder="All statuses"
+            value={statusInput}
+            onChange={(value) => setStatusInput(value as OrderStatus)}
+            data={[
+              { value: "PENDING", label: "Pending" },
+              { value: "UNSHIPPED", label: "Unshipped" },
+              { value: "PARTIALLY_SHIPPED", label: "Partially Shipped" },
+              { value: "SHIPPED", label: "Shipped" },
+              { value: "DELIVERED", label: "Delivered" },
+              { value: "CANCELLED", label: "Cancelled" },
+              { value: "UNFULFILLABLE", label: "Unfulfillable" },
+              { value: "INVOICE_UNCONFIRMED", label: "Invoice Unconfirmed" },
+            ]}
+            clearable
+          />
+          <DatePickerInput
+            type="range"
+            label="Purchase date range"
+            placeholder="Select date range"
+            value={dateRangeInput}
+            onChange={(val) => handleDateRangeChange(val as DateRange)}
+            maxDate={new Date()}
+            clearable
+          />
+          <div className={classes.filterActions}>
+            <Button className={appButton("light")} onClick={handleClearFilters}>
+              Clear
+            </Button>
+            <Button
+              className={appButton("primary")}
+              rightSection={<IconArrowRight size={14} />}
+              onClick={handleApplyFilters}
+            >
+              Apply filters
+            </Button>
+          </div>
+        </div>
 
-              <Paper p="md" radius="md" withBorder>
-                <Group justify="space-between">
-                  <div>
-                    <Text size="xs" c="dimmed" tt="uppercase" fw={700}>
-                      Pending
-                    </Text>
-                    <Text fw={700} size="xl" mt="xs">
-                      <CountUp end={stats.pendingOrders} duration={1.5} />
-                    </Text>
-                  </div>
-                  <ThemeIcon
-                    color="orange"
-                    size={44}
-                    radius="md"
-                    variant="light"
-                  >
-                    <IconClock size={24} stroke={1.5} />
-                  </ThemeIcon>
-                </Group>
-              </Paper>
-
-              <Paper p="md" radius="md" withBorder>
-                <Group justify="space-between">
-                  <div>
-                    <Text size="xs" c="dimmed" tt="uppercase" fw={700}>
-                      Shipped
-                    </Text>
-                    <Text fw={700} size="xl" mt="xs">
-                      <CountUp end={stats.shippedOrders} duration={1.5} />
-                    </Text>
-                  </div>
-                  <ThemeIcon color="blue" size={44} radius="md" variant="light">
-                    <IconTruck size={24} stroke={1.5} />
-                  </ThemeIcon>
-                </Group>
-              </Paper>
-
-              <Paper p="md" radius="md" withBorder>
-                <Group justify="space-between">
-                  <div>
-                    <Text size="xs" c="dimmed" tt="uppercase" fw={700}>
-                      Total Revenue
-                    </Text>
-                    <Text fw={700} size="lg" mt="xs">
-                      {stats.currencyCode}{" "}
-                      <CountUp
-                        end={stats.totalRevenue}
-                        duration={1.5}
-                        decimals={2}
-                        separator=","
-                      />
-                    </Text>
-                  </div>
-                  <ThemeIcon color="teal" size={44} radius="md" variant="light">
-                    <IconCurrencyDollar size={24} stroke={1.5} />
-                  </ThemeIcon>
-                </Group>
-              </Paper>
-            </SimpleGrid>
+        <div className={classes.presets}>
+          <span className={classes.presetsLabel}>Quick range</span>
+          {DATE_PRESETS.map((preset) => {
+            const range = preset.range();
+            const active =
+              dateRangeInput[0] === range[0] && dateRangeInput[1] === range[1];
+            return (
+              <button
+                key={preset.label}
+                type="button"
+                className={cx(classes.preset, active && classes.presetActive)}
+                aria-pressed={active}
+                onClick={() => handleDateRangeChange(range)}
+              >
+                {preset.label}
+              </button>
+            );
+          })}
+          {loadedWindow && (
+            <span className={classes.presetsHint}>
+              Date filters apply to the loaded orders ({loadedWindow}). Use
+              Next to load older orders.
+            </span>
           )}
+        </div>
+      </AppCard>
 
-          {/* Filters */}
-          <Paper p="md" radius="md" withBorder>
-            <Stack gap="md">
-              <Text fw={600}>Filters</Text>
-              <Grid>
-                <Grid.Col span={{ base: 12, sm: 6, md: 3 }}>
-                  <Select
-                    label="Order Status"
-                    placeholder="All statuses"
-                    value={statusInput}
-                    onChange={(value) => setStatusInput(value as OrderStatus)}
-                    data={[
-                      { value: "PENDING", label: "Pending" },
-                      { value: "UNSHIPPED", label: "Unshipped" },
-                      {
-                        value: "PARTIALLY_SHIPPED",
-                        label: "Partially Shipped",
-                      },
-                      { value: "SHIPPED", label: "Shipped" },
-                      { value: "DELIVERED", label: "Delivered" },
-                      { value: "CANCELLED", label: "Cancelled" },
-                      { value: "UNFULFILLABLE", label: "Unfulfillable" },
-                      {
-                        value: "INVOICE_UNCONFIRMED",
-                        label: "Invoice Unconfirmed",
-                      },
-                    ]}
-                    clearable
-                  />
-                </Grid.Col>
+      {/* Order revenue (follows the filters, incl. date range) */}
+      <OrderRevenueCard
+        orders={filteredOrders}
+        periodLabel={
+          dateFilterActive
+            ? formatRangeLabel(appliedFilters.dateRange)
+            : "Loaded orders"
+        }
+        loading={loading}
+      />
 
-                <Grid.Col span={{ base: 12, sm: 6, md: 3 }}>
-                  <TextInput
-                    label="Order ID"
-                    placeholder="Search by Amazon Order ID"
-                    value={orderIdInput}
-                    onChange={(e) => setOrderIdInput(e.currentTarget.value)}
-                    leftSection={<IconSearch size={16} />}
-                    onKeyDown={(e) => e.key === "Enter" && handleApplyFilters()}
-                  />
-                </Grid.Col>
+      {/* Summary strip */}
+      {summaryItems.length > 0 && (
+        <div className={classes.summary}>
+          {summaryItems.map((item) => (
+            <div key={item.label} className={classes.summaryItem}>
+              <span className={cx(classes.accent, classes[item.accent])} />
+              <div className={classes.summaryText}>
+                <span className={classes.summaryLabel}>{item.label}</span>
+                <span className={classes.summaryValue}>
+                  <CountUp end={item.value} duration={1.5} separator="," />
+                </span>
+              </div>
+              <span className={classes.summaryMeta}>{item.meta}</span>
+            </div>
+          ))}
+        </div>
+      )}
 
-                <Grid.Col span={{ base: 12, sm: 12, md: 6 }}>
-                  <DatePickerInput
-                    type="range"
-                    label="Purchase Date Range"
-                    placeholder="Select date range"
-                    value={dateRangeInput}
-                    onChange={(val) =>
-                      setDateRangeInput(val as [Date | null, Date | null])
-                    }
-                    clearable
-                  />
-                </Grid.Col>
-              </Grid>
+      {/* Orders list */}
+      <AppCard className={classes.list}>
+        <CardHeader
+          title={view === "cards" ? "Order cards" : "Orders table"}
+          subtitle={`Amazon SP-API response fields · ${filteredOrders.length} of ${totalCount} orders`}
+          right={
+            <div className={classes.toggle} role="group" aria-label="View">
+              <button
+                type="button"
+                className={cx(
+                  classes.toggleBtn,
+                  view === "cards" && classes.toggleActive,
+                )}
+                aria-pressed={view === "cards"}
+                onClick={() => setView("cards")}
+              >
+                Cards
+              </button>
+              <button
+                type="button"
+                className={cx(
+                  classes.toggleBtn,
+                  view === "table" && classes.toggleActive,
+                )}
+                aria-pressed={view === "table"}
+                onClick={() => setView("table")}
+              >
+                Table
+              </button>
+            </div>
+          }
+        />
 
-              <Group justify="flex-end">
-                <Button variant="subtle" onClick={handleClearFilters}>
-                  Clear Filters
-                </Button>
-                <Button
-                  leftSection={<IconFilter size={16} />}
-                  onClick={handleApplyFilters}
-                >
-                  Apply Filters
-                </Button>
-              </Group>
-            </Stack>
-          </Paper>
+        {view === "cards" ? (
+          <div className={classes.cards}>
+            <div className={cx(classes.cardGrid, classes.colHeader)}>
+              <span>Order &amp; buyer</span>
+              <span>Created / updated</span>
+              <span>Status / total</span>
+              <span>Marketplace / fulfillment</span>
+              <span className={classes.alignEnd}>Actions</span>
+            </div>
 
-          {/* Orders Table */}
-          <Paper radius="md" withBorder>
-            <Table.ScrollContainer minWidth={800}>
-              <Table striped highlightOnHover>
-                <Table.Thead>
+            {loading ? (
+              <Text ta="center" py="xl" c="dimmed">
+                Loading orders...
+              </Text>
+            ) : filteredOrders.length === 0 ? (
+              <Text ta="center" py="xl" c="dimmed">
+                {rawOrders.length > 0
+                  ? "No orders match your filters"
+                  : "No orders found"}
+              </Text>
+            ) : (
+              filteredOrders.map((order) => {
+                const status = getOrderStatus(order);
+                const items = getItemCount(order);
+                const { allowed, reason } = canGenerateInvoice(order);
+                const generating = generatingId === order.orderId;
+                const shipBy = order.fulfillment?.shipByWindow?.latestDateTime;
+                return (
+                  <div
+                    key={order.orderId}
+                    className={cx(classes.cardGrid, classes.orderCard)}
+                  >
+                    <div className={classes.cell}>
+                      <span className={classes.primary}>{order.orderId}</span>
+                      <span className={classes.secondary}>
+                        {getBuyerName(order)}
+                      </span>
+                    </div>
+
+                    <div className={classes.cell}>
+                      <span className={classes.primaryNormal}>
+                        {order.createdTime ? formatDate(order.createdTime) : "—"}
+                      </span>
+                      {order.lastUpdatedTime && (
+                        <span className={classes.secondary}>
+                          Updated {formatTime(order.lastUpdatedTime)}
+                        </span>
+                      )}
+                    </div>
+
+                    <div className={classes.cell}>
+                      <span className={classes.primary}>
+                        {getOrderTotal(order)}
+                      </span>
+                      <span className={classes.statusLine}>
+                        <StatusPill tone={orderStatusTone(status)} solid>
+                          {formatStatusLabel(status)}
+                        </StatusPill>
+                        <span className={classes.secondary}>
+                          {items} {items === 1 ? "item" : "items"}
+                        </span>
+                      </span>
+                    </div>
+
+                    <div className={classes.cell}>
+                      <span className={classes.primaryNormal}>
+                        {order.salesChannel?.marketplaceName ||
+                          order.salesChannel?.marketplaceId ||
+                          "—"}
+                      </span>
+                      <span className={classes.secondary}>
+                        {order.fulfillment?.fulfilledBy ||
+                          order.fulfillmentChannel ||
+                          "—"}
+                        {order.fulfillment?.fulfillmentServiceLevel
+                          ? ` · ${order.fulfillment.fulfillmentServiceLevel}`
+                          : ""}
+                        {shipBy ? ` · Ship by ${formatDate(shipBy)}` : ""}
+                      </span>
+                    </div>
+
+                    <div className={classes.actions}>
+                      {order.isPrime && (
+                        <StatusPill tone="info" solid>
+                          Prime
+                        </StatusPill>
+                      )}
+                      <Tooltip label="View details">
+                        <button
+                          type="button"
+                          className={classes.actionBtn}
+                          onClick={() => handleViewDetails(order.orderId)}
+                        >
+                          <span className={classes.actionIcon}>
+                            <IconEye size={16} />
+                          </span>
+                          <span className={classes.actionLabel}>View</span>
+                        </button>
+                      </Tooltip>
+                      <Tooltip label={reason}>
+                        {/* span wrapper: Mantine Tooltip needs a non-disabled child */}
+                        <span>
+                          <button
+                            type="button"
+                            className={classes.actionBtn}
+                            disabled={!allowed || generating}
+                            onClick={() =>
+                              allowed && handleGenerateInvoice(order.orderId)
+                            }
+                          >
+                            <span className={classes.actionIcon}>
+                              <IconFileInvoice size={16} />
+                            </span>
+                            <span className={classes.actionLabel}>
+                              {generating ? "…" : "Invoice"}
+                            </span>
+                          </button>
+                        </span>
+                      </Tooltip>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        ) : (
+          <Table.ScrollContainer minWidth={800}>
+            <Table highlightOnHover>
+              <Table.Thead>
+                <Table.Tr>
+                  <Table.Th>Order ID</Table.Th>
+                  <Table.Th>Purchase Date</Table.Th>
+                  <Table.Th>Customer</Table.Th>
+                  <Table.Th>Status</Table.Th>
+                  <Table.Th>Items</Table.Th>
+                  <Table.Th>Total</Table.Th>
+                  <Table.Th>Fulfillment</Table.Th>
+                  <Table.Th>Marketplace</Table.Th>
+                  <Table.Th>Actions</Table.Th>
+                </Table.Tr>
+              </Table.Thead>
+              <Table.Tbody>
+                {loading ? (
                   <Table.Tr>
-                    <Table.Th>Order ID</Table.Th>
-                    <Table.Th>Purchase Date</Table.Th>
-                    <Table.Th>Customer</Table.Th>
-                    <Table.Th>Status</Table.Th>
-                    <Table.Th>Items</Table.Th>
-                    <Table.Th>Total</Table.Th>
-                    <Table.Th>Fulfillment</Table.Th>
-                    <Table.Th>Marketplace</Table.Th>
-                    <Table.Th>Actions</Table.Th>
+                    <Table.Td colSpan={9}>
+                      <Text ta="center" py="xl" c="dimmed">
+                        Loading orders...
+                      </Text>
+                    </Table.Td>
                   </Table.Tr>
-                </Table.Thead>
-                <Table.Tbody>
-                  {loading ? (
-                    <Table.Tr>
-                      <Table.Td colSpan={9}>
-                        <Text ta="center" py="xl">
-                          Loading orders...
-                        </Text>
-                      </Table.Td>
-                    </Table.Tr>
-                  ) : filteredOrders.length === 0 ? (
-                    <Table.Tr>
-                      <Table.Td colSpan={9}>
-                        <Text ta="center" py="xl" c="dimmed">
-                          {rawOrders.length > 0
-                            ? "No orders match your filters"
-                            : "No orders found"}
-                        </Text>
-                      </Table.Td>
-                    </Table.Tr>
-                  ) : (
-                    filteredOrders.map((order) => (
+                ) : filteredOrders.length === 0 ? (
+                  <Table.Tr>
+                    <Table.Td colSpan={9}>
+                      <Text ta="center" py="xl" c="dimmed">
+                        {rawOrders.length > 0
+                          ? "No orders match your filters"
+                          : "No orders found"}
+                      </Text>
+                    </Table.Td>
+                  </Table.Tr>
+                ) : (
+                  filteredOrders.map((order) => {
+                    const status = getOrderStatus(order);
+                    const { allowed, reason } = canGenerateInvoice(order);
+                    return (
                       <Table.Tr key={order.orderId}>
                         <Table.Td>
-                          <Group>
+                          <Group gap="xs" wrap="nowrap">
                             <Text fw={600} size="sm">
                               {order.orderId}
                             </Text>
                             {order.isPrime && (
-                              <Badge size="xs" color="blue" mt={4}>
+                              <StatusPill tone="info" solid>
                                 Prime
-                              </Badge>
+                              </StatusPill>
                             )}
                           </Group>
                         </Table.Td>
                         <Table.Td>
-                          <Text size="sm">{formatDate(order.createdTime)}</Text>
-                        </Table.Td>
-                        <Table.Td>
                           <Text size="sm">
-                            {order.buyer?.buyerName || order.buyer?.name || "—"}
+                            {order.createdTime
+                              ? formatDate(order.createdTime)
+                              : "—"}
                           </Text>
                         </Table.Td>
                         <Table.Td>
-                          {/* SP-API list: status is at fulfillment.fulfillmentStatus */}
-                          {(() => {
-                            const status =
-                              order.fulfillment?.fulfillmentStatus ||
-                              order.orderStatus;
-                            return (
-                              <Badge
-                                color={getStatusColor(status as any)}
-                                variant="filled"
-                              >
-                                {status || "—"}
-                              </Badge>
-                            );
-                          })()}
+                          <Text size="sm">{getBuyerName(order)}</Text>
                         </Table.Td>
                         <Table.Td>
-                          {/* Item count: sum quantityOrdered across orderItems */}
-                          <Text size="sm">
-                            {order.orderItems
-                              ? order.orderItems.reduce(
-                                  (sum: number, i: any) =>
-                                    sum + (i.quantityOrdered || 1),
-                                  0,
-                                )
-                              : (order.numberOfItemsShipped ?? 0) +
-                                (order.numberOfItemsUnshipped ?? 0)}
-                          </Text>
+                          <StatusPill tone={orderStatusTone(status)} solid>
+                            {formatStatusLabel(status)}
+                          </StatusPill>
                         </Table.Td>
                         <Table.Td>
-                          {/* SP-API list: total is at proceeds.grandTotal */}
+                          <Text size="sm">{getItemCount(order)}</Text>
+                        </Table.Td>
+                        <Table.Td>
                           <Text fw={600} size="sm">
-                            {(() => {
-                              const t =
-                                order.proceeds?.grandTotal || order.orderTotal;
-                              return t
-                                ? formatCurrency(
-                                    Number(t.amount),
-                                    t.currencyCode,
-                                  )
-                                : "—";
-                            })()}
+                            {getOrderTotal(order)}
                           </Text>
                         </Table.Td>
                         <Table.Td>
-                          {/* SP-API list: fulfilledBy is at fulfillment.fulfilledBy */}
-                          <Badge variant="outline">
+                          <Text size="sm">
                             {order.fulfillment?.fulfilledBy ||
                               order.fulfillmentChannel ||
                               "—"}
-                          </Badge>
+                          </Text>
                         </Table.Td>
                         <Table.Td>
-                          <Badge variant="light">
+                          <Text size="sm">
                             {order.salesChannel?.marketplaceName ||
                               order.salesChannel?.marketplaceId ||
                               "—"}
-                          </Badge>
+                          </Text>
                         </Table.Td>
                         <Table.Td>
-                          <Group gap="xs">
+                          <Group gap="xs" wrap="nowrap">
                             <Tooltip label="View Details">
                               <ActionIcon
                                 variant="subtle"
-                                color="blue"
+                                color="teal"
                                 onClick={() => handleViewDetails(order.orderId)}
                               >
                                 <IconEye size={18} />
                               </ActionIcon>
                             </Tooltip>
-                            {/* Generate Invoice — disabled if already invoiced or not a shippable status */}
-                            {(() => {
-                              const { allowed, reason } =
-                                canGenerateInvoice(order);
-                              return (
-                                <Tooltip label={reason}>
-                                  {/* span wrapper required — Mantine Tooltip needs a non-disabled child */}
-                                  <span>
-                                    <ActionIcon
-                                      variant="subtle"
-                                      color={allowed ? "green" : "gray"}
-                                      disabled={
-                                        !allowed ||
-                                        generatingId === order.orderId
-                                      }
-                                      loading={generatingId === order.orderId}
-                                      onClick={() =>
-                                        allowed &&
-                                        handleGenerateInvoice(order.orderId)
-                                      }
-                                    >
-                                      <IconFileInvoice size={18} />
-                                    </ActionIcon>
-                                  </span>
-                                </Tooltip>
-                              );
-                            })()}
+                            <Tooltip label={reason}>
+                              {/* span wrapper required — Mantine Tooltip needs a non-disabled child */}
+                              <span>
+                                <ActionIcon
+                                  variant="subtle"
+                                  color={allowed ? "teal" : "gray"}
+                                  disabled={
+                                    !allowed || generatingId === order.orderId
+                                  }
+                                  loading={generatingId === order.orderId}
+                                  onClick={() =>
+                                    allowed &&
+                                    handleGenerateInvoice(order.orderId)
+                                  }
+                                >
+                                  <IconFileInvoice size={18} />
+                                </ActionIcon>
+                              </span>
+                            </Tooltip>
                           </Group>
-                        </Table.Td>
-                      </Table.Tr>
-                    ))
-                  )}
-                </Table.Tbody>
-              </Table>
-            </Table.ScrollContainer>
-          </Paper>
-
-          {/* SP-API nextToken pagination */}
-          {(pageIndex > 0 || hasMore) && (
-            <Group justify="space-between" mt="md">
-              <Text size="sm" c="dimmed">
-                Page {pageIndex + 1}
-                {filteredOrders.length > 0 &&
-                  ` · ${filteredOrders.length} orders`}
-                {hasMore ? " · more available" : ""}
-              </Text>
-              <Group>
-                <Button
-                  variant="default"
-                  disabled={pageIndex <= 0 || loading}
-                  onClick={handlePrevPage}
-                >
-                  Previous
-                </Button>
-                <Button
-                  variant="default"
-                  disabled={!hasMore || loading}
-                  onClick={handleNextPage}
-                >
-                  Next
-                </Button>
-              </Group>
-            </Group>
-          )}
-        </Stack>
-      </Container>
-
-      {/* Order Details Modal */}
-      <Modal
-        opened={detailsModalOpened}
-        onClose={() => setDetailsModalOpened(false)}
-        title="Order Details"
-        size="xl"
-        padding="lg"
-      >
-        {detailsLoading || !selectedOrder ? (
-          <Text>Loading order details...</Text>
-        ) : (
-          <Stack gap="lg">
-            {/* Order Header */}
-            <Paper p="md" withBorder>
-              <Group justify="space-between" mb="md">
-                <div>
-                  <Text fw={700} size="lg">
-                    {selectedOrder.orderId}
-                  </Text>
-                  <Text size="sm" c="dimmed">
-                    Purchased: {formatDate(selectedOrder.createdTime)}
-                  </Text>
-                  {selectedOrder.lastUpdatedTime && (
-                    <Text size="sm" c="dimmed">
-                      Last Updated: {formatDate(selectedOrder.lastUpdatedTime)}
-                    </Text>
-                  )}
-                  {(selectedOrder.buyer?.buyerName ||
-                    selectedOrder.buyer?.name) && (
-                    <Text size="sm" c="dimmed">
-                      Buyer:{" "}
-                      {selectedOrder.buyer?.buyerName ||
-                        selectedOrder.buyer?.name}
-                    </Text>
-                  )}
-                </div>
-                {/* SP-API detail: status lives at fulfillment.fulfillmentStatus */}
-                {(() => {
-                  const status =
-                    selectedOrder.orderStatus ||
-                    selectedOrder.fulfillment?.fulfillmentStatus;
-                  return status ? (
-                    <Badge
-                      size="lg"
-                      color={getStatusColor(status as any)}
-                      variant="filled"
-                    >
-                      {status}
-                    </Badge>
-                  ) : null;
-                })()}
-              </Group>
-
-              <Grid mt="xs" gutter="sm">
-                {/* Sales Channel */}
-                <Grid.Col span={6}>
-                  <Text size="xs" c="dimmed" tt="uppercase" fw={600}>
-                    Marketplace
-                  </Text>
-                  <Badge variant="light" color="blue" mt={4}>
-                    {selectedOrder.salesChannel?.marketplaceName || "—"}
-                  </Badge>
-                </Grid.Col>
-                <Grid.Col span={6}>
-                  <Text size="xs" c="dimmed" tt="uppercase" fw={600}>
-                    Channel
-                  </Text>
-                  <Badge variant="dot" color="green" mt={4}>
-                    {selectedOrder.salesChannel?.channelName || "—"}
-                  </Badge>
-                </Grid.Col>
-                <Grid.Col span={6}>
-                  <Text size="xs" c="dimmed" tt="uppercase" fw={600}>
-                    Marketplace ID
-                  </Text>
-                  <Text size="sm" ff="monospace" mt={4}>
-                    {selectedOrder.salesChannel?.marketplaceId || "—"}
-                  </Text>
-                </Grid.Col>
-
-                {/* Fulfillment */}
-                <Grid.Col span={6}>
-                  <Text size="xs" c="dimmed" tt="uppercase" fw={600}>
-                    Fulfilled By
-                  </Text>
-                  <Badge variant="outline" mt={4}>
-                    {selectedOrder.fulfillment?.fulfilledBy ||
-                      selectedOrder.fulfillmentChannel ||
-                      "—"}
-                  </Badge>
-                </Grid.Col>
-                {selectedOrder.fulfillment?.fulfillmentServiceLevel && (
-                  <Grid.Col span={6}>
-                    <Text size="xs" c="dimmed" tt="uppercase" fw={600}>
-                      Service Level
-                    </Text>
-                    <Badge variant="outline" color="orange" mt={4}>
-                      {selectedOrder.fulfillment.fulfillmentServiceLevel}
-                    </Badge>
-                  </Grid.Col>
-                )}
-                {selectedOrder.fulfillment?.shipByWindow?.latestDateTime && (
-                  <Grid.Col span={6}>
-                    <Text size="xs" c="dimmed" tt="uppercase" fw={600}>
-                      Ship By
-                    </Text>
-                    <Text size="sm" mt={4}>
-                      {formatDate(
-                        selectedOrder.fulfillment.shipByWindow.latestDateTime,
-                      )}
-                    </Text>
-                  </Grid.Col>
-                )}
-              </Grid>
-            </Paper>
-
-            {/* Recipient / Shipping Address */}
-            {selectedOrder.recipient && (
-              <Paper p="md" withBorder>
-                <Text fw={600} mb="sm">
-                  Shipping Address
-                </Text>
-                {/* SP-API 2026-01-01: address is under deliveryAddress */}
-                {(() => {
-                  const addr =
-                    selectedOrder.recipient.deliveryAddress ||
-                    selectedOrder.recipient.address;
-                  return (
-                    <Stack gap="xs">
-                      {addr?.name && (
-                        <Text size="sm" fw={500}>
-                          {addr.name}
-                        </Text>
-                      )}
-                      {addr?.addressLine1 && (
-                        <Text size="sm">{addr.addressLine1}</Text>
-                      )}
-                      {(addr?.city || addr?.postalCode) && (
-                        <Text size="sm">
-                          {[addr?.city, addr?.postalCode]
-                            .filter(Boolean)
-                            .join(", ")}
-                        </Text>
-                      )}
-                      {addr?.districtOrCounty && (
-                        <Text size="sm" c="dimmed">
-                          {addr.districtOrCounty}
-                        </Text>
-                      )}
-                      {addr?.countryCode && (
-                        <Text size="sm">{addr.countryCode}</Text>
-                      )}
-                    </Stack>
-                  );
-                })()}
-              </Paper>
-            )}
-
-            {/* Order Items */}
-            <Paper p="md" withBorder>
-              <Text fw={600} mb="md">
-                Order Items
-              </Text>
-              <Table>
-                <Table.Thead>
-                  <Table.Tr>
-                    <Table.Th>Product</Table.Th>
-                    <Table.Th>SKU</Table.Th>
-                    <Table.Th>Quantity</Table.Th>
-                    <Table.Th>Price</Table.Th>
-                  </Table.Tr>
-                </Table.Thead>
-                <Table.Tbody>
-                  {selectedOrderItems.map((item) => {
-                    // SP-API 2026-01-01: product info is nested under item.product
-                    const product = item.product || item;
-                    const price =
-                      product.price?.unitPrice ||
-                      item.proceeds?.proceedsTotal ||
-                      item.itemPrice;
-                    const title =
-                      product.title ||
-                      item.title ||
-                      item.productTitle ||
-                      product.asin;
-                    const asin = product.asin || item.asin;
-                    const sku = product.sellerSku || item.sellerSku || item.sku;
-
-                    return (
-                      <Table.Tr key={item.orderItemId}>
-                        <Table.Td>
-                          <Text size="sm" fw={500}>
-                            {title}
-                          </Text>
-                          <Text size="xs" c="dimmed">
-                            ASIN: {asin}
-                          </Text>
-                        </Table.Td>
-                        <Table.Td>
-                          <Text size="sm">{sku || "—"}</Text>
-                        </Table.Td>
-                        <Table.Td>
-                          <Text size="sm">{item.quantityOrdered}</Text>
-                        </Table.Td>
-                        <Table.Td>
-                          <Text size="sm" fw={600}>
-                            {price
-                              ? formatCurrency(
-                                  parseFloat(price.amount),
-                                  price.currencyCode,
-                                )
-                              : "—"}
-                          </Text>
                         </Table.Td>
                       </Table.Tr>
                     );
-                  })}
-                </Table.Tbody>
-              </Table>
-            </Paper>
-
-            {/* Price Breakdown — SP-API 2026-01-01 proceeds.breakdowns */}
-            {(() => {
-              // Collect all breakdowns: prefer item-level, fall back to order-level
-              const allBreakdowns: any[] = [];
-              selectedOrderItems.forEach((item) => {
-                if (item.proceeds?.breakdowns?.length) {
-                  item.proceeds.breakdowns.forEach((b: any) => {
-                    allBreakdowns.push({ ...b, _itemId: item.orderItemId });
-                  });
-                }
-              });
-              // If no item-level breakdowns, try order-level
-              const breakdowns =
-                allBreakdowns.length > 0
-                  ? allBreakdowns
-                  : selectedOrder.proceeds?.breakdowns || [];
-
-              const grandTotal =
-                selectedOrder.proceeds?.grandTotal || selectedOrder.orderTotal;
-
-              if (!breakdowns.length && !grandTotal) return null;
-
-              const isDeduction = (type: string) =>
-                ["DISCOUNT", "PROMOTION", "COUPON"].includes(
-                  type?.toUpperCase(),
-                );
-
-              const typeLabel: Record<string, string> = {
-                ITEM: "Items Subtotal",
-                SHIPPING: "Shipping",
-                GIFT_WRAP: "Gift Wrap",
-                DISCOUNT: "Discount",
-                PROMOTION: "Promotion",
-                COUPON: "Coupon",
-                TAX: "Tax",
-                FEE: "Fee",
-              };
-
-              return (
-                <Paper p="md" withBorder>
-                  <Text fw={600} mb="sm">
-                    Price Breakdown
-                  </Text>
-                  <Stack gap={6}>
-                    {breakdowns.map((b: any, i: number) => {
-                      const deduction = isDeduction(b.type);
-                      const label = typeLabel[b.type?.toUpperCase()] || b.type;
-                      const amt = parseFloat(b.subtotal?.amount || "0");
-                      const currency = b.subtotal?.currencyCode || "";
-
-                      return (
-                        <div key={i}>
-                          <Group justify="space-between">
-                            <Group gap={6}>
-                              <Text size="sm" c={deduction ? "red" : "inherit"}>
-                                {label}
-                              </Text>
-                              {deduction && (
-                                <Badge size="xs" color="red" variant="light">
-                                  deduction
-                                </Badge>
-                              )}
-                            </Group>
-                            <Text
-                              size="sm"
-                              fw={500}
-                              c={deduction ? "red" : "inherit"}
-                            >
-                              {deduction ? "−" : ""}
-                              {formatCurrency(amt, currency)}
-                            </Text>
-                          </Group>
-                          {/* Detailed sub-breakdowns (e.g. DISCOUNT → SHIPPING) */}
-                          {b.detailedBreakdowns?.map((d: any, j: number) => (
-                            <Group
-                              key={j}
-                              justify="space-between"
-                              pl="md"
-                              mt={2}
-                            >
-                              <Text size="xs" c="dimmed">
-                                └ {d.subtype}
-                              </Text>
-                              <Text size="xs" c="dimmed">
-                                {formatCurrency(
-                                  parseFloat(d.value?.amount || "0"),
-                                  d.value?.currencyCode || currency,
-                                )}
-                              </Text>
-                            </Group>
-                          ))}
-                        </div>
-                      );
-                    })}
-
-                    {/* Divider + grand total */}
-                    {grandTotal && (
-                      <>
-                        <div
-                          style={{
-                            borderTop:
-                              "1px solid var(--mantine-color-default-border)",
-                            margin: "4px 0",
-                          }}
-                        />
-                        <Group justify="space-between">
-                          <Text fw={700} size="sm">
-                            Order Total
-                          </Text>
-                          <Text fw={700} size="sm">
-                            {formatCurrency(
-                              parseFloat(grandTotal.amount),
-                              grandTotal.currencyCode,
-                            )}
-                          </Text>
-                        </Group>
-                      </>
-                    )}
-                  </Stack>
-                </Paper>
-              );
-            })()}
-          </Stack>
+                  })
+                )}
+              </Table.Tbody>
+            </Table>
+          </Table.ScrollContainer>
         )}
-      </Modal>
+
+        {/* SP-API nextToken pagination */}
+        <div className={classes.listFooter}>
+          <span className={classes.footerText}>
+            Showing {filteredOrders.length} of {totalCount} orders · synced from
+            Amazon SP-API
+            {(pageIndex > 0 || hasMore) && ` · Page ${pageIndex + 1}`}
+            {hasMore ? " · more available" : ""}
+          </span>
+          {(pageIndex > 0 || hasMore) && (
+            <div className={classes.pager}>
+              <Button
+                className={appButton("light", true)}
+                leftSection={<IconChevronLeft size={14} />}
+                disabled={pageIndex <= 0 || loading}
+                onClick={handlePrevPage}
+              >
+                Previous
+              </Button>
+              <Button
+                className={appButton("light", true)}
+                rightSection={<IconChevronRight size={14} />}
+                disabled={!hasMore || loading}
+                onClick={handleNextPage}
+              >
+                Next
+              </Button>
+            </div>
+          )}
+        </div>
+      </AppCard>
+
+      <OrderDetailsModal
+        opened={detailsModalOpened}
+        onClose={() => setDetailsModalOpened(false)}
+        loading={detailsLoading}
+        order={selectedOrder}
+        items={selectedOrderItems}
+      />
     </MainLayout>
   );
 }

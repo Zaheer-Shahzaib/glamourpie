@@ -1,38 +1,66 @@
+@use "../../styles/public-site" as ps;
+
+// Mantine Accordion parts are scoped under `.root` (two classes) so they
+// out-rank Mantine's single-class rules, which load after this module.
+
+.wrapper {
+  @include ps.page-container;
+  font-family: var(--ra-font-body);
+}
+
+.title {
+  margin: 0 0 clamp(1.25rem, 2.5vw, 2rem);
+  font-family: var(--ra-font-heading);
+  font-size: clamp(1.5rem, 2vw + 0.9rem, 1.875rem);
+  font-weight: 700;
+  line-height: 1.45;
+  text-align: center;
+  color: var(--ra-color-surface-inverse);
+}
+
 .root {
-  background-color: light-dark(var(--mantine-color-gray-0),
-      var(--mantine-color-dark-6));
-
+  background-color: transparent;
 }
 
-.item {
-  background-color: light-dark(var(--mantine-color-gray-0),
-      var(--mantine-color-dark-6));
-  border: 16px solid transparent;
-  position: relative;
-  z-index: 0;
-  transition: transform 150ms ease;
+.root .item {
+  border: 0;
+  border-bottom: 1px solid var(--ra-color-surface-variant);
+  background-color: var(--ra-color-surface-white);
+}
 
-  // border-bottom: 1px solid var(--item-border-color);
-  & [data-active] {
-    transform: scale(1.03);
-    z-index: 1;
-    background-color: var(--mantine-primary-color-filled) !important;
-    color: var(--mantine-color-white);
-    border-color: light-dark(var(--mantine-color-gray-2),
-        var(--mantine-color-dark-4));
-    box-shadow: var(--mantine-shadow-md);
-    border-radius: var(--mantine-radius-md);
-    font-weight: 600;
+.root .control {
+  min-height: 56px;
+  padding: 14px 24px;
+  font-family: var(--ra-font-body);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  color: var(--ra-color-text-primary);
+
+  &:hover {
+    background-color: var(--ra-color-surface-low);
   }
 }
 
-.panel {
-  padding: var(--mantine-spacing-sm);
-  font-size: var(--mantine-font-size-sm);
+.root .item[data-active] .control {
+  font-weight: 600;
+  color: var(--ra-color-brand);
 }
 
-.chevron {
-  &[data-rotate] {
-    transform: rotate(-90deg);
-  }
+.root .label {
+  padding-block: 0;
+}
+
+.root .chevron {
+  color: var(--ra-color-text-muted);
+}
+
+.root .panel {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--ra-color-text-secondary);
+}
+
+.root .content {
+  padding: 4px 24px 20px;
 }

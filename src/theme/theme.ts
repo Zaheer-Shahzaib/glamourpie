@@ -1,5 +1,33 @@
-import { createTheme } from "@mantine/core";
+import { createTheme, CSSVariablesResolver } from "@mantine/core";
 import { colors } from "./colors";
+import { publicSiteTokens } from "./publicSiteTokens";
+import { appColors } from "./appTokens";
+
+const toKebab = (value: string) =>
+  value.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase();
+
+const toCssVariables = (prefix: string, values: Record<string, string>) =>
+  Object.fromEntries(
+    Object.entries(values).map(([key, value]) => [
+      `--ra-${prefix}-${toKebab(key)}`,
+      value,
+    ]),
+  );
+
+/**
+ * Exposes the public-site design tokens as `--ra-color-*`, `--ra-font-*` and
+ * `--ra-radius-*` CSS variables so SCSS modules can consume them.
+ */
+export const cssVariablesResolver: CSSVariablesResolver = () => ({
+  variables: {
+    ...toCssVariables("color", publicSiteTokens.colors),
+    ...toCssVariables("color", appColors),
+    ...toCssVariables("font", publicSiteTokens.fonts),
+    ...toCssVariables("radius", publicSiteTokens.radii),
+  },
+  light: {},
+  dark: {},
+});
 
 export const theme = createTheme({
   fontFamily: "Plus Jakarta Sans, sans-serif",
@@ -15,6 +43,7 @@ export const theme = createTheme({
     // },
   },
   other: {
+    publicSite: publicSiteTokens,
     paragraphs: {
       xl: { fontSize: "20px", lineHeight: "30px", letterSpacing: "0" },
       l: { fontSize: "18px", lineHeight: "28px", letterSpacing: "0" },

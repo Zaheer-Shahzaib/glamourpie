@@ -1,35 +1,22 @@
 "use client";
 
 import {
-  ActionIcon,
   Alert,
   Button,
-  Center,
   Checkbox,
-  Group,
-  Paper,
   PasswordInput,
-  Text,
   TextInput,
-  TextProps,
-  Title,
+  Tooltip,
   useMantineTheme,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import classes from "./page.module.scss";
-import Surface from "../../Surface/Surface";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import SignInLayout from "./layout";
-import { PATH_APPS, PATH_AUTH, PATH_DASHBOARD } from "../../../routes";
+import { PATH_AUTH } from "../../../routes";
 import { api, API_BASE_URL } from "../../../Services/api";
 import { notifications } from "@mantine/notifications";
-import { useAuth } from "../../../Context/useAuth";
 import { useState, useEffect } from "react";
-import { IconArrowLeft, IconInfoCircle } from "@tabler/icons-react";
-
-const LINK_PROPS: TextProps = {
-  className: classes.link,
-};
+import { IconAt, IconInfoCircle, IconLock } from "@tabler/icons-react";
+import AuthShell, { authUi } from "../AuthShell";
 
 function LoginPage() {
   const navigate = useNavigate();
@@ -37,8 +24,10 @@ function LoginPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [rememberMe, setRememberMe] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [amazonConnecting, setAmazonConnecting] = useState(false);
 
+  // Amazon SSO round-trip: the provider redirects back here with `code` / `error` params.
   useEffect(() => {
     const code = searchParams.get("code");
     const amzError =
@@ -55,28 +44,6 @@ function LoginPage() {
     }
   }, [searchParams]);
 
-  const handleAmazonLogin = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    setAmazonConnecting(true);
-    setErrorMessage(null);
-    try {
-      const resp = await api.get("/api/amazon");
-      if (resp.data.success && resp.data.url) {
-        window.location.href = resp.data.url;
-      } else {
-        setErrorMessage("Failed to initiate Amazon SSO.");
-      }
-    } catch (err: any) {
-      setErrorMessage(
-        err.response?.data?.message ||
-          JSON.stringify(err.response?.data) ||
-          "Could not connect to Amazon SSO.",
-      );
-    } finally {
-      setAmazonConnecting(false);
-    }
-  };
-
   const form = useForm({
     initialValues: { email: "", password: "" },
     validate: {
@@ -88,10 +55,12 @@ function LoginPage() {
         value && value?.length < 12
           ? "Password must include at least 12 characters"
           : null,
-      // rememberMe: (value: boolean) => setRememberMe(value),
     },
   });
+
   const handleSubmit = async (values: typeof form.values) => {
+    setSubmitting(true);
+    setErrorMessage(null);
     try {
       const resp = await api.post("/api/signin", {
         ...values,
@@ -114,118 +83,97 @@ function LoginPage() {
       }
     } catch (error: any) {
       setErrorMessage(error.response?.data?.message || "Login failed");
+    } finally {
+      setSubmitting(false);
     }
   };
 
   return (
     <>
-      <>
-        <title>Sign in | Runanalytic Invoice</title>
-        <meta
-          name="description"
-          content="Explore our versatile dashboard website template featuring a stunning array of themes and meticulously crafted components. Elevate your web project with seamless integration, customizable themes, and a rich variety of components for a dynamic user experience. Effortlessly bring your data to life with our intuitive dashboard template, designed to streamline development and captivate users. Discover endless possibilities in design and functionality today!"
-        />
-      </>
-      <SignInLayout>
-        <Title ta="center">Welcome back!</Title>
-        <Text ta="center">Sign in to your account to continue</Text>
-
-        <Surface component={Paper} className={classes.card}>
-          <ActionIcon
-            variant="filled"
-            // color="brand"
-            size="lg"
-            onClick={() => navigate(-1)}
-            style={{
-              position: "absolute",
-              top: 16,
-              left: 16,
-              zIndex: 10,
-            }}
-            title="Go back"
-          >
-            <IconArrowLeft size={20} />
-          </ActionIcon>
+      <title>Sign in | Runanalytic Invoice</title>
+      <meta
+        name="description"
+        content="Sign in to your RunAnalytic SellerCenter workspace."
+      />
+      <AuthShell
+        eyebrow="Welcome back"
+        headline="Sign in to SellerCenter"
+        title="Sign in to SellerCenter"
+        subtitle="Welcome back"
+      >
+        <form className={authUi.form} onSubmit={form.onSubmit(handleSubmit)}>
           {errorMessage && (
             <Alert
               variant="light"
-              c={theme.colors.red[8]}
-              radius="lg"
-              title=""
+              color="red"
+              radius="md"
               icon={<IconInfoCircle />}
             >
               {errorMessage}
             </Alert>
           )}
-          <form onSubmit={form.onSubmit(handleSubmit)}>
-            <TextInput
-              label="Email"
-              placeholder="example@domain.com"
-              required
-              classNames={{ label: classes.label }}
-              {...form.getInputProps("email")}
-            />
+
+          <TextInput
+            label="Email address"
+            placeholder="alex@example.com"
+            required
+            autoComplete="email"
+            leftSection={<IconAt size={16} />}
+            {...form.getInputProps("email")}
+          />
+
+          <div>
             <PasswordInput
               label="Password"
               placeholder="Your password"
               required
-              mt="md"
-              classNames={{ label: classes.label }}
+              autoComplete="current-password"
+              leftSection={<IconLock size={16} />}
               {...form.getInputProps("password")}
             />
-            <Group justify="space-between" mt="lg">
+            <div className={authUi.between} style={{ marginTop: 14 }}>
               <Checkbox
+                size="xs"
                 label="Remember me"
-                classNames={{ label: classes.label }}
                 checked={rememberMe}
                 onChange={(event) => setRememberMe(event.currentTarget.checked)}
               />
-              <Text
-                component={Link}
-                to={PATH_AUTH.forgetPassword}
-                size="sm"
-                {...LINK_PROPS}
-              >
+              <Link to={PATH_AUTH.forgetPassword} className={authUi.link}>
                 Forgot password?
-              </Text>
-            </Group>
-            <Button fullWidth mt="xl" type="submit">
-              Sign in
-            </Button>
-            {/* 
-            <Group justify="center" mt="md">
-              <a
-                href="#"
-                id="LoginWithAmazon"
-                onClick={handleAmazonLogin}
-                style={{
-                  cursor: amazonConnecting ? "wait" : "pointer",
-                  opacity: amazonConnecting ? 0.7 : 1,
-                }}
+              </Link>
+            </div>
+          </div>
+
+          <Button
+            type="submit"
+            fullWidth
+            loading={submitting}
+            className={authUi.submit}
+          >
+            Sign in
+          </Button>
+
+          <div className={authUi.divider}>OR</div>
+
+          {/* No Google sign-in backend exists yet, so the SSO button is shown disabled. */}
+          <Tooltip label="Coming soon" position="bottom">
+            <div>
+              <Button
+                type="button"
+                fullWidth
+                disabled
+                className={`${authUi.submit} ${authUi.sso}`}
               >
-                <img
-                  alt="Login with Amazon"
-                  src="https://images-na.ssl-images-amazon.com/images/G/01/lwa/btnLWA_gold_156x32.png"
-                  width="156"
-                  height="32"
-                  style={{ border: 0 }}
-                />
-              </a>
-            </Group> */}
-          </form>
-          <Center mt="md">
-            <Text
-              fz="sm"
-              ta="center"
-              component={Link}
-              to={PATH_AUTH.signup}
-              {...LINK_PROPS}
-            >
-              Do not have an account yet? Create account
-            </Text>
-          </Center>
-        </Surface>
-      </SignInLayout>
+                Continue with Google
+              </Button>
+            </div>
+          </Tooltip>
+
+          <p className={authUi.footerText}>
+            New to SellerCenter? <Link to={PATH_AUTH.signup}>Create an account</Link>
+          </p>
+        </form>
+      </AuthShell>
     </>
   );
 }

@@ -1,17 +1,7 @@
-import {
-  Button,
-  Group,
-  List,
-  Paper,
-  PaperProps,
-  Stack,
-  Text,
-  ThemeIcon,
-  Title,
-} from "@mantine/core";
-import { IconArrowRight, IconCheck } from "@tabler/icons-react";
+import type { CSSProperties } from "react";
+import { Button, PaperProps } from "@mantine/core";
 import CountUp from "react-countup";
-import Surface from "../Surface/Surface";
+import classes from "./PricingCard.module.scss";
 
 type PricingCardProps = {
   tier: string;
@@ -43,107 +33,64 @@ const PricingCard = (props: PricingCardProps) => {
     onAction,
     loading,
     isCurrentPlan,
-    ...others
+    className,
+    style,
   } = props;
 
+  const footnote = tier === "Free" ? "No card required" : "Cancel anytime";
+  const showArrow = !loading && !isCurrentPlan;
+
   return (
-    <Surface
-      component={Paper}
-      {...others}
+    <article
+      className={[classes.card, className].filter(Boolean).join(" ")}
+      style={style as CSSProperties | undefined}
+      data-featured={preferred || undefined}
+      aria-label={`${tier} plan`}
     >
-      <Group
-        gap={4}
-        align='center'
-        justify='center'
-      >
+      {preferred && <span className={classes.strip} aria-hidden="true" />}
+
+      <div className={classes.price}>
         {customPrice ? (
-          <Title size={40} ta='center'>
-            Custom Pricing
-          </Title>
+          <span>Custom Pricing</span>
         ) : (
           <>
-            <Text size='xl' fw={700} mb={6} style={{ alignSelf: 'flex-end' }}>AED</Text>
-            <Group
-              align='flex-end'
-              gap={1}
-            >
-              <Title size={48}>
-                <CountUp end={monthly && price.year ? price.year : price.month} />
-              </Title>
-              <Text
-                size='md'
-                fw={500}
-                mb={6}
-              >
-                /mo
-              </Text>
-            </Group>
+            <span className={classes.currency}>AED</span>{" "}
+            <CountUp end={monthly && price.year ? price.year : price.month} />
+            <span className={classes.unit}>/mo</span>
           </>
         )}
-      </Group>
-      <Title
-        ta='center'
-        my='md'
-        tt='capitalize'
-        order={3}
-        fw={600}
-      >
-        {tier}
-      </Title>
-      <Text ta='center'>{description}</Text>
-      <List
-        spacing='xs'
-        size='md'
-        center
-        my='xl'
-        icon={
-          <ThemeIcon
-            size={24}
-            radius='xl'
-            variant={preferred ? "dark" : "filled"}
-            color={preferred ? "blue" : "dark"}
-          >
-            <IconCheck size={16} />
-          </ThemeIcon>
-        }
-      >
-        {features.map((f, i) => (
-          <List.Item
-            key={`${f}-${i}`}
-            mb='md'
-          >
-            {f}
-          </List.Item>
+      </div>
+
+      <h3 className={classes.tier}>{tier}</h3>
+      {description && <p className={classes.description}>{description}</p>}
+
+      <ul className={classes.features}>
+        {features.map((feature, index) => (
+          <li key={`${feature}-${index}`} className={classes.feature}>
+            <span className={classes.check} aria-hidden="true">
+              &#10003;
+            </span>
+            <span>{feature}</span>
+          </li>
         ))}
-      </List>
-      <Stack justify="flex-end" mt={"xl"} h={'inherit'} >
+      </ul>
+
+      <div className={classes.actions}>
         <Button
-          variant={isCurrentPlan ? "filled" : preferred ? "filled" : "outline"}
-          color={isCurrentPlan ? "green" : undefined}
-          rightSection={!loading && !isCurrentPlan ? <IconArrowRight size={18} /> : undefined}
           fullWidth
-          size='md'
-          mb='sm'
-          style={{ textTransform: "capitalize" }}
+          classNames={{ root: classes.button, label: classes.buttonLabel }}
+          data-featured={preferred || undefined}
+          data-current={isCurrentPlan || undefined}
+          rightSection={showArrow ? <span aria-hidden="true">&rarr;</span> : undefined}
           onClick={onAction}
           loading={loading}
           disabled={isCurrentPlan}
         >
           {actionText}
         </Button>
-        {
-         'Free' === tier && (
-            <Text
-              ta='center'
-              c='dimmed'
-              size='sm'
-            >
-              No card required
-            </Text>
-          )
-        }
-      </Stack>
-    </Surface>
+        <p className={classes.footnote}>{footnote}</p>
+      </div>
+    </article>
   );
 };
 

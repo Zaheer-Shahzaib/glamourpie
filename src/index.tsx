@@ -2,7 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
 import { MantineProvider } from "@mantine/core";
-import { theme } from "./theme/theme";
+import { theme, cssVariablesResolver } from "./theme/theme";
 import "@mantine/notifications/styles.css";
 import "@mantine/core/styles.css";
 import "@mantine/dates/styles.css";
@@ -35,6 +35,7 @@ root.render(
         withCssVariables
         withGlobalClasses
         theme={theme}
+        cssVariablesResolver={cssVariablesResolver}
         defaultColorScheme="light"
       >
         <Notifications />

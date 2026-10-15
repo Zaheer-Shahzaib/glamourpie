@@ -2,13 +2,13 @@
 
 import { ReactNode } from 'react';
 
-import { AppShell, Container, rem, useMantineTheme } from '@mantine/core';
-import { useDisclosure, useLocalStorage, useMediaQuery } from '@mantine/hooks';
+import { AppShell } from '@mantine/core';
+import { useDisclosure, useLocalStorage } from '@mantine/hooks';
 import HeaderNav from '../../Components/HeaderNav';
 import Navigation from '../../Components/Navigation/Navigation';
-import AppMain from '../../Components/AppMain';
 import FooterNav from '../../Components/FooterNav';
-
+import classes from './MainLayout.module.scss';
+import { useAppTheme } from '../../hooks/useAppTheme';
 
 export type SidebarState = 'hidden' | 'mini' | 'full';
 
@@ -16,66 +16,54 @@ type Props = {
   children: ReactNode;
 };
 
+/**
+ * Seller Center shell (sidebar + topbar). Pages wrap their content in this component.
+ * While mounted it tags <body> with `ra-app`, which switches Mantine (including its
+ * portals) to the Seller Center theme defined in `styles/app-theme.scss`.
+ */
 export default function MainLayout({ children }: Props) {
-  const theme = useMantineTheme();
-  const tablet_match = useMediaQuery('(max-width: 768px)');
-  const [mobileOpened, { toggle: toggleMobile }] = useDisclosure();
-  const [desktopOpened] = useDisclosure(true);
+  const [mobileOpened, { toggle: toggleMobile, close: closeMobile }] =
+    useDisclosure();
+  // The previous design had a "mini" rail; the new sidebar only shows/hides, so a
+  // persisted "mini" value is treated as "full".
   const [sidebarState, setSidebarState] = useLocalStorage<SidebarState>({
     key: 'mantine-nav-state',
     defaultValue: 'full',
   });
+  const sidebarHidden = sidebarState === 'hidden';
 
-  const toggleSidebarState = () => {
-    setSidebarState((current) => {
-      if (current === 'full') return 'mini';
-      if (current === 'mini') return 'hidden';
-      return 'full';
-    });
-  };
+  useAppTheme();
+
+  const toggleSidebar = () =>
+    setSidebarState(sidebarHidden ? 'full' : 'hidden');
 
   return (
     <AppShell
       layout="alt"
-      header={{ height: 60 }}
-      footer={{ height: 60 }}
+      header={{ height: 68 }}
       navbar={{
-        width: sidebarState === 'full' ? 300 : sidebarState === 'mini' ? 60 : 0,
+        width: 232,
         breakpoint: 'md',
-        collapsed: { mobile: !mobileOpened, desktop: !desktopOpened },
+        collapsed: { mobile: !mobileOpened, desktop: sidebarHidden },
       }}
-      bg={theme.colors.gray[2]}
     >
-      <AppShell.Header
-        style={{
-          height: rem(60),
-          boxShadow: tablet_match ? theme.shadows.md : theme.shadows.sm,
-        }}
-      >
-        <Container fluid py="sm" px="lg" pl={15}>
-          <HeaderNav
-            mobileOpened={mobileOpened}
-            toggleMobile={toggleMobile}
-            sidebarState={sidebarState}
-            onSidebarStateChange={toggleSidebarState}
-          />
-        </Container>
-      </AppShell.Header>
-      <AppShell.Navbar>
-        <Navigation
-          onClose={toggleMobile}
-          sidebarState={sidebarState}
-          onSidebarStateChange={setSidebarState}
+      <AppShell.Header className={classes.header}>
+        <HeaderNav
+          mobileOpened={mobileOpened}
+          onToggleMobile={toggleMobile}
+          sidebarHidden={sidebarHidden}
+          onToggleSidebar={toggleSidebar}
         />
+      </AppShell.Header>
+      <AppShell.Navbar className={classes.navbar}>
+        <Navigation onClose={closeMobile} />
       </AppShell.Navbar>
-      <AppShell.Main>
-        <AppMain>{children}</AppMain>
-      </AppShell.Main>
-      <AppShell.Footer p="md">
-        <Container fluid px="lg">
+      <AppShell.Main className={classes.main}>
+        <div className={classes.content}>{children}</div>
+        <div className={classes.footer}>
           <FooterNav />
-        </Container>
-      </AppShell.Footer>
+        </div>
+      </AppShell.Main>
     </AppShell>
   );
 }

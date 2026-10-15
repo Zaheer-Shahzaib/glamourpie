@@ -1,0 +1,144 @@
+.card {
+  margin-bottom: 16px;
+  padding: 20px;
+}
+
+.body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr);
+  gap: 32px;
+
+  @media (max-width: 900px) {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
+  }
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.label {
+  color: var(--ra-color-text-muted);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  line-height: 14px;
+  text-transform: uppercase;
+}
+
+.value {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  color: var(--ra-color-text-primary);
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 40px;
+}
+
+.currency {
+  color: var(--ra-color-text-muted);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.other {
+  color: var(--ra-color-text-muted);
+  font-size: 11px;
+  line-height: 16px;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin: 16px 0 0;
+
+  @media (max-width: 600px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  > div {
+    padding: 10px 12px;
+    border-radius: 8px;
+    background-color: var(--ra-color-surface-low);
+  }
+
+  dt {
+    color: var(--ra-color-text-muted);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  dd {
+    margin: 2px 0 0;
+    color: var(--ra-color-text-primary);
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 20px;
+  }
+}
+
+.chart {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  height: 140px;
+  margin-bottom: 20px;
+  padding-top: 8px;
+  border-bottom: 1px solid var(--ra-color-surface-variant);
+}
+
+.barCol {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  min-width: 0;
+  height: 100%;
+}
+
+.bar {
+  display: block;
+  width: 100%;
+  max-width: 28px;
+  border-radius: 4px 4px 0 0;
+  background-color: var(--ra-color-brand-container);
+  transition: background-color 120ms ease;
+
+  .barCol:hover & {
+    background-color: var(--ra-color-brand);
+  }
+}
+
+.barLabel {
+  position: relative;
+  top: 18px;
+  height: 0;
+  overflow: visible;
+  color: var(--ra-color-text-muted);
+  font-size: 9px;
+  line-height: 14px;
+  white-space: nowrap;
+}
+
+.empty {
+  margin: 0;
+  padding: 24px 0;
+  color: var(--ra-color-text-muted);
+  font-size: 13px;
+  text-align: center;
+}

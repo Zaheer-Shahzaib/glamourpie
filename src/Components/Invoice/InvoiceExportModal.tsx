@@ -1,5 +1,4 @@
 import {
-  Modal,
   Stack,
   Group,
   Button,
@@ -11,7 +10,6 @@ import {
   Loader,
   Center,
   Alert,
-  Divider,
   ThemeIcon,
   Tooltip,
   Title,
@@ -47,6 +45,8 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../Context/useAuth";
 import { downloadExportedFile } from "../../Services/invoice-services";
 import { useScroll } from "../../Context/scrollContext";
+import { AppModal, StatusPill, appButton, cx, ui } from "../AppUi";
+import classes from "./InvoiceExportModal.module.scss";
 
 interface InvoiceExportModalProps {
   opened: boolean;
@@ -244,24 +244,19 @@ export default function InvoiceExportModal({
   // ── Main Export UI ────────────────────────────────────────────────────────
 
   return (
-    <Modal
+    <AppModal
       opened={opened}
       onClose={onClose}
-      title={
-        <Group gap="xs">
-          <ThemeIcon size="sm" variant="light" color="blue">
-            <IconFileExport size={14} />
-          </ThemeIcon>
-          <Text fw={600}>Export Invoices</Text>
-          {userPlan && (
-            <Badge variant="dot" color="green" size="sm" tt="capitalize">
-              {userPlan} plan
-            </Badge>
-          )}
-        </Group>
+      title="Export invoices"
+      subtitle="Choose a range and format for your invoice export."
+      aside={
+        userPlan ? (
+          <StatusPill tone="success">
+            {`${userPlan} plan`.toUpperCase()}
+          </StatusPill>
+        ) : undefined
       }
-      size="lg"
-      padding="lg"
+      size={500}
     >
       {/* ── Subscription gate: no plan at all ── */}
       {noSubscription && !creating ? (
@@ -292,26 +287,23 @@ export default function InvoiceExportModal({
           )}
 
           {/* ── Export Configuration ─────────────────────────────── */}
-          <Paper p="md" radius="md" withBorder>
-            <Text fw={600} size="sm" mb="md">
-              Export Configuration
-            </Text>
+          <Paper className={ui.modalCard}>
+            <h3 className={ui.modalSectionTitle}>Export configuration</h3>
             <Stack gap="sm">
               {/* Date range */}
               <DatePickerInput
                 type="range"
-                label="Date Range"
+                label="Date range"
                 placeholder="Filter by issue date (optional)"
                 value={dateRange}
                 onChange={setDateRange}
-                size="sm"
                 clearable
                 popoverProps={{ withinPortal: true }}
               />
 
               {/* Status filter */}
               <Select
-                label="Invoice Status"
+                label="Invoice status"
                 placeholder="All statuses"
                 data={InvoiceStatusOptions.map((s) => ({
                   value: s.value,
@@ -320,12 +312,11 @@ export default function InvoiceExportModal({
                 value={selectedStatus}
                 onChange={setSelectedStatus}
                 clearable
-                size="sm"
               />
 
               {/* Type filter */}
               <Select
-                label="Invoice Type"
+                label="Invoice type"
                 placeholder="All types"
                 data={[
                   { value: "INVOICE", label: "Invoice" },
@@ -335,118 +326,86 @@ export default function InvoiceExportModal({
                 value={selectedType}
                 onChange={setSelectedType}
                 clearable
-                size="sm"
               />
-
-              {/* Format selector */}
-              <div>
-                <Text size="sm" fw={500} mb={6}>
-                  Export Format
-                </Text>
-                <Group gap="sm">
-                  {/* PDF — always available */}
-                  <Paper
-                    p="sm"
-                    radius="md"
-                    withBorder
-                    style={{
-                      cursor: "pointer",
-                      flex: 1,
-                      borderColor:
-                        format === "PDF"
-                          ? "var(--mantine-color-blue-6)"
-                          : undefined,
-                      background:
-                        format === "PDF"
-                          ? "var(--mantine-color-blue-0)"
-                          : undefined,
-                    }}
-                    onClick={() => setFormat("PDF")}
-                  >
-                    <Group gap="xs" justify="center">
-                      <ThemeIcon size="sm" variant="light" color="red">
-                        <IconFileTypePdf size={14} />
-                      </ThemeIcon>
-                      <Text size="sm" fw={600}>
-                        PDF
-                      </Text>
-                      {format === "PDF" && (
-                        <Badge size="xs" color="blue" variant="filled">
-                          Selected
-                        </Badge>
-                      )}
-                    </Group>
-                    <Text size="xs" c="dimmed" ta="center" mt={4}>
-                      Available on all paid plans
-                    </Text>
-                  </Paper>
-
-                  {/* CSV — Growth+ only */}
-                  <Tooltip
-                    label="CSV export requires Growth or Scale plan"
-                    disabled={csvAvailable}
-                    position="top"
-                    withArrow
-                  >
-                    <Paper
-                      p="sm"
-                      radius="md"
-                      withBorder
-                      style={{
-                        cursor: csvAvailable ? "pointer" : "not-allowed",
-                        flex: 1,
-                        opacity: csvAvailable ? 1 : 0.5,
-                        borderColor:
-                          format === "CSV" && csvAvailable
-                            ? "var(--mantine-color-blue-6)"
-                            : undefined,
-                        background:
-                          format === "CSV" && csvAvailable
-                            ? "var(--mantine-color-blue-0)"
-                            : undefined,
-                      }}
-                      onClick={() => csvAvailable && setFormat("CSV")}
-                    >
-                      <Group gap="xs" justify="center">
-                        <ThemeIcon size="sm" variant="light" color="green">
-                          <IconFileTypeCsv size={14} />
-                        </ThemeIcon>
-                        <Text size="sm" fw={600}>
-                          CSV
-                        </Text>
-                        {!csvAvailable && (
-                          <IconLock
-                            size={12}
-                            color="var(--mantine-color-dimmed)"
-                          />
-                        )}
-                      </Group>
-                      <Text size="xs" c="dimmed" ta="center" mt={4}>
-                        {csvAvailable ? "Available" : "Growth plan required"}
-                      </Text>
-                    </Paper>
-                  </Tooltip>
-                </Group>
-              </div>
-
-              <Button
-                fullWidth
-                leftSection={<IconFileExport size={18} />}
-                onClick={handleCreateExport}
-                loading={creating}
-                mt="xs"
-              >
-                Create Export
-              </Button>
             </Stack>
           </Paper>
 
-          <Divider label="Export History" labelPosition="center" />
+          {/* Format selector */}
+          <div>
+            <div className={classes.formatLabel}>Export format</div>
+            <div className={classes.formats}>
+              {/* PDF — always available */}
+              <button
+                type="button"
+                className={cx(
+                  classes.format,
+                  format === "PDF" && classes.formatSelected,
+                )}
+                onClick={() => setFormat("PDF")}
+                aria-pressed={format === "PDF"}
+              >
+                <span className={classes.formatHead}>
+                  <IconFileTypePdf size={16} />
+                  <span className={classes.formatName}>PDF</span>
+                  {format === "PDF" && (
+                    <span className={classes.selectedTag}>SELECTED</span>
+                  )}
+                </span>
+                <span className={classes.formatNote}>
+                  Available on all paid plans
+                </span>
+              </button>
+
+              {/* CSV — Growth+ only */}
+              <Tooltip
+                label="CSV export requires Growth or Scale plan"
+                disabled={csvAvailable}
+                position="top"
+                withArrow
+              >
+                <button
+                  type="button"
+                  className={cx(
+                    classes.format,
+                    format === "CSV" && csvAvailable && classes.formatSelected,
+                    !csvAvailable && classes.formatDisabled,
+                  )}
+                  onClick={() => csvAvailable && setFormat("CSV")}
+                  aria-pressed={format === "CSV" && csvAvailable}
+                  aria-disabled={!csvAvailable}
+                >
+                  <span className={classes.formatHead}>
+                    <IconFileTypeCsv size={16} />
+                    <span className={classes.formatName}>CSV</span>
+                    {!csvAvailable && <IconLock size={13} />}
+                    {format === "CSV" && csvAvailable && (
+                      <span className={classes.selectedTag}>SELECTED</span>
+                    )}
+                  </span>
+                  <span className={classes.formatNote}>
+                    {csvAvailable ? "Available" : "Growth plan required"}
+                  </span>
+                </button>
+              </Tooltip>
+            </div>
+          </div>
+
+          <Button
+            fullWidth
+            className={appButton("primary")}
+            leftSection={<IconFileExport size={16} />}
+            onClick={handleCreateExport}
+            loading={creating}
+          >
+            Create export
+          </Button>
+
+          <div className={classes.historyHeading}>Export history</div>
 
           {/* ── Export History ───────────────────────────────────── */}
-          <Paper radius="md" withBorder>
+          <div className={classes.history}>
             {loading ? (
-              <Center h={160}>
+              <Center h={126}>
                 <Stack align="center" gap="sm">
                   <Loader size="md" />
                   <Text size="sm" c="dimmed">
@@ -455,19 +414,14 @@ export default function InvoiceExportModal({
                 </Stack>
               </Center>
             ) : exports.length === 0 ? (
-              <Center h={120}>
-                <Stack align="center" gap="xs">
-                  <ThemeIcon size="xl" variant="light" color="gray">
-                    <IconFileExport size={20} />
-                  </ThemeIcon>
-                  <Text size="sm" c="dimmed">
-                    No exports yet
-                  </Text>
-                </Stack>
+              <Center h={126}>
+                <Text size="sm" c="dimmed">
+                  No exports yet
+                </Text>
               </Center>
             ) : (
               <Table.ScrollContainer minWidth={500}>
-                <Table striped highlightOnHover>
+                <Table highlightOnHover>
                   <Table.Thead>
                     <Table.Tr>
                       <Table.Th>Export ID</Table.Th>
@@ -545,9 +499,9 @@ export default function InvoiceExportModal({
                 </Table>
               </Table.ScrollContainer>
             )}
-          </Paper>
+          </div>
         </Stack>
       )}
-    </Modal>
+    </AppModal>
   );
 }

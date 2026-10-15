@@ -1,0 +1,427 @@
+// Shared building blocks for the Seller Center screens.
+// Figma: "RunAnalytic SellerCenter — New Product System" › "01 Product UI".
+// Colours / fonts / radii come from the `--ra-*` variables (see src/theme/*Tokens.ts).
+
+// ── Page header ─────────────────────────────────────────────────────────────
+.pageHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.pageTitle {
+  margin: 0;
+  color: var(--ra-color-text-primary);
+  font-family: var(--ra-font-body);
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 36px;
+}
+
+.pageSubtitle {
+  margin: 2px 0 0;
+  color: var(--ra-color-text-muted);
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.pageActions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+// ── Cards ───────────────────────────────────────────────────────────────────
+.card {
+  padding: 24px;
+  border-radius: 12px;
+  background-color: var(--ra-color-surface-white);
+  box-shadow: 0 1px 2px rgb(11 28 48 / 4%);
+}
+
+.cardFlush {
+  padding: 0;
+}
+
+.cardDark {
+  background-color: var(--ra-color-surface-inverse);
+  color: var(--ra-color-text-inverse);
+}
+
+.cardHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.cardTitle {
+  margin: 0;
+  color: var(--ra-color-text-primary);
+  font-family: var(--ra-font-body);
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 24px;
+
+  .cardDark & {
+    color: var(--ra-color-surface-white);
+  }
+}
+
+.cardSubtitle {
+  margin: 2px 0 0;
+  color: var(--ra-color-text-muted);
+  font-size: 12px;
+  line-height: 20px;
+}
+
+.eyebrow {
+  color: var(--ra-color-text-muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  line-height: 16px;
+  text-transform: uppercase;
+}
+
+// ── Status pill ─────────────────────────────────────────────────────────────
+.pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 24px;
+  padding: 0 12px;
+  border-radius: var(--ra-radius-full);
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+// soft (default) tones
+.pillSuccess {
+  background-color: var(--ra-color-brand-fixed);
+  color: var(--ra-color-brand);
+}
+
+.pillInfo {
+  background-color: var(--ra-color-text-inverse);
+  color: var(--ra-color-brand-tertiary);
+}
+
+.pillWarning {
+  background-color: var(--ra-color-warning-soft);
+  color: var(--ra-color-warning);
+}
+
+.pillDanger {
+  background-color: var(--ra-color-danger-soft-alt);
+  color: var(--ra-color-danger);
+}
+
+.pillNeutral {
+  background-color: var(--ra-color-surface-high);
+  color: var(--ra-color-text-secondary);
+}
+
+// solid tones (order status badges)
+.pillSolid {
+  color: var(--ra-color-surface-white);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+
+  &.pillSuccess {
+    background-color: var(--ra-color-brand-container);
+    color: var(--ra-color-surface-white);
+  }
+
+  &.pillInfo {
+    background-color: var(--ra-color-brand-tertiary);
+    color: var(--ra-color-surface-white);
+  }
+
+  &.pillWarning {
+    background-color: var(--ra-color-warning);
+    color: var(--ra-color-surface-white);
+  }
+
+  &.pillDanger {
+    background-color: var(--ra-color-danger);
+    color: var(--ra-color-surface-white);
+  }
+
+  &.pillNeutral {
+    background-color: var(--ra-color-surface-inverse);
+    color: var(--ra-color-surface-white);
+  }
+}
+
+// ── Buttons (applied on top of Mantine <Button className=…>) ───────────────
+.btn {
+  &#{&} {
+    height: 40px;
+    padding-inline: 18px;
+    border-radius: var(--ra-radius-sm);
+    font-family: var(--ra-font-body);
+    font-size: 12px;
+    font-weight: 600;
+  }
+}
+
+.btnPrimary {
+  &#{&} {
+    --button-bg: var(--ra-color-brand);
+    --button-hover: var(--ra-color-brand-hover);
+    --button-color: var(--ra-color-surface-white);
+  }
+}
+
+.btnDark {
+  &#{&} {
+    --button-bg: var(--ra-color-surface-inverse);
+    --button-hover: var(--ra-color-surface-inverse-deep);
+    --button-color: var(--ra-color-surface-white);
+  }
+}
+
+.btnLight {
+  &#{&} {
+    --button-bg: var(--ra-color-surface-white);
+    --button-hover: var(--ra-color-surface-low);
+    --button-color: var(--ra-color-text-primary);
+    --button-bd: 1px solid var(--ra-color-border);
+  }
+}
+
+.btnSoft {
+  &#{&} {
+    --button-bg: var(--ra-color-text-inverse);
+    --button-hover: var(--ra-color-surface-high);
+    --button-color: var(--ra-color-brand-tertiary);
+  }
+}
+
+.btnDangerText {
+  &#{&} {
+    --button-bg: transparent;
+    --button-hover: var(--ra-color-danger-soft-alt);
+    --button-color: var(--ra-color-danger);
+  }
+}
+
+.btnSm {
+  &#{&} {
+    height: 30px;
+    padding-inline: 12px;
+  }
+}
+
+// ── Modals (Figma "04 Auth & Modals") ──────────────────────────────────────
+.modalOverlay {
+  &#{&} {
+    --overlay-bg: color-mix(in srgb, var(--ra-color-surface-inverse) 58%, transparent);
+    --overlay-filter: none;
+  }
+}
+
+.modalContent {
+  &#{&} {
+    border-radius: 12px;
+    background-color: var(--ra-color-surface-white);
+  }
+}
+
+.modalHeader {
+  &#{&} {
+    align-items: flex-start;
+    padding: 24px 24px 8px;
+  }
+}
+
+.modalTitleWrap {
+  &#{&} {
+    flex: 1;
+    min-width: 0;
+    margin-right: 12px;
+  }
+}
+
+.modalTitle {
+  display: block;
+  color: var(--ra-color-text-primary);
+  font-family: var(--ra-font-body);
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 25px;
+}
+
+.modalSubRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.modalSubtitle {
+  color: var(--ra-color-text-muted);
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 20px;
+}
+
+.modalBody {
+  &#{&} {
+    padding: 8px 24px 24px;
+  }
+}
+
+.modalClose {
+  &#{&} {
+    color: var(--ra-color-text-muted);
+  }
+}
+
+// Section card inside a modal
+.modalCard {
+  &#{&} {
+    padding: 14px 16px;
+    border: 1px solid var(--ra-color-surface-low);
+    border-radius: 8px;
+    background-color: var(--ra-color-surface-white);
+  }
+}
+
+.modalSectionTitle {
+  margin: 0 0 10px;
+  color: var(--ra-color-text-primary);
+  font-family: var(--ra-font-body);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+}
+
+.modalLabel {
+  color: var(--ra-color-text-muted);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  line-height: 20px;
+  text-transform: uppercase;
+}
+
+.modalValue {
+  color: var(--ra-color-text-primary);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 20px;
+}
+
+.modalMuted {
+  color: var(--ra-color-text-muted);
+  font-size: 11px;
+  line-height: 20px;
+}
+
+.modalRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 12px;
+  line-height: 20px;
+}
+
+.modalRowLabel {
+  color: var(--ra-color-text-muted);
+}
+
+.modalRowValue {
+  color: var(--ra-color-text-primary);
+  font-weight: 600;
+}
+
+.modalRowNegative {
+  color: var(--ra-color-danger);
+  font-weight: 600;
+}
+
+.modalDivider {
+  height: 1px;
+  margin: 8px 0;
+  background-color: var(--ra-color-surface-variant);
+}
+
+.modalTotal {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+// ── "Coming soon" placeholders ─────────────────────────────────────────────
+.comingSoon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 120px;
+  padding: 16px;
+  border: 1px dashed var(--ra-color-border);
+  border-radius: var(--ra-radius-md);
+  background-color: var(--ra-color-surface);
+  text-align: center;
+}
+
+.comingSoonTitle {
+  color: var(--ra-color-text-primary);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.comingSoonText {
+  color: var(--ra-color-text-muted);
+  font-size: 12px;
+}
+
+.comingSoonTag {
+  display: inline-flex;
+  align-items: center;
+  height: 18px;
+  padding: 0 8px;
+  border-radius: var(--ra-radius-full);
+  background-color: var(--ra-color-surface-high);
+  color: var(--ra-color-text-secondary);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+// ── Misc ────────────────────────────────────────────────────────────────────
+.mutedText {
+  color: var(--ra-color-text-muted);
+  font-size: 12px;
+}
+
+.linkText {
+  color: var(--ra-color-brand-tertiary);
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.pageFootnote {
+  margin-top: 24px;
+  color: var(--ra-color-text-muted);
+  font-size: 11px;
+  line-height: 20px;
+}

@@ -1,27 +1,21 @@
 import { useState } from "react";
 import {
-  Paper,
   Table,
-  Badge,
-  Group,
   Text,
-  ActionIcon,
   Tooltip,
   Pagination,
-  Stack,
   Loader,
   Center,
+  Stack,
 } from "@mantine/core";
-import { IconEye, IconFileDownload } from "@tabler/icons-react";
+import { IconDownload } from "@tabler/icons-react";
 import { useAuth } from "../../Context/useAuth";
 import { downloadInvoiceDocument } from "../../Services/invoice-services";
 import { notifications } from "@mantine/notifications";
-import { Invoice, InvoiceListItem } from "../../types/invoice.types";
-import {
-  formatCurrency,
-  formatDate,
-  getStatusColor,
-} from "../../utils/helperFunctions";
+import { InvoiceListItem } from "../../types/invoice.types";
+import { formatCurrency, formatDate } from "../../utils/helperFunctions";
+import { StatusPill, invoiceStatusTone } from "../AppUi";
+import classes from "./InvoiceList.module.scss";
 
 interface InvoiceListProps {
   invoices: InvoiceListItem[];
@@ -30,8 +24,14 @@ interface InvoiceListProps {
   currentPage?: number;
   onPageChange?: (page: number) => void;
   onInvoiceClick?: (invoiceId: string) => void;
+  /** Message shown when there are no rows (e.g. when filters hide everything) */
+  emptyMessage?: string;
 }
 
+/**
+ * Invoice ledger (Figma "Invoice ledger"). Renders only the table + pagination —
+ * the surrounding card / heading is supplied by the page.
+ */
 export default function InvoiceList({
   invoices,
   loading,
@@ -39,10 +39,11 @@ export default function InvoiceList({
   currentPage = 1,
   onPageChange,
   onInvoiceClick,
+  emptyMessage = "No invoices found",
 }: InvoiceListProps) {
   const { token } = useAuth();
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
-  console.log("Dashboard", invoices);
+
   const handleDownload = async (invoiceId: string, e: React.MouseEvent) => {
     e.stopPropagation();
 
@@ -76,141 +77,134 @@ export default function InvoiceList({
 
   if (loading) {
     return (
-      <Paper p="md" radius="md" withBorder>
-        <Center h={300}>
-          <Stack align="center" gap="md">
-            <Loader size="lg" />
-            <Text c="dimmed">Loading invoices...</Text>
-          </Stack>
-        </Center>
-      </Paper>
+      <Center h={240}>
+        <Stack align="center" gap="sm">
+          <Loader size="md" color="teal" />
+          <Text c="dimmed" size="sm">
+            Loading invoices...
+          </Text>
+        </Stack>
+      </Center>
     );
   }
 
   if (invoices.length === 0) {
     return (
-      <Paper p="md" radius="md" withBorder>
-        <Center h={300}>
-          <Stack align="center" gap="md">
-            <Text size="xl" c="dimmed">
-              No invoices found
-            </Text>
-            <Text size="sm" c="dimmed">
-              Try adjusting your filters or create a new invoice
-            </Text>
-          </Stack>
-        </Center>
-      </Paper>
+      <Center h={200}>
+        <Stack align="center" gap={4}>
+          <Text fw={600} size="sm">
+            {emptyMessage}
+          </Text>
+          <Text size="xs" c="dimmed">
+            Invoices appear here once they are generated from your orders.
+          </Text>
+        </Stack>
+      </Center>
     );
   }
 
   return (
-    <Stack gap="md">
-      <Paper radius="md" withBorder>
-        <Table.ScrollContainer minWidth={800}>
-          <Table striped highlightOnHover>
-            <Table.Thead>
-              <Table.Tr>
-                <Table.Th>Invoice Number</Table.Th>
-                <Table.Th>Date</Table.Th>
-                <Table.Th>Customer</Table.Th>
-                <Table.Th>Order ID</Table.Th>
-                <Table.Th>Status</Table.Th>
-                <Table.Th>Amount</Table.Th>
-                <Table.Th>Tax</Table.Th>
-                <Table.Th>Actions</Table.Th>
-              </Table.Tr>
-            </Table.Thead>
-            <Table.Tbody>
-              {invoices.map((invoice: InvoiceListItem) => {
-                // Serializer returns invoiceId (string ID like GP-2026-0027); fall back to amazonOrderId
-                const displayId =
-                  invoice.invoiceNumber ??
-                  invoice.invoiceId ??
-                  invoice.amazonOrderId;
-                return (
-                  <Table.Tr
-                    key={invoice.invoiceId || displayId}
-                    style={{ cursor: "pointer" }}
-                    onClick={() => onInvoiceClick?.(displayId)}
-                  >
-                    <Table.Td>
-                      <Text fw={600} size="sm">
-                        {displayId}
-                      </Text>
-                    </Table.Td>
-                    <Table.Td>{formatDate(invoice.invoiceDate)}</Table.Td>
-                    <Table.Td>{invoice.buyerName || "—"}</Table.Td>
-                    <Table.Td>
-                      <Text size="sm" c="dimmed">
-                        {invoice.amazonOrderId || "—"}
-                      </Text>
-                    </Table.Td>
-                    <Table.Td>
-                      <Badge
-                        color={getStatusColor(
-                          invoice.status,
-                        ).toLocaleUpperCase()}
-                        variant="filled"
+    <div>
+      <Table.ScrollContainer minWidth={760}>
+        <Table highlightOnHover>
+          <Table.Thead>
+            <Table.Tr>
+              <Table.Th>Invoice</Table.Th>
+              <Table.Th>Issued</Table.Th>
+              <Table.Th>Source order</Table.Th>
+              <Table.Th>Status</Table.Th>
+              <Table.Th>Amount</Table.Th>
+              <Table.Th>Tax</Table.Th>
+              <Table.Th />
+            </Table.Tr>
+          </Table.Thead>
+          <Table.Tbody>
+            {invoices.map((invoice: InvoiceListItem) => {
+              // Serializer returns invoiceId (string ID like GP-2026-0027); fall back to amazonOrderId
+              const displayId =
+                invoice.invoiceNumber ??
+                invoice.invoiceId ??
+                invoice.amazonOrderId;
+              return (
+                <Table.Tr
+                  key={invoice.invoiceId || displayId}
+                  className={classes.row}
+                  onClick={() => onInvoiceClick?.(displayId)}
+                >
+                  <Table.Td>
+                    <span className={classes.invoiceId}>{displayId}</span>
+                    {invoice.buyerName && (
+                      <span className={classes.buyer}>{invoice.buyerName}</span>
+                    )}
+                  </Table.Td>
+                  <Table.Td className={classes.muted}>
+                    {formatDate(invoice.invoiceDate)}
+                  </Table.Td>
+                  <Table.Td>
+                    <span className={classes.orderLink}>
+                      {invoice.amazonOrderId
+                        ? `#${invoice.amazonOrderId}`
+                        : "—"}
+                    </span>
+                  </Table.Td>
+                  <Table.Td>
+                    <StatusPill tone={invoiceStatusTone(invoice.status)}>
+                      {invoice.status || "Pending"}
+                    </StatusPill>
+                  </Table.Td>
+                  <Table.Td className={classes.amount}>
+                    {formatCurrency(invoice.totalAmount, invoice.currency)}
+                  </Table.Td>
+                  <Table.Td className={classes.muted}>
+                    {formatCurrency(invoice.taxAmount, invoice.currency) || "—"}
+                  </Table.Td>
+                  <Table.Td>
+                    <div className={classes.actions}>
+                      <button
+                        type="button"
+                        className={classes.viewBtn}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onInvoiceClick?.(displayId);
+                        }}
                       >
-                        {invoice.status || "Pending"}
-                      </Badge>
-                    </Table.Td>
-                    <Table.Td>
-                      <Text fw={500} size="sm">
-                        {formatCurrency(invoice.totalAmount, invoice.currency)}
-                      </Text>
-                    </Table.Td>
-                    <Table.Td>
-                      <Text size="sm">
-                        {formatCurrency(invoice.taxAmount, invoice.currency) ||
-                          "—"}
-                      </Text>
-                    </Table.Td>
-                    <Table.Td>
-                      <Group gap="xs">
-                        <Tooltip label="View Details">
-                          <ActionIcon
-                            variant="subtle"
-                            color="blue"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onInvoiceClick?.(displayId);
-                            }}
-                          >
-                            <IconEye size={18} />
-                          </ActionIcon>
-                        </Tooltip>
-                        <Tooltip label="Download PDF">
-                          <ActionIcon
-                            variant="subtle"
-                            color="green"
-                            onClick={(e) => handleDownload(displayId, e)}
-                            loading={downloadingId === displayId}
-                          >
-                            <IconFileDownload size={18} />
-                          </ActionIcon>
-                        </Tooltip>
-                      </Group>
-                    </Table.Td>
-                  </Table.Tr>
-                );
-              })}
-            </Table.Tbody>
-          </Table>
-        </Table.ScrollContainer>
-      </Paper>
+                        View
+                      </button>
+                      <Tooltip label="Download PDF">
+                        <button
+                          type="button"
+                          className={classes.viewBtn}
+                          aria-label="Download PDF"
+                          disabled={downloadingId === displayId}
+                          onClick={(e) => handleDownload(displayId, e)}
+                        >
+                          {downloadingId === displayId ? (
+                            <Loader size={12} color="teal" />
+                          ) : (
+                            <IconDownload size={14} />
+                          )}
+                        </button>
+                      </Tooltip>
+                    </div>
+                  </Table.Td>
+                </Table.Tr>
+              );
+            })}
+          </Table.Tbody>
+        </Table>
+      </Table.ScrollContainer>
 
       {totalPages > 1 && (
-        <Group justify="center">
+        <div className={classes.pagination}>
           <Pagination
             total={totalPages}
             value={currentPage}
             onChange={onPageChange}
-            size="md"
+            size="sm"
+            color="teal"
           />
-        </Group>
+        </div>
       )}
-    </Stack>
+    </div>
   );
 }

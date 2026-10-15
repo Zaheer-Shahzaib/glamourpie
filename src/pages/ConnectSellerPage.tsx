@@ -1,24 +1,13 @@
 import React, { useState, useEffect } from "react";
-import {
-  Container,
-  Paper,
-  Title,
-  Text,
-  Select,
-  Checkbox,
-  Button,
-  Stack,
-  Group,
-  Avatar,
-  Box,
-  LoadingOverlay,
-  Alert,
-} from "@mantine/core";
-import { useNavigate, useLocation } from "react-router-dom";
+import { Select, Checkbox, LoadingOverlay, Alert } from "@mantine/core";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../Context/useAuth";
-import { AMAZON_MARKETPLACES, Marketplace } from "../constants/marketplaces";
+import { AMAZON_MARKETPLACES } from "../constants/marketplaces";
 import { getAmazonAuthUrl } from "../Services/spapi-services";
-import { IconAlertCircle, IconExternalLink } from "@tabler/icons-react";
+import { IconAlertCircle } from "@tabler/icons-react";
+import Wordmark from "../Components/Brand/Wordmark";
+import { PATH_PAGES } from "../routes";
+import classes from "./ConnectSellerPage.module.scss";
 
 const ConnectSellerPage: React.FC = () => {
   const { profile, logout } = useAuth();
@@ -114,136 +103,134 @@ const ConnectSellerPage: React.FC = () => {
     }));
   }, []);
 
+  const selectClassNames = {
+    label: classes.label,
+    input: classes.input,
+    section: classes.section,
+  };
+
   return (
-    <Box mih="100vh" bg="gray.0" py={100}>
-      <Container size="sm">
-        <Stack align="center" mb={40}>
-          <Box
-            component="img"
-            src="/logo.png"
-            alt="RunAnalytics"
-            h={40}
-            style={{ filter: "grayscale(0.5)" }}
+    <main className={classes.page}>
+      <div className={classes.strip} aria-hidden="true" />
+
+      <header className={classes.header}>
+        <Wordmark tone="onLight" />
+        <h1 className={classes.title}>Connect your Amazon seller account</h1>
+        <p className={classes.lead}>
+          Choose your first marketplace to start using SellerCenter.
+        </p>
+      </header>
+
+      <section className={classes.card} aria-labelledby="connect-card-title">
+        <LoadingOverlay visible={loading} overlayProps={{ blur: 2 }} />
+
+        <h2 id="connect-card-title" className={classes.cardTitle}>
+          Marketplace connection
+        </h2>
+
+        <div className={classes.form}>
+          {error && (
+            <Alert
+              icon={<IconAlertCircle size="1rem" />}
+              title="Connection Error"
+              color="red"
+              role="alert"
+            >
+              {error}
+            </Alert>
+          )}
+
+          <Select
+            label="Primary marketplace"
+            placeholder="Pick a marketplace"
+            data={marketplaceData || []}
+            value={selectedMarketplaceDomain}
+            onChange={handleMarketplaceChange}
+            searchable
+            size="md"
+            allowDeselect={false}
+            classNames={selectClassNames}
           />
-          <Title order={1} fw={900} size="h2" style={{ color: "#1A1B1E" }}>
-            Connect to Seller Central
-          </Title>
-        </Stack>
 
-        <Paper
-          withBorder
-          shadow="md"
-          p={30}
-          radius="md"
-          style={{ position: "relative" }}
-        >
-          <LoadingOverlay visible={loading} overlayProps={{ blur: 2 }} />
+          <Select
+            label="Primary currency"
+            placeholder="Pick a currency"
+            data={currencyData || []}
+            value={selectedCurrency}
+            onChange={handleMarketplaceChange}
+            size="md"
+            allowDeselect={false}
+            classNames={selectClassNames}
+          />
 
-          <Stack gap="xl">
-            {error && (
-              <Alert
-                icon={<IconAlertCircle size="1rem" />}
-                title="Connection Error"
-                color="red"
-              >
-                {error}
-              </Alert>
-            )}
+          <div className={classes.checks}>
+            <Checkbox
+              size="18px"
+              radius="4px"
+              color="var(--ra-color-brand)"
+              classNames={{ input: classes.checkInput, label: classes.checkLabel }}
+              label={
+                <>
+                  I have read and accepted the RunAnalytic{" "}
+                  <Link
+                    to={PATH_PAGES.terms}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={classes.inlineLink}
+                  >
+                    Terms &amp; Conditions
+                  </Link>
+                </>
+              }
+              checked={termsAccepted}
+              onChange={(event) => setTermsAccepted(event.currentTarget.checked)}
+            />
+            <Checkbox
+              size="18px"
+              radius="4px"
+              color="var(--ra-color-brand)"
+              classNames={{ input: classes.checkInput, label: classes.checkLabel }}
+              label="Send me important product updates"
+              checked={newsletterSubscribed}
+              onChange={(event) =>
+                setNewsletterSubscribed(event.currentTarget.checked)
+              }
+            />
+          </div>
 
-            <Box>
-              <Text fw={700} mb={5} size="sm">
-                Choose your main marketplace:
-              </Text>
-              <Select
-                placeholder="Pick a marketplace"
-                data={marketplaceData || []}
-                value={selectedMarketplaceDomain}
-                onChange={handleMarketplaceChange}
-                searchable
-                size="md"
-                allowDeselect={false}
-              />
-            </Box>
-
-            <Box>
-              <Text fw={700} mb={5} size="sm">
-                Choose your main currency:
-              </Text>
-              <Select
-                placeholder="Pick a currency"
-                data={currencyData || []}
-                value={selectedCurrency}
-                onChange={handleMarketplaceChange}
-                size="md"
-                allowDeselect={false}
-              />
-            </Box>
-
-            <Stack gap="sm" mt="md">
-              <Checkbox
-                label={
-                  <Text size="sm">
-                    I have read and accepted RunAnalytics{" "}
-                    <Text
-                      span
-                      c="blue"
-                      inherit
-                      style={{ cursor: "pointer", textDecoration: "underline" }}
-                    >
-                      terms and conditions
-                    </Text>
-                  </Text>
-                }
-                checked={termsAccepted}
-                onChange={(event) =>
-                  setTermsAccepted(event.currentTarget.checked)
-                }
-              />
-              <Checkbox
-                label={
-                  <Text size="sm">
-                    Subscribe to our newsletter. Only important updates, no
-                    spam!
-                  </Text>
-                }
-                checked={newsletterSubscribed}
-                onChange={(event) =>
-                  setNewsletterSubscribed(event.currentTarget.checked)
-                }
-              />
-            </Stack>
-
-            <Box mt="lg">
-              <Button
-                fullWidth
-                size="lg"
-                color="blue"
-                onClick={handleConnect}
-                disabled={!termsAccepted || !selectedMarketplaceDomain}
-                rightSection={<IconExternalLink size="1.2rem" />}
-                style={{ height: 50, fontSize: 18 }}
-              >
-                Connect to Seller Central
-              </Button>
-            </Box>
-          </Stack>
-        </Paper>
-
-        <Group justify="center" mt="xl">
-          <Text size="sm" c="dimmed">
-            Looking for other marketplaces?
-          </Text>
-          <Text
-            size="sm"
-            c="blue"
-            style={{ cursor: "pointer" }}
-            onClick={handleLogout}
+          <button
+            type="button"
+            className={classes.submit}
+            onClick={handleConnect}
+            disabled={!termsAccepted || !selectedMarketplaceDomain}
           >
-            Log out
-          </Text>
-        </Group>
-      </Container>
-    </Box>
+            Connect to Seller Central
+            <span aria-hidden="true">&#8599;</span>
+          </button>
+        </div>
+
+        <p className={classes.note}>
+          Your marketplace data stays protected and you can add more
+          marketplaces later from Settings.
+        </p>
+      </section>
+
+      <p className={classes.switch}>
+        <span>Looking for another account?</span>
+        <button
+          type="button"
+          className={classes.switchAction}
+          onClick={handleLogout}
+        >
+          Log out
+        </button>
+      </p>
+
+      <p className={classes.footer}>
+        RunAnalytic securely connects to Amazon through authorized marketplace
+        permissions.
+      </p>
+    </main>
   );
 };
 

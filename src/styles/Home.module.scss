@@ -1,119 +1,72 @@
-.hero {
- position: relative; /* Ensure the pseudo-element is positioned relative to this container */
-  background-color: var(--mantine-color-black);
-  color: var(--mantine-color-white);
-  padding: calc(var(--mantine-spacing-xl) * 2);
+@use "./public-site" as ps;
 
-  @media (max-width: 768px) {
-    padding-top: var(--mantine-spacing-xl);
-  }
+// Home page: wrappers for the pricing / FAQ / support blocks that sit below
+// the landing sections (see src/Components/Landing for the rest).
 
-  /* Add the background image with opacity using a pseudo-element */
-  &::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-image: url("../../public/assets/create-invoice.jpg"); /* Path to your image */
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    opacity: 0.3; /* Adjust opacity as needed */
-    z-index: 1; /* Place the pseudo-element behind the content */
-  }
-
-  /* Ensure the content is above the background image */
-  * {
-    position: relative;
-    z-index: 2;
-  }
-
-  .title {
-    font-weight: 800;
-    font-size: 40px;
-    color: var(--mantine-color-white);
-    letter-spacing: -1px;
-    margin-bottom: var(--mantine-spacing-xs);
-
-    @media (max-width: 768px) {
-      font-size: 28px;
-      text-align: left;
-    }
-  }
-  .highlight {
-    color: var(--mantine-color-yellow-9);
-  }
-
-  .btn{
-    background-color: var(--mantine-color-yellow-9);
-    border-radius: var(--mantine-radius-xl);
-    border: noen;   
-    :hover {
-      background-color: var(--mantine-color-yellow-8);
-    }
-  }
+.section {
+  scroll-margin-top: 7.25rem; // clear the fixed landing header (116px)
+  padding-block: clamp(2.5rem, 5vw, 4rem);
+  font-family: var(--ra-font-body);
 }
 
-.stackControl {
-  text-transform: capitalize;
-  background-color: var(--mantine-color-dark-6);
-  color: var(--mantine-color-white);
-  padding: 6px 10px;
-  border-radius: var(--mantine-radius-md);
+.bgBase {
+  background-color: var(--ra-color-surface);
 }
 
-.variantImg {
-  max-height: 4480px;
-  width: 100%;
-  object-fit: contain;
+.pricingSection {
+  padding-top: clamp(3rem, 6vw, 5rem);
 }
 
-.variantTitle {
+.support {
+  @include ps.page-container;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
   text-align: center;
-  margin-top: var(--mantine-spacing-md);
+}
+
+.supportTitle {
+  margin: 0;
+  font-family: var(--ra-font-heading);
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.45;
+  color: var(--ra-color-surface-inverse);
+}
+
+.supportActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+}
+
+.supportLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 22px;
+  border-radius: var(--ra-radius-sm);
+  background-color: var(--ra-color-surface-inverse);
+  font-size: 13px;
   font-weight: 600;
-}
+  line-height: 20px;
+  text-decoration: none;
+  color: var(--ra-color-surface-white);
+  transition: background-color 0.15s ease;
 
-.paper {
-  height: 100%;
-  background-color: transparent;
-}
-
-.contactPaper {
-  background-color: transparent;
-  text-align: center;
-
-  .contactBtn {
-    background-color: var(--mantine-color-blue-4);
-    color: var(--mantine-color-white);
-    padding: 10px 20px;
-    border-radius: var(--mantine-radius-md);
-    font-weight: 600;
-    font-size: var(--mantine-font-size-sm);
-    text-transform: capitalize;
-    transition: all ease 200ms;
-
-    &:hover {
-      background-color: var(--mantine-color-blue-5);
-      color: var(--mantine-color-white);
-      transform: scale(1.02);
-    }
+  &:hover {
+    background-color: var(--ra-color-cta-pill);
   }
+
+  @include ps.focus-ring;
 }
 
-.paperImage {
-  height: 100%;
-  background-color: transparent;
-  transition: all ease 200ms;
-  .paperTitle {
-    font-weight: 600;
-    color: light-dark(var(--mantine-color-black), var(--mantine-color-white));
-    font-size: var(--mantine-font-size-lg);
-    margin-bottom: var(--mantine-spacing-xs);
-    }
-  .paperText {
-    color: var(--mantine-color-gray-6);
+@media (prefers-reduced-motion: reduce) {
+  .supportLink {
+    transition: none;
   }
 }

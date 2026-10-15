@@ -1,29 +1,14 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
-  Container,
-  Paper,
-  Title,
   Text,
-  Stack,
-  Group,
   Avatar,
   Button,
   TextInput,
-  Grid,
   Select,
   FileButton,
   ActionIcon,
-  useMantineTheme,
 } from "@mantine/core";
-import {
-  IconUser,
-  IconMail,
-  IconPhone,
-  IconBuilding,
-  IconMapPin,
-  IconCamera,
-  IconTrash,
-} from "@tabler/icons-react";
+import { IconCamera, IconTrash } from "@tabler/icons-react";
 import { notifications } from "@mantine/notifications";
 import { UpdateProfileData } from "../../types/profile.types";
 import { useAuth } from "../../Context/useAuth";
@@ -34,13 +19,46 @@ import {
 } from "../../Services/user-services";
 import MainLayout from "../../layout/Main";
 import { getAvatarUrl } from "../../utils/helperFunctions";
+import {
+  AppCard,
+  PageHeader,
+  appButton,
+  ui,
+} from "../../Components/AppUi";
+import ProfileTabs from "../../Components/Profile/ProfileTabs";
+import {
+  pickBestPlan,
+  useSubscriptionStatus,
+} from "../../hooks/useSubscriptionStatus";
+import classes from "./ProfilePage.module.scss";
+
+const MARKETPLACE_OPTIONS = [
+  { value: "amazon.ae", label: "Amazon UAE" },
+  { value: "amazon.com.br", label: "Amazon Brazil" },
+  { value: "amazon.in", label: "Amazon India" },
+  { value: "amazon.com", label: "Amazon US" },
+];
 
 export default function ProfilePersonalPage() {
   const { profile, token, loading } = useAuth();
   const [editMode, setEditMode] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const theme = useMantineTheme();
+
+  const { data: subscription } = useSubscriptionStatus();
+  const activePlan = useMemo(
+    () => pickBestPlan(subscription?.activePlans || []),
+    [subscription],
+  );
+
+  // The profile API has no timezone field yet — show the browser's zone read-only.
+  const browserTimezone = useMemo(() => {
+    try {
+      return Intl.DateTimeFormat().resolvedOptions().timeZone || "";
+    } catch {
+      return "";
+    }
+  }, []);
 
   const [formData, setFormData] = useState<UpdateProfileData>({
     username: profile?.username || "",
@@ -130,7 +148,6 @@ export default function ProfilePersonalPage() {
     }
   };
 
-  console.log(getAvatarUrl(profile?.avatar));
   const handleProfileUpdate = async () => {
     if (!token) return;
 
@@ -157,300 +174,268 @@ export default function ProfilePersonalPage() {
     }
   };
 
+  const handleCancel = () => {
+    setEditMode(false);
+    if (profile) {
+      setFormData((prev) => ({
+        ...prev,
+        firstname: profile.firstname || "",
+        lastname: profile.lastname || "",
+        phone: profile.phone || "",
+        company: profile.company || "",
+        taxId: profile.taxId || "",
+        marketplace: profile.marketplace || "",
+        address: {
+          street: profile.address?.street || "",
+          city: profile.address?.city || "",
+          state: profile.address?.state || "",
+          postalCode: profile.address?.postalCode || "",
+          country: profile.address?.country || "",
+        },
+      }));
+    }
+  };
+
   if (loading || !profile) {
     return (
       <MainLayout>
-        <Container size="lg" py="xl">
-          <Text>Loading profile...</Text>
-        </Container>
+        <Text c="dimmed">Loading profile...</Text>
       </MainLayout>
     );
   }
 
+  const displayName =
+    [profile.firstname, profile.lastname].filter(Boolean).join(" ") ||
+    profile.username;
+  const initials =
+    [profile.firstname, profile.lastname]
+      .filter(Boolean)
+      .map((n) => n!.charAt(0))
+      .join("")
+      .toUpperCase() || (profile.username || "?").charAt(0).toUpperCase();
+
+  // Inputs stay white (as designed); they are simply read-only until "Edit profile".
+  const readOnly = !editMode;
+
   return (
     <MainLayout>
-      <Container size="lg" py="xl">
-        <Stack gap="lg">
-          {/* Header with Avatar */}
-          <Paper p="xl" radius="md" withBorder>
-            <Group justify="space-between">
-              <Group>
-                <div style={{ position: "relative" }}>
-                  <Avatar
-                    src={getAvatarUrl(profile?.avatar)}
-                    size={100}
-                    radius="md"
-                  >
-                    {profile.username?.charAt(0).toUpperCase()}
-                  </Avatar>
-                  <FileButton onChange={handleAvatarUpload} accept="image/*">
-                    {(props) => (
-                      <ActionIcon
-                        {...props}
-                        variant="filled"
-                        color="blue"
-                        size="sm"
-                        radius="xl"
-                        loading={uploading}
-                        style={{
-                          position: "absolute",
-                          bottom: 0,
-                          right: 0,
-                        }}
-                      >
-                        <IconCamera size={14} />
-                      </ActionIcon>
-                    )}
-                  </FileButton>
-                </div>
+      <PageHeader
+        title="Profile"
+        subtitle="Manage your identity, contact details, and account security."
+      />
 
-                <div>
-                  <Title order={2}>{profile.firstname}</Title>
-                  <Text c={theme.colors.green[4]} size="sm">
-                    {profile.email}
-                  </Text>
-                </div>
-              </Group>
-
-              {profile.avatar && (
-                <Button
-                  variant="subtle"
-                  color="red"
-                  leftSection={<IconTrash size={16} />}
-                  onClick={handleAvatarDelete}
-                  loading={uploading}
-                >
-                  Remove Avatar
-                </Button>
-              )}
-            </Group>
-          </Paper>
-
-          {/* Personal Information */}
-          <Paper p="xl" radius="md" withBorder>
-            <Group justify="space-between" mb="lg">
-              <Title order={3}>Personal Information</Title>
-              {!editMode ? (
-                <Button onClick={() => setEditMode(true)}>Edit Profile</Button>
-              ) : (
-                <Group>
-                  <Button variant="subtle" onClick={() => setEditMode(false)}>
-                    Cancel
-                  </Button>
-                  <Button onClick={handleProfileUpdate} loading={saving}>
-                    Save Changes
-                  </Button>
-                </Group>
-              )}
-            </Group>
-
-            <Stack gap="md">
-              <Grid>
-                {/* <Grid.Col span={6}>
-                                    <TextInput
-                                        label="Username"
-                                        placeholder="Enter username"
-                                        value={formData.username}
-                                        onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                                        disabled={!editMode}
-                                        leftSection={<IconUser size={16} />}
-                                        size="sm"
-                                    />
-                                </Grid.Col> */}
-                <Grid.Col span={6}>
-                  <TextInput
-                    label="Email"
-                    value={profile.email}
-                    disabled
-                    leftSection={<IconMail size={16} />}
-                    size="sm"
-                  />
-                </Grid.Col>
-              </Grid>
-
-              <Grid>
-                <Grid.Col span={6}>
-                  <TextInput
-                    label="First Name"
-                    placeholder="Enter first name"
-                    value={formData.firstname}
-                    onChange={(e) =>
-                      setFormData({ ...formData, firstname: e.target.value })
-                    }
-                    disabled={!editMode}
-                    size="sm"
-                  />
-                </Grid.Col>
-                <Grid.Col span={6}>
-                  <TextInput
-                    label="Last Name"
-                    placeholder="Enter last name"
-                    value={formData.lastname}
-                    onChange={(e) =>
-                      setFormData({ ...formData, lastname: e.target.value })
-                    }
-                    disabled={!editMode}
-                    size="sm"
-                  />
-                </Grid.Col>
-              </Grid>
-
-              <Grid>
-                <Grid.Col span={6}>
-                  <TextInput
-                    label="Phone"
-                    placeholder="Enter phone number"
-                    value={formData.phone}
-                    onChange={(e) =>
-                      setFormData({ ...formData, phone: e.target.value })
-                    }
-                    disabled={!editMode}
-                    leftSection={<IconPhone size={16} />}
-                    size="sm"
-                  />
-                </Grid.Col>
-                <Grid.Col span={6}>
-                  <TextInput
-                    label="Company"
-                    placeholder="Enter company name"
-                    value={formData.company}
-                    onChange={(e) =>
-                      setFormData({ ...formData, company: e.target.value })
-                    }
-                    disabled={!editMode}
-                    leftSection={<IconBuilding size={16} />}
-                    size="sm"
-                  />
-                </Grid.Col>
-              </Grid>
-
-              <Grid>
-                <Grid.Col span={6}>
-                  <TextInput
-                    label="Tax ID / VAT Number"
-                    placeholder="Enter tax ID"
-                    value={formData.taxId}
-                    onChange={(e) =>
-                      setFormData({ ...formData, taxId: e.target.value })
-                    }
-                    disabled={!editMode}
-                    size="sm"
-                  />
-                </Grid.Col>
-                <Grid.Col span={6}>
-                  <Select
-                    label="Primary Marketplace"
-                    placeholder="Select marketplace"
-                    value={formData.marketplace}
-                    onChange={(value) =>
-                      setFormData({ ...formData, marketplace: value || "" })
-                    }
-                    disabled={!editMode}
-                    data={[
-                      { value: "amazon.ae", label: "Amazon UAE" },
-                      { value: "amazon.com.br", label: "Amazon Brazil" },
-                      { value: "amazon.in", label: "Amazon India" },
-                      { value: "amazon.com", label: "Amazon US" },
-                    ]}
-                    size="sm"
-                  />
-                </Grid.Col>
-              </Grid>
-
-              <Title order={4} mt="md">
-                Address
-              </Title>
-
-              <TextInput
-                label="Street Address"
-                placeholder="Enter street address"
-                value={formData.address?.street}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    address: { ...formData.address, street: e.target.value },
-                  })
-                }
-                disabled={!editMode}
-                leftSection={<IconMapPin size={16} />}
+      {/* ── Identity card ───────────────────────────────────── */}
+      <AppCard className={classes.identity}>
+        <div className={classes.avatarWrap}>
+          <Avatar
+            src={getAvatarUrl(profile?.avatar)}
+            size={72}
+            radius={36}
+            classNames={{ placeholder: classes.avatarPlaceholder }}
+          >
+            {initials}
+          </Avatar>
+          <FileButton onChange={handleAvatarUpload} accept="image/*">
+            {(props) => (
+              <ActionIcon
+                {...props}
+                className={classes.cameraBtn}
+                variant="filled"
                 size="sm"
-              />
+                radius="xl"
+                loading={uploading}
+                aria-label="Upload avatar"
+              >
+                <IconCamera size={14} />
+              </ActionIcon>
+            )}
+          </FileButton>
+        </div>
 
-              <Grid>
-                <Grid.Col span={6}>
-                  <TextInput
-                    label="City"
-                    placeholder="Enter city"
-                    value={formData.address?.city}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        address: { ...formData.address, city: e.target.value },
-                      })
-                    }
-                    disabled={!editMode}
-                    size="sm"
-                  />
-                </Grid.Col>
-                <Grid.Col span={6}>
-                  <TextInput
-                    label="State / Province"
-                    placeholder="Enter state"
-                    value={formData.address?.state}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        address: { ...formData.address, state: e.target.value },
-                      })
-                    }
-                    disabled={!editMode}
-                    size="sm"
-                  />
-                </Grid.Col>
-              </Grid>
+        <div className={classes.identityText}>
+          <h2 className={classes.name}>{displayName}</h2>
+          <p className={classes.email}>{profile.email}</p>
+        </div>
 
-              <Grid>
-                <Grid.Col span={6}>
-                  <TextInput
-                    label="Postal Code"
-                    placeholder="Enter postal code"
-                    value={formData.address?.postalCode}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        address: {
-                          ...formData.address,
-                          postalCode: e.target.value,
-                        },
-                      })
-                    }
-                    disabled={!editMode}
-                    size="sm"
-                  />
-                </Grid.Col>
-                <Grid.Col span={6}>
-                  <TextInput
-                    label="Country"
-                    placeholder="Enter country"
-                    value={formData.address?.country}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        address: {
-                          ...formData.address,
-                          country: e.target.value,
-                        },
-                      })
-                    }
-                    disabled={!editMode}
-                    size="sm"
-                  />
-                </Grid.Col>
-              </Grid>
-            </Stack>
-          </Paper>
-        </Stack>
-      </Container>
+        <div className={classes.identityActions}>
+          {activePlan && (
+            <span className={classes.planPill}>
+              {activePlan.toUpperCase()} PLAN
+            </span>
+          )}
+          {profile.avatar && (
+            <Button
+              className={appButton("dangerText")}
+              leftSection={<IconTrash size={16} />}
+              onClick={handleAvatarDelete}
+              loading={uploading}
+            >
+              Remove avatar
+            </Button>
+          )}
+          {editMode ? (
+            <Button className={appButton("light")} onClick={handleCancel}>
+              Cancel
+            </Button>
+          ) : (
+            <Button
+              className={appButton("primary")}
+              onClick={() => setEditMode(true)}
+            >
+              Edit profile
+            </Button>
+          )}
+        </div>
+      </AppCard>
+
+      {/* ── Personal information ────────────────────────────── */}
+      <AppCard className={classes.formCard}>
+        <h2 className={classes.formTitle}>Personal information</h2>
+        <ProfileTabs active="personal" />
+
+        <div className={classes.formGrid}>
+          <TextInput label="Email" value={profile.email} disabled />
+          <Select
+            label="Primary marketplace"
+            placeholder="Select marketplace"
+            value={formData.marketplace || null}
+            onChange={(value) =>
+              setFormData({ ...formData, marketplace: value || "" })
+            }
+            readOnly={readOnly}
+            data={MARKETPLACE_OPTIONS}
+          />
+
+          <TextInput
+            label="First name"
+            placeholder="Enter first name"
+            value={formData.firstname}
+            onChange={(e) =>
+              setFormData({ ...formData, firstname: e.target.value })
+            }
+            readOnly={readOnly}
+          />
+          <TextInput
+            label="Last name"
+            placeholder="Enter last name"
+            value={formData.lastname}
+            onChange={(e) =>
+              setFormData({ ...formData, lastname: e.target.value })
+            }
+            readOnly={readOnly}
+          />
+
+          <TextInput
+            label="Phone"
+            placeholder="Enter phone number"
+            value={formData.phone}
+            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+            readOnly={readOnly}
+          />
+          <TextInput
+            label="Company"
+            placeholder="Enter company name"
+            value={formData.company}
+            onChange={(e) =>
+              setFormData({ ...formData, company: e.target.value })
+            }
+            readOnly={readOnly}
+          />
+
+          <TextInput
+            label="Tax ID / VAT number"
+            placeholder="Enter tax ID"
+            value={formData.taxId}
+            onChange={(e) => setFormData({ ...formData, taxId: e.target.value })}
+            readOnly={readOnly}
+          />
+          <TextInput
+            label="Timezone"
+            value={browserTimezone}
+            description="Detected from your browser"
+            disabled
+          />
+        </div>
+
+        <h3 className={classes.sectionTitle}>Address</h3>
+        <div className={classes.formGrid}>
+          <TextInput
+            className={classes.fullWidth}
+            label="Street address"
+            placeholder="Enter street address"
+            value={formData.address?.street}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                address: { ...formData.address, street: e.target.value },
+              })
+            }
+            readOnly={readOnly}
+          />
+          <TextInput
+            label="City"
+            placeholder="Enter city"
+            value={formData.address?.city}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                address: { ...formData.address, city: e.target.value },
+              })
+            }
+            readOnly={readOnly}
+          />
+          <TextInput
+            label="State / Province"
+            placeholder="Enter state"
+            value={formData.address?.state}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                address: { ...formData.address, state: e.target.value },
+              })
+            }
+            readOnly={readOnly}
+          />
+          <TextInput
+            label="Postal code"
+            placeholder="Enter postal code"
+            value={formData.address?.postalCode}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                address: { ...formData.address, postalCode: e.target.value },
+              })
+            }
+            readOnly={readOnly}
+          />
+          <TextInput
+            label="Country"
+            placeholder="Enter country"
+            value={formData.address?.country}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                address: { ...formData.address, country: e.target.value },
+              })
+            }
+            readOnly={readOnly}
+          />
+        </div>
+
+        <div className={classes.formFooter}>
+          <span className={ui.mutedText}>
+            Profile changes are saved per workspace.
+          </span>
+          <Button
+            className={appButton("primary")}
+            onClick={handleProfileUpdate}
+            loading={saving}
+            disabled={!editMode}
+          >
+            Save changes
+          </Button>
+        </div>
+      </AppCard>
     </MainLayout>
   );
 }
