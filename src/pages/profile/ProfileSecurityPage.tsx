@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import {
-    Container,
-    Paper,
-    Title,
     Stack,
     Button,
     PasswordInput,
 } from '@mantine/core';
+import { AppCard, PageHeader, appButton } from '../../Components/AppUi';
+import ProfileTabs from '../../Components/Profile/ProfileTabs';
+import classes from './ProfilePage.module.scss';
 import { IconKey } from '@tabler/icons-react';
 import { useAuth } from '../../Context/useAuth';
 import { notifications } from '@mantine/notifications';
@@ -64,13 +64,21 @@ export default function ProfileSecurityPage() {
 
     return (
         <MainLayout>
-            <Container size="lg" py="xl">
-                <Paper p="xl" radius="md" withBorder>
-                    <Title order={3} mb="lg">Change Password</Title>
+            <PageHeader
+                title="Profile"
+                subtitle="Manage your identity, contact details, and account security."
+            />
+            <AppCard>
+                    <ProfileTabs active="security" />
+                    <h2 className={classes.securityTitle}>Change password</h2>
+                    <p className={classes.securitySubtitle}>
+                        Keep your SellerCenter account secure with a strong password.
+                    </p>
+                    <hr className={classes.securityRule} />
 
-                    <Stack gap="md" style={{ maxWidth: 500 }}>
+                    <Stack gap="md" className={classes.securityForm}>
                         <PasswordInput
-                            label="Current Password"
+                            label="Current password"
                             placeholder="Enter current password"
                             value={passwordData.currentPassword}
                             onChange={(e) =>
@@ -79,7 +87,7 @@ export default function ProfileSecurityPage() {
                         />
 
                         <PasswordInput
-                            label="New Password"
+                            label="New password"
                             placeholder="Enter new password"
                             value={passwordData.newPassword}
                             onChange={(e) =>
@@ -88,7 +96,7 @@ export default function ProfileSecurityPage() {
                         />
 
                         <PasswordInput
-                            label="Confirm New Password"
+                            label="Confirm new password"
                             placeholder="Confirm new password"
                             value={passwordData.confirmPassword}
                             onChange={(e) =>
@@ -97,15 +105,17 @@ export default function ProfileSecurityPage() {
                         />
 
                         <Button
+                            className={appButton('primary')}
                             onClick={handlePasswordChange}
                             loading={saving}
                             leftSection={<IconKey size={16} />}
+                            fullWidth
+                            mt="sm"
                         >
-                            Change Password
+                            Change password
                         </Button>
                     </Stack>
-                </Paper>
-            </Container>
+            </AppCard>
         </MainLayout>
     );
 }

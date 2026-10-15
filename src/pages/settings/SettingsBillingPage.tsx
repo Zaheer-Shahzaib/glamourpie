@@ -1,8 +1,5 @@
 import { useState, useEffect } from "react";
 import {
-  Container,
-  Paper,
-  Title,
   Text,
   Stack,
   Group,
@@ -12,8 +9,6 @@ import {
   Badge,
   Table,
   Modal,
-  ActionIcon,
-  Tooltip,
   Loader,
   Center,
   Box,
@@ -22,12 +17,10 @@ import { useDisclosure } from "@mantine/hooks";
 import {
   IconAlertCircle,
   IconDownload,
-  IconExternalLink,
-  IconEye,
-  IconX,
   IconHistory,
 } from "@tabler/icons-react";
 import { useAuth } from "../../Context/useAuth";
+import { pickBestPlan } from "../../hooks/useSubscriptionStatus";
 import { notifications } from "@mantine/notifications";
 import {
   getSubscriptionStatus,
@@ -36,8 +29,45 @@ import {
 } from "../../Services/stripeService";
 import MainLayout from "../../layout/Main";
 import { Link } from "react-router-dom";
-import { getBillingStatusColor } from "../../utils/helperFunctions";
 import { useScroll } from "../../Context/scrollContext";
+import {
+  AppCard,
+  PageHeader,
+  PillTone,
+  StatusPill,
+  appButton,
+  ui,
+} from "../../Components/AppUi";
+import classes from "./Billing.module.scss";
+
+/** Stripe subscription status → pill tone */
+const subTone = (status: string, cancelAtPeriodEnd: boolean): PillTone => {
+  if (cancelAtPeriodEnd) return "warning";
+  switch (status) {
+    case "active":
+    case "trialing":
+      return "success";
+    case "past_due":
+      return "danger";
+    default:
+      return "neutral";
+  }
+};
+
+/** Stripe invoice status → pill tone */
+const receiptTone = (status: string): PillTone => {
+  switch (status) {
+    case "paid":
+      return "success";
+    case "open":
+      return "warning";
+    case "void":
+    case "uncollectible":
+      return "danger";
+    default:
+      return "neutral";
+  }
+};
 
 export default function SettingsBillingPage() {
   const { token } = useAuth();
@@ -83,8 +113,6 @@ export default function SettingsBillingPage() {
         getSubscriptionStatus(),
         getCustomerInvoicesDetails(),
       ]);
-      console.log("subData", subData);
-      console.log("invData", invData);
       setSubscriptions(subData.subscriptions || []);
       setActivePlans(subData.activePlans || []);
       setTotalAllowedInvoices(subData.totalAllowedInvoices || 0);
@@ -151,281 +179,255 @@ export default function SettingsBillingPage() {
     });
   };
 
-  const getStatusColor = (status: string, cancelAtPeriodEnd: boolean) => {
-    if (cancelAtPeriodEnd) return "orange"; // Pending cancellation
-    switch (status) {
-      case "active":
-        return "green";
-      case "past_due":
-        return "red";
-      case "canceled":
-        return "gray";
-      case "trialing":
-        return "cyan";
-      default:
-        return "gray";
-    }
-  };
-  console.log("subscriptions", subscriptions);
+  // Primary plan shown in the "Active plan" card (highest-ranking live subscription)
+  const liveSubs = subscriptions.filter((s) =>
+    ["active", "trialing", "past_due"].includes(s.status),
+  );
+  const bestPlan = pickBestPlan(liveSubs.map((s) => s.plan));
+  const primarySub =
+    liveSubs.find((s) => s.plan === bestPlan) ?? liveSubs[0] ?? null;
+
+  const remainingInvoices = Math.max(
+    totalAllowedInvoices - invoicesGeneratedThisMonth,
+    0,
+  );
+  const usedPct =
+    totalAllowedInvoices > 0
+      ? Math.min(
+          100,
+          Math.round((invoicesGeneratedThisMonth / totalAllowedInvoices) * 100),
+        )
+      : 0;
+
   return (
     <MainLayout>
-      <Container size="lg" py="xl">
-        <Paper p="xl" radius="md" withBorder>
-          <Stack gap="xl">
-            <Box>
-              <Title order={3}>Subscription & Billing Overview</Title>
-              <Text size="sm" c="dimmed">
-                Manage your current active plans, view historical records, and
-                securely access your invoices directly.
-              </Text>
-            </Box>
+      <PageHeader
+        title="Subscription & billing"
+        subtitle="Manage your active plan, usage, and payment history."
+      />
 
-            <Divider />
+      {hasPastDue && (
+        <Alert
+          mb="lg"
+          icon={<IconAlertCircle size={16} />}
+          title="Payment Action Required"
+          color="red"
+          variant="filled"
+        >
+          Your recent subscription payment failed. Your automated invoicing
+          feature is currently paused.
+        </Alert>
+      )}
 
-            {hasPastDue && (
-              <Alert
-                icon={<IconAlertCircle size={16} />}
-                title="Payment Action Required"
-                color="red"
-                variant="filled"
-              >
-                Your recent subscription payment failed. Your automated
-                invoicing feature is currently paused.
-              </Alert>
-            )}
+      {/* ── Plan + usage ─────────────────────────────────────── */}
+      <div className={classes.planRow}>
+        <AppCard tone="dark" className={classes.planCard}>
+          <span className={classes.planEyebrow}>Active plan</span>
+          {primarySub ? (
+            <>
+              <div className={classes.planTop}>
+                <span className={classes.planName}>
+                  {primarySub.plan.charAt(0).toUpperCase() +
+                    primarySub.plan.slice(1)}
+                </span>
+                {primarySub.currentPeriodEnd && (
+                  <span className={classes.planRenew}>
+                    {primarySub.cancel_at_period_end ? "Ends" : "Renews"}{" "}
+                    {formatDate(primarySub.currentPeriodEnd)}
+                  </span>
+                )}
+              </div>
+              <div className={classes.planBottom}>
+                <StatusPill
+                  tone={subTone(primarySub.status, primarySub.cancel_at_period_end)}
+                  className={classes.upper}
+                >
+                  {primarySub.cancel_at_period_end
+                    ? "Cancels at period end"
+                    : primarySub.status.replace(/_/g, " ")}
+                </StatusPill>
+                {primarySub.plan.toLowerCase() === "free" && (
+                  <Button
+                    className={appButton("primary", true)}
+                    onClick={() => navigateToSection("pricing", "/")}
+                  >
+                    Upgrade plan
+                  </Button>
+                )}
+              </div>
+            </>
+          ) : (
+            <>
+              <div className={classes.planTop}>
+                <span className={classes.planName}>No active plan</span>
+              </div>
+              <div className={classes.planBottom}>
+                <Button
+                  className={appButton("primary", true)}
+                  onClick={() => navigateToSection("pricing", "/")}
+                >
+                  Subscribe
+                </Button>
+              </div>
+            </>
+          )}
+        </AppCard>
 
-            <Group align="flex-start" grow>
-              <Paper
-                withBorder
-                p="md"
-                radius="md"
-                bg="var(--mantine-color-gray-0)"
-              >
-                <Text c="dimmed" size="sm" fw={500} tt="uppercase">
-                  Active Plan & Status
-                </Text>
-                <Group gap="md" mt="xs">
-                  {subscriptions.filter((s) =>
-                    ["active", "trialing", "past_due"].includes(s.status),
-                  ).length > 0 ? (
-                    subscriptions
-                      .filter((s) =>
-                        ["active", "trialing", "past_due"].includes(s.status),
-                      )
-                      .map((sub: any) => (
-                        <Stack gap={4} key={`active-${sub.id}`} justify="space-between">
-                          <Group gap="xs" justify="space-between">
-                            <Badge size="lg" color="blue" variant="light">
-                            {sub.plan.charAt(0).toUpperCase() +
-                              sub.plan.slice(1)}
-                          </Badge>
-                          {sub.plan.toLowerCase() === "free" && (
-                            <Button
-                              size="xs"
-                              onClick={() => navigateToSection("pricing", "/")}
-                              variant="light"
-                              color="green"
-                            >
-                              Upgrade Plan
-                            </Button>
-                          )}
-                            </Group>
-                        </Stack>
-                      ))
-                  ) : (
-                    <Group>
-                      <Text c="dimmed" size="sm" fw={500} tt="uppercase">
-                        No active plans
-                      </Text>
-                      <Button
-                        onClick={() => navigateToSection("pricing", "/")}
-                        variant="transparent"
-                        color="blue"
+        <AppCard className={classes.usageCard}>
+          <div className={classes.usageText}>
+            <span className={ui.eyebrow}>Monthly invoices remaining</span>
+            <span className={classes.usageValue}>
+              {remainingInvoices.toLocaleString()} left
+            </span>
+            <span className={ui.mutedText}>
+              {invoicesGeneratedThisMonth.toLocaleString()} used out of{" "}
+              {totalAllowedInvoices.toLocaleString()} limit
+            </span>
+          </div>
+          <span className={classes.usageTrack}>
+            <span
+              className={classes.usageBar}
+              style={{ width: `${usedPct}%` }}
+            />
+          </span>
+        </AppCard>
+      </div>
+
+      {/* ── Subscription history ─────────────────────────────── */}
+      <AppCard className={classes.tableCard}>
+        <h2 className={classes.tableTitle}>Subscription history</h2>
+        {loading ? (
+          <Center py="xl">
+            <Loader color="teal" />
+          </Center>
+        ) : subscriptions.length > 0 ? (
+          <Table.ScrollContainer minWidth={640}>
+            <Table highlightOnHover>
+              <Table.Thead>
+                <Table.Tr>
+                  <Table.Th>Plan</Table.Th>
+                  <Table.Th>Status</Table.Th>
+                  <Table.Th>Activation date</Table.Th>
+                  <Table.Th>Current period end</Table.Th>
+                  <Table.Th ta="right">Action</Table.Th>
+                </Table.Tr>
+              </Table.Thead>
+              <Table.Tbody>
+                {subscriptions.map((sub: any) => (
+                  <Table.Tr key={sub.id}>
+                    <Table.Td className={classes.strong} tt="capitalize">
+                      {sub.plan}
+                    </Table.Td>
+                    <Table.Td>
+                      <StatusPill
+                        tone={subTone(sub.status, sub.cancel_at_period_end)}
+                        className={classes.upper}
                       >
-                        <Badge size="lg" color="blue" variant="light">
-                          Subscribe
-                        </Badge>
-                      </Button>
-                    </Group>
-                  )}
-                </Group>
-              </Paper>
+                        {sub.cancel_at_period_end
+                          ? "Cancels at period end"
+                          : sub.status.replace(/_/g, " ")}
+                      </StatusPill>
+                    </Table.Td>
+                    <Table.Td className={ui.mutedText}>
+                      {formatDate(sub.createdAt)}
+                    </Table.Td>
+                    <Table.Td className={ui.mutedText}>
+                      {formatDate(sub.currentPeriodEnd)}
+                    </Table.Td>
+                    <Table.Td ta="right">
+                      {sub.status === "active" && !sub.cancel_at_period_end && (
+                        <Button
+                          className={appButton("dangerText", true)}
+                          onClick={() => handleCancelClick(sub.id)}
+                        >
+                          Cancel plan
+                        </Button>
+                      )}
+                    </Table.Td>
+                  </Table.Tr>
+                ))}
+              </Table.Tbody>
+            </Table>
+          </Table.ScrollContainer>
+        ) : (
+          <Text size="sm" c="dimmed">
+            No subscriptions found on your account.
+          </Text>
+        )}
+      </AppCard>
 
-              <Paper
-                withBorder
-                p="md"
-                radius="md"
-                bg="var(--mantine-color-gray-0)"
-              >
-                <Text c="dimmed" size="sm" fw={500} tt="uppercase">
-                  Monthly Invoices Remaining
-                </Text>
-                <Text size="xl" fw={700} mt="xs" c="brand">
-                  {totalAllowedInvoices - invoicesGeneratedThisMonth > 0
-                    ? (
-                        totalAllowedInvoices - invoicesGeneratedThisMonth
-                      ).toLocaleString()
-                    : "0"}{" "}
-                  Left
-                </Text>
-                <Text size="sm" c="dimmed" mt={4}>
-                  {invoicesGeneratedThisMonth.toLocaleString()} used out of{" "}
-                  {totalAllowedInvoices.toLocaleString()} limit
-                </Text>
-              </Paper>
-            </Group>
-
-            {/* Subscriptions History Table */}
-            <Box>
-              <Group justify="space-between" mb="sm">
-                <Title order={4}>Subscription History</Title>
-                <Text size="sm" fw={500} c="dimmed">
-                  Current Date:{" "}
-                  {new Date().toLocaleDateString(undefined, {
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric",
-                  })}
-                </Text>
-              </Group>
-              {loading ? (
-                <Center py="xl">
-                  <Loader />
-                </Center>
-              ) : subscriptions.length > 0 ? (
-                <Table striped highlightOnHover withTableBorder>
-                  <Table.Thead>
-                    <Table.Tr>
-                      <Table.Th>Plan Tier</Table.Th>
-                      <Table.Th>Status</Table.Th>
-                      <Table.Th>Activation Date</Table.Th>
-                      <Table.Th>Current Period End</Table.Th>
-                      <Table.Th>Actions</Table.Th>
-                    </Table.Tr>
-                  </Table.Thead>
-                  <Table.Tbody>
-                    {subscriptions.map((sub: any) => (
-                      <Table.Tr key={sub.id}>
-                        <Table.Td fw={500} tt="capitalize">
-                          {sub.plan}
-                        </Table.Td>
-                        <Table.Td>
-                          <Badge
-                            color={getStatusColor(
-                              sub.status,
-                              sub.cancel_at_period_end,
-                            )}
-                            variant={
-                              sub.status === "canceled" ? "outline" : "light"
-                            }
+      {/* ── Invoices & receipts ──────────────────────────────── */}
+      <AppCard className={classes.tableCard}>
+        <h2 className={classes.tableTitle}>Invoices &amp; receipts</h2>
+        {loading ? (
+          <Center py="xl">
+            <Loader color="teal" />
+          </Center>
+        ) : invoices.length > 0 ? (
+          <Table.ScrollContainer minWidth={560}>
+            <Table highlightOnHover>
+              <Table.Thead>
+                <Table.Tr>
+                  <Table.Th>Date</Table.Th>
+                  <Table.Th>Amount</Table.Th>
+                  <Table.Th>Status</Table.Th>
+                  <Table.Th ta="right">Actions</Table.Th>
+                </Table.Tr>
+              </Table.Thead>
+              <Table.Tbody>
+                {invoices.map((inv: any) => (
+                  <Table.Tr key={inv.id}>
+                    <Table.Td className={ui.mutedText}>
+                      {formatUnix(inv.created)}
+                    </Table.Td>
+                    <Table.Td className={classes.strong}>
+                      {inv.currency.toUpperCase()}{" "}
+                      {(inv.amount_paid / 100).toFixed(2)}
+                    </Table.Td>
+                    <Table.Td>
+                      <StatusPill
+                        tone={receiptTone(inv.status)}
+                        className={classes.upper}
+                      >
+                        {inv.status}
+                      </StatusPill>
+                    </Table.Td>
+                    <Table.Td>
+                      <div className={classes.rowActions}>
+                        {inv.hosted_invoice_url && (
+                          <Button
+                            className={appButton("soft", true)}
+                            onClick={() => handleViewInvoice(inv)}
                           >
-                            {sub.cancel_at_period_end
-                              ? "Cancels at Period End"
-                              : sub.status}
-                          </Badge>
-                        </Table.Td>
-                        <Table.Td>{formatDate(sub.createdAt)}</Table.Td>
-                        <Table.Td>{formatDate(sub.currentPeriodEnd)}</Table.Td>
-                        <Table.Td>
-                          {sub.status === "active" &&
-                            !sub.cancel_at_period_end && (
-                              <Button
-                                size="xs"
-                                color="red"
-                                variant="subtle"
-                                onClick={() => handleCancelClick(sub.id)}
-                              >
-                                Cancel Plan
-                              </Button>
-                            )}
-                        </Table.Td>
-                      </Table.Tr>
-                    ))}
-                  </Table.Tbody>
-                </Table>
-              ) : (
-                <Text size="sm" c="dimmed">
-                  No subscriptions found on your account.
-                </Text>
-              )}
-            </Box>
-
-            {/* Invoices Table */}
-            <Box>
-              <Title order={4} mb="sm">
-                Invoices & Receipts
-              </Title>
-              {loading ? (
-                <Center py="xl">
-                  <Loader />
-                </Center>
-              ) : invoices.length > 0 ? (
-                <Table striped highlightOnHover withTableBorder>
-                  <Table.Thead>
-                    <Table.Tr>
-                      <Table.Th>Date</Table.Th>
-                      <Table.Th>Amount</Table.Th>
-                      <Table.Th>Status</Table.Th>
-                      <Table.Th>Actions</Table.Th>
-                    </Table.Tr>
-                  </Table.Thead>
-                  <Table.Tbody>
-                    {invoices.map((inv: any) => (
-                      <Table.Tr key={inv.id}>
-                        <Table.Td>{formatUnix(inv.created)}</Table.Td>
-                        <Table.Td>
-                          {(inv.amount_paid / 100).toFixed(2)}{" "}
-                          {inv.currency.toUpperCase()}
-                        </Table.Td>
-                        <Table.Td>
-                          <Badge color={getBillingStatusColor(inv.status)}>
-                            {inv.status}
-                          </Badge>
-                        </Table.Td>
-                        <Table.Td>
-                          <Group gap="xs">
-                            {inv.hosted_invoice_url && (
-                              <Tooltip label="View Invoice Details">
-                                <ActionIcon
-                                  variant="light"
-                                  color="blue"
-                                  onClick={() => handleViewInvoice(inv)}
-                                >
-                                  <IconEye size={16} />
-                                </ActionIcon>
-                              </Tooltip>
-                            )}
-                            {inv.invoice_pdf && (
-                              <Tooltip label="Download PDF">
-                                <ActionIcon
-                                  variant="light"
-                                  color="teal"
-                                  component="a"
-                                  href={inv.invoice_pdf}
-                                  download
-                                >
-                                  <IconDownload size={16} />
-                                </ActionIcon>
-                              </Tooltip>
-                            )}
-                          </Group>
-                        </Table.Td>
-                      </Table.Tr>
-                    ))}
-                  </Table.Tbody>
-                </Table>
-              ) : (
-                <Group gap="sm" mt="md">
-                  <IconHistory size={20} color="gray" />
-                  <Text size="sm" c="dimmed">
-                    No historical invoices have been generated yet.
-                  </Text>
-                </Group>
-              )}
-            </Box>
-          </Stack>
-        </Paper>
-      </Container>
+                            View
+                          </Button>
+                        )}
+                        {inv.invoice_pdf && (
+                          <Button
+                            className={appButton("soft", true)}
+                            component="a"
+                            href={inv.invoice_pdf}
+                            download
+                          >
+                            Download
+                          </Button>
+                        )}
+                      </div>
+                    </Table.Td>
+                  </Table.Tr>
+                ))}
+              </Table.Tbody>
+            </Table>
+          </Table.ScrollContainer>
+        ) : (
+          <Group gap="sm" mt="md">
+            <IconHistory size={20} color="gray" />
+            <Text size="sm" c="dimmed">
+              No historical invoices have been generated yet.
+            </Text>
+          </Group>
+        )}
+      </AppCard>
 
       <Modal
         opened={opened}

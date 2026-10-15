@@ -1,34 +1,18 @@
 import React, { useEffect, useState } from "react";
-import {
-  Alert,
-  Button,
-  Group,
-  Paper,
-  Text,
-  TextInput,
-  Title,
-  useMantineTheme,
-} from "@mantine/core";
-import { useMediaQuery } from "@mantine/hooks";
+import { Alert, Button, PinInput } from "@mantine/core";
 import { IconInfoCircle } from "@tabler/icons-react";
 import { useForm } from "@mantine/form";
-import classes from "./page.module.scss";
-import Surface from "../../Surface/Surface";
-import PasswordLayout from "./layout";
-import { api } from "../../../Services/api";
 import { notifications } from "@mantine/notifications";
+import { Link, useNavigate } from "react-router-dom";
+import { api } from "../../../Services/api";
 import { useAuth } from "../../../Context/useAuth";
-import { useNavigate } from "react-router-dom";
-import { PATH_DASHBOARD } from "../../../routes";
-import { fetchUserProfile } from "../../../Services/user-services";
+import { PATH_AUTH, PATH_DASHBOARD } from "../../../routes";
+import AuthShell, { authUi } from "../AuthShell";
 
 function OTPVerify() {
-  const mobile_match = useMediaQuery("(max-width: 425px)");
-  const theme = useMantineTheme();
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [timer, setTimer] = useState(0);
-  const { profile } = useAuth();
   const navigate = useNavigate();
   const OTP_EXPIRY_SECONDS = 30;
   const { login } = useAuth();
@@ -39,6 +23,9 @@ function OTPVerify() {
         /^\d{6}$/.test(value) ? null : "OTP must be a 6-digit number",
     },
   });
+
+  const email =
+    localStorage.getItem("signup_email") || localStorage.getItem("otp_email");
 
   useEffect(() => {
     const updateTimer = () => {
@@ -59,20 +46,19 @@ function OTPVerify() {
 
     try {
       // Get stored email and rememberMe (signup or login)
-      const email =
+      const storedEmail =
         localStorage.getItem("signup_email") ||
         localStorage.getItem("otp_email");
-      const rememberMe =
-        localStorage.getItem("rememberMe") === "true" ? true : false;
+      const rememberMe = localStorage.getItem("rememberMe") === "true";
 
-      if (!email) {
+      if (!storedEmail) {
         setError("Email not found. Please login/signup again.");
         return;
       }
 
       // Call backend verifyOtp endpoint
       const response = await api.post("/api/verifyOtp", {
-        email,
+        email: storedEmail,
         otp: values.otp,
         isRememberMe: rememberMe,
       });
@@ -105,9 +91,9 @@ function OTPVerify() {
 
   // Handle resending OTP
   const handleResend = async () => {
-    const email =
+    const storedEmail =
       localStorage.getItem("signup_email") || localStorage.getItem("otp_email");
-    if (!email) {
+    if (!storedEmail) {
       setError("Email not found. Please login/signup again.");
       return;
     }
@@ -116,7 +102,7 @@ function OTPVerify() {
     setError(null);
 
     try {
-      const response = await api.post("/api/resendOtp", { email });
+      const response = await api.post("/api/resendOtp", { email: storedEmail });
       if (response.status === 200) {
         notifications.show({
           title: "Success",
@@ -136,61 +122,86 @@ function OTPVerify() {
     }
   };
 
+  const formattedTimer = `${String(Math.floor(timer / 60)).padStart(2, "0")}:${String(
+    timer % 60,
+  ).padStart(2, "0")}`;
+
   return (
     <>
       <title>OTP Verification</title>
-      <PasswordLayout>
-        <Title ta="center">OTP Verification</Title>
-        <Text ta="center">
-          Please Enter the 6 digit OTP Code that we sent to your email
-        </Text>
-
-        <Surface component={Paper} className={classes.card}>
+      <AuthShell
+        eyebrow="Secure your SellerCenter account"
+        headline="Verify your email"
+        title="Verify your email"
+        subtitle="Secure your SellerCenter account"
+      >
+        <form className={authUi.form} onSubmit={form.onSubmit(handleVerify)}>
           {error && (
             <Alert
               variant="light"
-              c={theme.colors.red[8]}
-              radius="lg"
+              color="red"
+              radius="md"
               icon={<IconInfoCircle />}
             >
               {error}
             </Alert>
           )}
 
-          <form onSubmit={form.onSubmit(handleVerify)}>
-            <TextInput
-              label="Enter OTP"
-              placeholder="123456"
-              required
+          <p className={authUi.footerText} style={{ fontSize: 14 }}>
+            We sent a 6-digit code to {email ?? "your email"}
+          </p>
+
+          <div className={authUi.pinRow}>
+            <PinInput
+              length={6}
+              type="number"
+              oneTimeCode
+              size="lg"
+              gap={16}
+              inputMode="numeric"
+              aria-label="One-time code"
+              error={Boolean(form.errors.otp)}
               {...form.getInputProps("otp")}
             />
+          </div>
+          {form.errors.otp && (
+            <p className={authUi.note} style={{ color: "var(--ra-color-danger)" }}>
+              {form.errors.otp}
+            </p>
+          )}
 
-            <Group justify="space-between" mt="lg" className={classes.controls}>
-              <Button
-                variant="subtle"
-                onClick={handleResend}
-                loading={submitting}
-                type="button"
-                disabled={timer > 0}
-              >
-                {timer > 0
-                  ? `Resend in ${Math.floor(timer / 60)}:${String(
-                      timer % 60,
-                    ).padStart(2, "0")}`
-                  : "Re-Send"}
-              </Button>
+          <Button
+            type="submit"
+            fullWidth
+            loading={submitting}
+            className={authUi.submit}
+          >
+            Verify code
+          </Button>
 
-              <Button
-                type="submit"
-                // loading={submitting}
-                fullWidth={mobile_match}
-              >
-                Verify OTP
-              </Button>
-            </Group>
-          </form>
-        </Surface>
-      </PasswordLayout>
+          {timer > 0 && (
+            <p className={authUi.footerText}>
+              You can request a new code in {formattedTimer}
+            </p>
+          )}
+
+          <p className={authUi.footerText}>
+            Didn&apos;t receive it?{" "}
+            <button
+              type="button"
+              className={authUi.link}
+              onClick={handleResend}
+              disabled={submitting || timer > 0}
+            >
+              Resend code
+            </button>
+          </p>
+
+          <Link to={PATH_AUTH.signin} className={authUi.mutedLink}>
+            ← Back to sign in
+          </Link>
+        </form>
+      </AuthShell>
     </>
   );
 }

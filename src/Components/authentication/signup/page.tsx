@@ -1,48 +1,36 @@
 "use client";
 
 import {
-  ActionIcon,
   Alert,
   Button,
-  Center,
-  Flex,
-  NumberInput,
-  Paper,
   PasswordInput,
-  Text,
   TextInput,
-  Title,
   useMantineTheme,
 } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { useForm } from "@mantine/form";
 import { Link, useNavigate } from "react-router-dom";
-import { PATH_AUTH } from "../../../routes";
-import classes from "./page.module.scss";
-import Surface from "../../Surface/Surface";
-import SignUpLayout from "./layout";
+import { PATH_AUTH, PATH_PAGES } from "../../../routes";
 import { api } from "../../../Services/api";
 import { useState } from "react";
-import { IconArrowLeft, IconInfoCircle } from "@tabler/icons-react";
-import { useAuth } from "../../../Context/useAuth";
-import { values } from "lodash";
+import { IconAt, IconInfoCircle, IconLock } from "@tabler/icons-react";
 import PasswordRules from "../../CustomComponent/passwordRules";
+import AuthShell, { authUi } from "../AuthShell";
 
 function SignupPage() {
   const theme = useMantineTheme();
   const navigate = useNavigate();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState<boolean>(false);
-  const { login } = useAuth();
   const [passwordFocused, setPasswordFocused] = useState(false);
 
   const OTP_EXPIRY_SECONDS = 30;
+
   const form = useForm({
     initialValues: {
       firstname: "",
       lastname: "",
       email: "",
-      // phone: "",
       password: "",
     },
 
@@ -53,8 +41,6 @@ function SignupPage() {
         String(value).trim().length === 0 ? "last name is required" : null,
       email: (value: string) =>
         /^\S+@\S+$/.test(value) ? null : "Invalid email",
-      // phone: (value: string | number) =>
-      //   String(value).trim().length < 10 ? "Invalid phone number" : null,
       password: (value: string) => {
         const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{12,}$/;
 
@@ -70,15 +56,14 @@ function SignupPage() {
       },
     },
   });
+
   const handleSubmit = async (values: typeof form.values) => {
     setSubmitting(true);
     setErrorMessage(null);
     try {
-      // Call signup API
       const resp = await api.post("/api/signup", { ...values });
-      console.log(resp);
       if (resp.data.otpSent === true) {
-        // Store email & remember info for OTP verification
+        // Store email & expiry for OTP verification
         localStorage.setItem("signup_email", values.email);
         const newExpiry = Date.now() + OTP_EXPIRY_SECONDS * 1000;
         localStorage.setItem("otp_expiry", String(newExpiry));
@@ -90,7 +75,6 @@ function SignupPage() {
           position: "top-right",
         });
 
-        // Redirect to OTP verification page
         navigate(PATH_AUTH.otpVerify);
       }
     } catch (err: any) {
@@ -101,112 +85,97 @@ function SignupPage() {
       setSubmitting(false);
     }
   };
+
   return (
     <>
-      <>
-        <title>Sign up</title>
-        <meta
-          name="description"
-          content="Explore our versatile dashboard website template featuring a stunning array of themes and meticulously crafted components..."
-        />
-      </>
-      <SignUpLayout>
-        <Title ta="center">Welcome!</Title>
-        <Text ta="center">Create your account to continue</Text>
-        <Surface component={Paper} classNames={{ root: classes.card }}>
-          <ActionIcon
-            variant="filled"
-            // color="brand"
-            size="lg"
-            onClick={() => navigate(-1)}
-            style={{
-              position: "absolute",
-              top: 16,
-              left: 16,
-              zIndex: 10,
-            }}
-            title="Go back"
-          >
-            <IconArrowLeft size={20} />
-          </ActionIcon>
+      <title>Sign up</title>
+      <meta
+        name="description"
+        content="Create your RunAnalytic SellerCenter workspace."
+      />
+      <AuthShell
+        eyebrow="Start with a clear view of your Amazon business"
+        headline="Create your SellerCenter workspace"
+        title="Create your workspace"
+        subtitle="Start with a clear view of your Amazon business"
+      >
+        <form className={authUi.form} onSubmit={form.onSubmit(handleSubmit)}>
           {errorMessage && (
             <Alert
               variant="light"
-              c={theme.colors.red[8]}
-              radius="lg"
-              title=""
+              color="red"
+              radius="md"
               icon={<IconInfoCircle />}
             >
               {errorMessage}
             </Alert>
           )}
-          <form onSubmit={form.onSubmit(handleSubmit)}>
-            <Flex
-              direction={{ base: "column", sm: "row" }}
-              gap={{ base: "md" }}
-            >
-              <TextInput
-                key="firstname"
-                label="First Name"
-                placeholder="John"
-                {...form.getInputProps("firstname")}
-                required
-              />
 
-              <TextInput
-                key="lastname"
-                label="Last Name"
-                placeholder="Alex"
-                {...form.getInputProps("lastname")}
-                required
-              />
-            </Flex>
-
+          <div className={authUi.row}>
             <TextInput
-              label="Email"
-              placeholder="john@example.com"
-              {...form.getInputProps("email")}
+              label="First name"
+              placeholder="Alex"
+              autoComplete="given-name"
               required
+              {...form.getInputProps("firstname")}
             />
+            <TextInput
+              label="Last name"
+              placeholder="Morgan"
+              autoComplete="family-name"
+              required
+              {...form.getInputProps("lastname")}
+            />
+          </div>
 
-            {/* <NumberInput
-              label='Phone Number'
-              placeholder='+921234567890'
-              mt='md'
-              hideControls
-              {...form.getInputProps("phone")}
-            /> */}
+          <TextInput
+            label="Work email"
+            placeholder="alex@example.com"
+            autoComplete="email"
+            leftSection={<IconAt size={16} />}
+            required
+            {...form.getInputProps("email")}
+          />
 
+          <div>
             <PasswordInput
               label="Password"
-              placeholder="Your password"
-              mt="md"
+              placeholder="Create a password"
+              autoComplete="new-password"
+              leftSection={<IconLock size={16} />}
+              inputWrapperOrder={["label", "input", "description", "error"]}
+              description="At least 12 characters with an uppercase letter, a number and a special character."
+              required
               {...form.getInputProps("password")}
               onFocus={() => setPasswordFocused(true)}
               onBlur={() => setPasswordFocused(false)}
-              required
             />
             <PasswordRules
               password={form.values.password}
               focused={passwordFocused}
             />
-            <Button fullWidth mt="xl" type="submit" loading={submitting}>
-              Create account
-            </Button>
-          </form>
+          </div>
 
-          <Center mt="md">
-            <Text
-              size="sm"
-              component={Link}
-              to={PATH_AUTH.signin}
-              className={classes.link}
-            >
-              Already have an account? Sign in
-            </Text>
-          </Center>
-        </Surface>
-      </SignUpLayout>
+          <Button
+            type="submit"
+            fullWidth
+            loading={submitting}
+            className={authUi.submit}
+          >
+            Create account
+          </Button>
+
+          <p className={authUi.note}>
+            By continuing, you agree to our{" "}
+            <Link to={PATH_PAGES.terms}>Terms</Link> and{" "}
+            <Link to={PATH_PAGES.privacy}>Privacy Policy</Link>.
+          </p>
+
+          <p className={authUi.footerText}>
+            Already have an account? <Link to={PATH_AUTH.signin}>Sign in</Link>
+          </p>
+        </form>
+      </AuthShell>
     </>
   );
 }

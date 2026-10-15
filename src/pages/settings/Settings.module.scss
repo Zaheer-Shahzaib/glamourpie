@@ -1,0 +1,179 @@
+// Shared styles for the Settings screens (Invoice preferences, Billing, Marketplace).
+
+.twoCol {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  align-items: start;
+  gap: 20px;
+
+  @media (max-width: 1100px) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.panel {
+  padding: 24px;
+}
+
+// Large card heading used by single-form pages (Business information)
+.pageCardTitle {
+  margin: 0;
+  color: var(--ra-color-text-primary);
+  font-family: var(--ra-font-body);
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 34px;
+}
+
+.pageCardSubtitle {
+  margin: 4px 0 0;
+  color: var(--ra-color-text-muted);
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.pageCardRule {
+  height: 1px;
+  margin: 24px 0 28px;
+  border: 0;
+  background-color: var(--ra-color-surface-variant);
+}
+
+.sectionTitle {
+  margin: 0 0 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--ra-color-surface-variant);
+  color: var(--ra-color-text-primary);
+  font-family: var(--ra-font-body);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 24px;
+}
+
+.sectionGap {
+  margin-top: 28px;
+}
+
+.switchRow {
+  padding: 12px 0;
+}
+
+.switchRoot {
+  width: 100%;
+}
+
+.switchBody {
+  &#{&} {
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+  }
+}
+
+.switchLabelWrap {
+  &#{&} {
+    flex: 1;
+  }
+}
+
+.fieldGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px 24px;
+
+  @media (max-width: 700px) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.fullWidth {
+  grid-column: 1 / -1;
+}
+
+.note {
+  margin: 20px 0 0;
+  color: var(--ra-color-text-muted);
+  font-size: 11px;
+  line-height: 16px;
+}
+
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+// ── Live preview (navy) ─────────────────────────────────────────────────────
+.preview {
+  min-height: 420px;
+  padding: 24px;
+}
+
+.previewTitle {
+  margin: 0;
+  color: var(--ra-color-surface-white);
+  font-family: var(--ra-font-body);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 24px;
+}
+
+.previewSub {
+  margin: 2px 0 20px;
+  color: var(--ra-color-text-muted);
+  font-size: 11px;
+}
+
+.sheet {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px;
+  border-radius: 12px;
+  background-color: var(--ra-color-surface-white);
+  color: var(--ra-color-text-primary);
+}
+
+.sheetBrand {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.sheetTitle {
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 24px;
+}
+
+.sheetRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 10px;
+
+  > :first-child {
+    color: var(--ra-color-text-muted);
+  }
+
+  > :last-child {
+    font-weight: 700;
+  }
+}
+
+.sheetDivider {
+  height: 1px;
+  background-color: var(--ra-color-surface-variant);
+}
+
+.sheetOrder {
+  color: var(--ra-color-brand-tertiary);
+}
+
+.sheetTotal {
+  font-size: 13px;
+}

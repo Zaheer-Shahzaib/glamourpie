@@ -1,0 +1,46 @@
+@use "../../styles/public-site" as ps;
+
+.root {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 2px;
+  text-decoration: none;
+  line-height: 1;
+  border-radius: 4px;
+
+  @include ps.focus-ring;
+}
+
+.name {
+  font-family: var(--ra-font-heading);
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.tagline {
+  font-family: var(--ra-font-body);
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.onLight {
+  .name {
+    color: var(--ra-color-text-primary);
+  }
+
+  .tagline {
+    color: var(--ra-color-brand-container);
+  }
+}
+
+.onDark {
+  .name {
+    color: var(--ra-color-surface-white);
+  }
+
+  .tagline {
+    color: var(--ra-color-brand-fixed);
+  }
+}

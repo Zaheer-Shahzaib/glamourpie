@@ -1,205 +1,153 @@
-import { useEffect, useState } from "react";
-
-import {
-  ActionIcon,
-  Box,
-  Flex,
-  Group,
-  Image,
-  ScrollArea,
-  Text,
-} from "@mantine/core";
-import { useMediaQuery } from "@mantine/hooks";
-import {
-  IconBrandAuth0,
-  IconBriefcase,
-  IconCalendar,
-  IconChartArcs3,
-  IconChartBar,
-  IconChartInfographic,
-  IconFileInvoice,
-  IconFiles,
-  IconListDetails,
-  IconLogin2,
-  IconMessages,
-  IconRotateRectangle,
-  IconUserCircle,
-  IconUserCode,
-  IconUserPlus,
-  IconUserShield,
-  IconX,
-} from "@tabler/icons-react";
+import { ActionIcon, Avatar, Skeleton } from "@mantine/core";
+import { IconX } from "@tabler/icons-react";
+import { Link } from "react-router-dom";
 import classes from "./Navigation.module.scss";
-import { SidebarState, User } from "../../types/index";
-import { LinksGroup } from "./Links/Links";
-import UserProfileButton from "../UserButton";
-import { useNavigate } from "react-router-dom";
+import { LinksGroup, LinksGroupProps } from "./Links/Links";
 import { PATH_DASHBOARD, PATH_APPS } from "../../routes";
 import { useAuth } from "../../Context/useAuth";
-import { fetchUserProfile } from "../../Services/user-services";
-import { UserProfile } from "../../types/profile.types";
 import { getAvatarUrl } from "../../utils/helperFunctions";
-const mockdata = [
+import {
+  pickBestPlan,
+  useSubscriptionStatus,
+} from "../../hooks/useSubscriptionStatus";
+
+type NavGroup = { title: string; items: Omit<LinksGroupProps, "onNavigate">[] };
+
+/**
+ * Sidebar structure from Figma "01 Product UI".
+ * Entries flagged `soon` have no route/backend yet and render as disabled items.
+ */
+const NAV_GROUPS: NavGroup[] = [
   {
-    title: "Dashboard",
-    links: [
-      { label: "Home", icon: IconChartBar, link: PATH_DASHBOARD.default },
-      // {
-      //   label: "Analytics",
-      //   icon: IconChartInfographic,
-      //   link: PATH_APPS.analytics,
-      // },
-      { label: "Orders", icon: IconListDetails, link: PATH_APPS.orders },
-      {
-        label: "Invoices",
-        icon: IconFileInvoice,
-        link: PATH_APPS.invoices.root,
-      },
+    title: "Workspace",
+    items: [
+      { label: "Overview", link: PATH_DASHBOARD.default },
+      { label: "Orders", link: PATH_APPS.orders },
+      { label: "Products", soon: true },
     ],
   },
   {
-    title: "Settings",
-    links: [
+    title: "Finance",
+    items: [
+      {
+        label: "Invoices",
+        link: PATH_APPS.invoices.root,
+        matchPrefix: PATH_APPS.invoices.root,
+      },
+      { label: "Revenue & fees", soon: true },
+      { label: "Refunds", soon: true },
+    ],
+  },
+  {
+    title: "Insights",
+    items: [
+      // The Analytics route still renders mock data, so it stays hidden behind "Soon"
+      // (it was already hidden from the previous navigation).
+      { label: "Analytics", soon: true },
+      { label: "Reports", soon: true },
+    ],
+  },
+  {
+    title: "Account",
+    items: [
       {
         label: "Profile",
-        icon: IconUserCircle,
-        links: [
-          { label: "Personal Info", link: PATH_APPS.profile.personal },
-          { label: "Security", link: PATH_APPS.profile.security },
-          // { label: "API Credentials", link: PATH_APPS.profile.credentials },
-          // { label: "Statistics", link: PATH_APPS.profile.statistics },
-        ],
+        link: PATH_APPS.profile.personal,
+        matchPrefix: PATH_APPS.profile.root,
       },
       {
         label: "Settings",
-        icon: IconUserCode,
+        matchPrefix: PATH_APPS.settings.root,
         links: [
-          // { label: "SP-API Credentials", link: PATH_APPS.settings.spApi },
           { label: "Marketplace", link: PATH_APPS.settings.marketplace },
           { label: "Invoices", link: PATH_APPS.settings.invoices },
-          // { label: "Notifications", link: PATH_APPS.settings.notifications },
-          { label: "Business Info", link: PATH_APPS.settings.business },
-          { label: "Billing & Subscription", link: PATH_APPS.settings.billing },
+          { label: "Business info", link: PATH_APPS.settings.business },
+          {
+            label: "Billing & Subscription",
+            link: PATH_APPS.settings.billing,
+          },
         ],
       },
-
-      // { label: "Tasks", icon: IconListDetails, link: PATH_APPS.tasks },
-      // { label: "Calendar", icon: IconCalendar, link: PATH_APPS.calendar },
-      // { label: "File Manager", icon: IconFiles, link: PATH_APPS.fileManager },
     ],
   },
 ];
 
 type NavigationProps = {
+  /** Closes the mobile drawer */
   onClose: () => void;
-  sidebarState: SidebarState;
-  onSidebarStateChange: (state: SidebarState) => void;
 };
 
-const Navigation = ({
-  onClose,
-  onSidebarStateChange,
-  sidebarState,
-}: NavigationProps) => {
-  const tablet_match = useMediaQuery("(max-width: 768px)");
-  const navigate = useNavigate();
-  const { token } = useAuth();
-  const [profile, setProfile] = useState<UserProfile>();
-  const [loading, setLoading] = useState(true);
+const Navigation = ({ onClose }: NavigationProps) => {
+  const { profile, loading } = useAuth();
+  const { data: subscription } = useSubscriptionStatus();
 
-  useEffect(() => {
-    if (token) {
-      fetchUserProfile(token)
-        .then((data) => setProfile(data))
-        .catch((err) => console.error(err))
-        .finally(() => setLoading(false));
-    }
-  }, [token]);
-
-  useEffect(() => {
-    if (tablet_match) {
-      onSidebarStateChange("full");
-    }
-  }, [onSidebarStateChange, tablet_match]);
-
-  const links = mockdata.map((m) => (
-    <Box
-      key={m.title}
-      pl={0}
-      mb={sidebarState === "mini" ? 0 : "md"}
-      className="box_content"
-    >
-      {sidebarState !== "mini" && (
-        <Text
-          tt="uppercase"
-          size="xs"
-          pl="md"
-          fw={500}
-          mb="sm"
-          className={classes.linkHeader}
-        >
-          {m.title}
-        </Text>
-      )}
-      {m.links.map((item) => (
-        <LinksGroup
-          key={item.label}
-          {...item}
-          isMini={sidebarState === "mini"}
-          closeSidebar={() => {
-            // setTimeout(() => {
-            //   onClose();
-            // }, 250);
-          }}
-        />
-      ))}
-    </Box>
-  ));
+  const plan = pickBestPlan(subscription?.activePlans);
+  const fullName =
+    [profile?.firstname, profile?.lastname].filter(Boolean).join(" ") ||
+    profile?.username ||
+    profile?.email ||
+    "";
+  const initial = (fullName || "U").charAt(0).toUpperCase();
 
   return (
-    <div className={classes.navbar} data-sidebar-state={sidebarState}>
+    <nav className={classes.navbar} aria-label="Primary">
       <div className={classes.header}>
-        <Flex justify="space-between" align="center" gap="sm">
-          <Group
-            justify={sidebarState === "mini" ? "center" : "space-between"}
-            style={{ flex: tablet_match ? "auto" : 1 }}
-          >
-            <Image
-              src="/bgremove-background.png"
-              alt="Logo"
-              h={120}
-              className={classes.logo}
-              style={{
-                flex: tablet_match ? "auto" : 1,
-                width: tablet_match ? "auto" : 100,
-              }}
-            />
-          </Group>
-          {tablet_match && (
-            <ActionIcon onClick={onClose} variant="transparent">
-              <IconX color="white" />
-            </ActionIcon>
+        <Link
+          to={PATH_DASHBOARD.default}
+          className={classes.brand}
+          aria-label="RunAnalytic SellerCenter home"
+          onClick={onClose}
+        >
+          <span className={classes.brandName}>RunAnalytic</span>
+          <span className={classes.brandSub}>SellerCenter</span>
+        </Link>
+        <ActionIcon
+          hiddenFrom="md"
+          variant="transparent"
+          className={classes.closeButton}
+          onClick={onClose}
+          aria-label="Close navigation"
+        >
+          <IconX size={18} />
+        </ActionIcon>
+      </div>
+
+      <div className={classes.links}>
+        {NAV_GROUPS.map((group) => (
+          <div key={group.title} className={classes.group}>
+            <p className={classes.groupLabel}>{group.title}</p>
+            {group.items.map((item) => (
+              <LinksGroup key={item.label} {...item} onNavigate={onClose} />
+            ))}
+          </div>
+        ))}
+      </div>
+
+      <Link
+        to={PATH_APPS.profile.personal}
+        className={classes.footer}
+        onClick={onClose}
+      >
+        <Avatar
+          size={28}
+          radius="md"
+          src={getAvatarUrl(profile?.avatar)}
+          className={classes.avatar}
+        >
+          {initial}
+        </Avatar>
+        <div className={classes.userText}>
+          {loading && !profile ? (
+            <Skeleton height={12} width={90} />
+          ) : (
+            <div className={classes.userName}>{fullName || "Your account"}</div>
           )}
-        </Flex>
-      </div>
-
-      <ScrollArea className={classes.links}>
-        <div className={classes.linksInner} data-sidebar-state={sidebarState}>
-          {links}
+          <div className={classes.userPlan}>
+            {plan ? `${plan} workspace` : "Seller workspace"}
+          </div>
         </div>
-      </ScrollArea>
-
-      <div className={classes.footer}>
-        {profile && (
-          <UserProfileButton
-            email={profile.email}
-            image={getAvatarUrl(profile?.avatar)}
-            name={profile?.firstname + " " + profile?.lastname}
-            showText={sidebarState !== "mini"}
-          />
-        )}
-      </div>
-    </div>
+      </Link>
+    </nav>
   );
 };
 

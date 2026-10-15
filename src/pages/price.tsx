@@ -3,33 +3,17 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import {
-  Badge,
-  Button,
-  Container,
-  Paper,
-  PaperProps,
-  SimpleGrid,
-  Stack,
-  Text,
-  Title,
-  Group,
-} from "@mantine/core";
+import { PaperProps } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import PricingCard from "../Components/PricingCard/PricingCard";
-import { createCheckoutSession, getSubscriptionStatus, createPortalSession } from "../Services/stripeService";
+import { createCheckoutSession, getSubscriptionStatus } from "../Services/stripeService";
 import { useAuth } from "../Context/useAuth";
 import { PATH_PAGES } from "../routes";
+import classes from "../styles/Pricing.module.scss";
 
+// Card chrome (padding, radius, surface) lives in PricingCard.module.scss.
 const PAPER_PROPS: PaperProps = {
-  p: "md",
-  shadow: "md",
-  radius: "md",
-  style: {
-    height: "100%",
-    display: "flex",
-    flexDirection: "column",
-  },
+  style: { height: "100%" },
 };
 
 type PricingTier = {
@@ -248,43 +232,34 @@ function Pricing() {
           content="Simple, fair pricing for Amazon sellers. Automate invoice generation and save hours every week."
         />
       </>
-      <Container fluid>
-        <Stack gap="lg">
-          <Paper style={{ backgroundColor: "transparent" }}>
-            <Stack>
-              <Title order={2} ta="center">
-                Simple, fair pricing.
-              </Title>
-              <Text size="lg" ta="center" c="dimmed">
-                Choose the plan that fits your Amazon selling volume.
-                Automate your invoicing and save hours every week.
-              </Text>
-              
-              {isAuthenticated && activePlans.length > 0 && (
-                <Stack align="center" gap="xs">
-                  <Text ta="center" size="sm">
-                    You currently have the following active plans:
-                  </Text>
-                  <Group justify="center" gap="sm">
-                    {activePlans.map(plan => (
-                      <Badge key={plan} color="blue" variant="light" size="lg">
-                        {plan.charAt(0).toUpperCase() + plan.slice(1)} Plan
-                      </Badge>
-                    ))}
-                  </Group>
-                </Stack>
-              )}
-            </Stack>
-          </Paper>
-          <SimpleGrid
-            cols={{ base: 1, sm: 2, lg: 3, xl: 5 }}
-            spacing={{ base: 10, sm: "xl" }}
-            verticalSpacing={{ base: "md", sm: "xl" }}
-          >
-            {pricingItems}
-          </SimpleGrid>
-        </Stack>
-      </Container>
+      <div className={classes.pricing}>
+        <header className={classes.header}>
+          <h2 id="pricing-title" className={classes.title}>
+            Simple, fair pricing.
+          </h2>
+          <p className={classes.lead}>
+            Choose the plan that fits your Amazon selling volume. Automate your
+            invoicing and save hours every week.
+          </p>
+
+          {isAuthenticated && activePlans.length > 0 && (
+            <div className={classes.active}>
+              <p className={classes.activeText}>
+                You currently have the following active plans:
+              </p>
+              <ul className={classes.activeList}>
+                {activePlans.map((plan) => (
+                  <li key={plan} className={classes.activeBadge}>
+                    {plan.charAt(0).toUpperCase() + plan.slice(1)} Plan
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </header>
+
+        <div className={classes.grid}>{pricingItems}</div>
+      </div>
     </>
   );
 }

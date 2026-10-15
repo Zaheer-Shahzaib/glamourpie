@@ -1,21 +1,14 @@
 import { useState, useEffect } from "react";
-import {
-  Container,
-  Paper,
-  Title,
-  Text,
-  Stack,
-  Group,
-  Button,
-  TextInput,
-  Select,
-  Divider,
-  Skeleton,
-} from "@mantine/core";
+import { Button, TextInput, Select, Skeleton } from "@mantine/core";
 import { useAuth } from "../../Context/useAuth";
 import { notifications } from "@mantine/notifications";
 import MainLayout from "../../layout/Main";
-import { fetchSellerSettings, updateSellerSettings } from "../../Services/settings-services";
+import { AppCard, PageHeader, appButton } from "../../Components/AppUi";
+import {
+  fetchSellerSettings,
+  updateSellerSettings,
+} from "../../Services/settings-services";
+import classes from "./Settings.module.scss";
 
 export default function SettingsBusinessPage() {
   const { token } = useAuth();
@@ -36,7 +29,7 @@ export default function SettingsBusinessPage() {
         const info = data?.data?.businessInfo || {};
         setSettings({
           businessName: info.businessName || "",
-          taxId:        info.taxId        || "",
+          taxId: info.taxId || "",
           businessType: info.businessType || "company",
         });
       })
@@ -53,7 +46,7 @@ export default function SettingsBusinessPage() {
         businessInfo: {
           businessName: settings.businessName,
           businessType: settings.businessType,
-          taxId:        settings.taxId,
+          taxId: settings.taxId,
         },
       });
       notifications.show({
@@ -74,74 +67,91 @@ export default function SettingsBusinessPage() {
 
   return (
     <MainLayout>
-      <Container size="lg" py="xl">
-        <Paper p="xl" radius="md" withBorder>
-          <Stack gap="md">
-            <div>
-              <Title order={3}>Business Information</Title>
-              <Text size="sm" c="dimmed">
-                Configure your business details — these appear on generated invoices.
-              </Text>
-            </div>
+      <PageHeader
+        title="Settings"
+        subtitle="Track and manage marketplace activity."
+      />
+      <AppCard className={classes.panel}>
+        <h2 className={classes.pageCardTitle}>Business information</h2>
+        <p className={classes.pageCardSubtitle}>
+          These details appear on generated invoices.
+        </p>
+        <hr className={classes.pageCardRule} />
 
-            <Divider />
+        {loading ? (
+          <div className={classes.fieldGrid}>
+            {[0, 1, 2].map((i) => (
+              <Skeleton key={i} height={42} radius="sm" />
+            ))}
+          </div>
+        ) : (
+          <div className={classes.fieldGrid}>
+            <TextInput
+              label="Business name"
+              placeholder="Enter business name"
+              value={settings.businessName}
+              onChange={(e) =>
+                setSettings({ ...settings, businessName: e.target.value })
+              }
+              required
+            />
 
-            {loading ? (
-              <>
-                <Skeleton height={36} radius="sm" />
-                <Skeleton height={36} radius="sm" />
-                <Skeleton height={36} radius="sm" />
-              </>
-            ) : (
-              <>
-                <TextInput
-                  label="Business Name"
-                  placeholder="Enter business name"
-                  value={settings.businessName}
-                  onChange={(e) =>
-                    setSettings({ ...settings, businessName: e.target.value })
-                  }
-                  required
-                  size="sm"
-                />
+            <Select
+              label="Business type"
+              value={settings.businessType}
+              onChange={(value) =>
+                setSettings({
+                  ...settings,
+                  businessType: value as
+                    | "individual"
+                    | "company"
+                    | "partnership",
+                })
+              }
+              data={[
+                { value: "individual", label: "Individual" },
+                { value: "company", label: "Company" },
+                { value: "partnership", label: "Partnership" },
+              ]}
+              allowDeselect={false}
+            />
 
-                <Select
-                  label="Business Type"
-                  value={settings.businessType}
-                  onChange={(value) =>
-                    setSettings({
-                      ...settings,
-                      businessType: value as "individual" | "company" | "partnership",
-                    })
-                  }
-                  data={[
-                    { value: "individual", label: "Individual" },
-                    { value: "company", label: "Company" },
-                    { value: "partnership", label: "Partnership" },
-                  ]}
-                  size="sm"
-                />
+            <TextInput
+              label="TRN / Tax ID"
+              placeholder="Enter tax registration number"
+              value={settings.taxId}
+              onChange={(e) =>
+                setSettings({ ...settings, taxId: e.target.value })
+              }
+            />
 
-                <TextInput
-                  label="TRN / Tax ID"
-                  placeholder="Enter tax registration number"
-                  value={settings.taxId}
-                  onChange={(e) =>
-                    setSettings({ ...settings, taxId: e.target.value })
-                  }
-                  size="sm"
-                />
-              </>
-            )}
+            {/* Address details are not stored by the backend yet. */}
+            <TextInput
+              label="Street address"
+              placeholder="Coming soon"
+              disabled
+            />
+            <TextInput label="City" placeholder="Coming soon" disabled />
+            <Select
+              label="Country"
+              placeholder="Coming soon"
+              data={[]}
+              disabled
+            />
+          </div>
+        )}
 
-            <Group justify="flex-end" mt="md">
-              <Button onClick={handleSave} loading={saving} disabled={loading}>
-                Save Settings
-              </Button>
-            </Group>
-          </Stack>
-        </Paper>
-      </Container>
+        <div className={classes.footer}>
+          <Button
+            className={appButton("primary")}
+            onClick={handleSave}
+            loading={saving}
+            disabled={loading}
+          >
+            Save settings
+          </Button>
+        </div>
+      </AppCard>
     </MainLayout>
   );
 }

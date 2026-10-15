@@ -32,6 +32,10 @@ export const PATH_APPS = {
     sample: path(ROOT_APPS, ROOTS_INVOICES + `/details/`),
     invoice_details: (id: string): string =>
       path(ROOT_APPS, ROOTS_INVOICES + `/details/${id}`),
+    /** Route pattern for the full-page invoice document preview */
+    previewPattern: ":invoiceId/preview",
+    preview: (id: string): string =>
+      path(ROOT_APPS, ROOTS_INVOICES + `/${encodeURIComponent(id)}/preview`),
   },
   orders: path(ROOT_APPS, "/orders"),
   profile: {

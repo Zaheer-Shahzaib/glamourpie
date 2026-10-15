@@ -1,0 +1,223 @@
+@use "../styles/public-site" as ps;
+
+// Mantine parts (Select input/label, Checkbox input/label, Alert) are targeted
+// as `.card .part` / `.page .part` so they out-rank Mantine's single-class
+// rules, which load after this module.
+
+.page {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  padding: 72px 1rem 48px;
+  background-color: var(--ra-color-page-bg);
+  font-family: var(--ra-font-body);
+  color: var(--ra-color-surface-inverse);
+}
+
+.strip {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 6px;
+  background-color: var(--ra-color-brand);
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  max-width: 600px;
+  text-align: center;
+}
+
+.title {
+  margin: 28px 0 0;
+  font-family: var(--ra-font-body);
+  font-size: clamp(1.625rem, 2.5vw + 0.8rem, 2.125rem);
+  font-weight: 700;
+  line-height: 1.45;
+  color: var(--ra-color-surface-inverse);
+}
+
+.lead {
+  margin: 0;
+  font-size: 16px;
+  line-height: 23px;
+  color: var(--ra-color-text-secondary);
+}
+
+.card {
+  position: relative;
+  width: 100%;
+  max-width: 600px;
+  margin-top: 40px;
+  padding: clamp(1.5rem, 4vw, 2.5rem);
+  border: 1px solid var(--ra-color-border);
+  border-radius: var(--ra-radius-lg);
+  background-color: var(--ra-color-surface-white);
+}
+
+.cardTitle {
+  margin: 0 0 28px;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 26px;
+  color: var(--ra-color-surface-inverse);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.card .label {
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 22px;
+  color: var(--ra-color-surface-inverse);
+}
+
+.card .input {
+  height: 48px;
+  border: 1px solid var(--ra-color-border);
+  border-radius: var(--ra-radius-sm);
+  background-color: var(--ra-color-surface-white);
+  font-family: var(--ra-font-body);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ra-color-text-primary);
+
+  &:focus,
+  &:focus-within {
+    border-color: var(--ra-color-brand);
+    outline: 1px solid var(--ra-color-brand);
+  }
+}
+
+.card .section {
+  color: var(--ra-color-text-muted);
+}
+
+.checks {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.card .checkInput {
+  border: 1px solid var(--ra-color-border);
+  background-color: var(--ra-color-surface-white);
+
+  &:checked {
+    border-color: var(--ra-color-brand);
+    background-color: var(--ra-color-brand);
+  }
+}
+
+.card .checkLabel {
+  padding-inline-start: 12px;
+  font-family: var(--ra-font-body);
+  font-size: 14px;
+  line-height: 22px;
+  color: var(--ra-color-text-primary);
+}
+
+.inlineLink {
+  color: var(--ra-color-link);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+
+  @include ps.focus-ring(var(--ra-color-link));
+}
+
+.submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 52px;
+  margin-top: 4px;
+  border: 0;
+  border-radius: 9px;
+  background-color: var(--ra-color-brand);
+  font-family: var(--ra-font-body);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 22px;
+  color: var(--ra-color-surface-white);
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    opacity 0.15s ease;
+
+  &:hover:not(:disabled) {
+    background-color: var(--ra-color-brand-container);
+  }
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+
+  @include ps.focus-ring;
+}
+
+.note {
+  margin: 16px 0 0;
+  font-size: 13px;
+  line-height: 22px;
+  text-align: center;
+  color: var(--ra-color-text-secondary);
+}
+
+.switch {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  margin: 48px 0 0;
+  font-size: 13px;
+  line-height: 22px;
+  color: var(--ra-color-text-secondary);
+}
+
+.switchAction {
+  padding: 0;
+  border: 0;
+  background: none;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: 600;
+  color: var(--ra-color-link);
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  @include ps.focus-ring(var(--ra-color-link));
+}
+
+.footer {
+  width: 100%;
+  max-width: 1120px;
+  margin: 40px 0 0;
+  padding-top: 22px;
+  border-top: 1px solid var(--ra-color-border);
+  font-size: 12px;
+  line-height: 22px;
+  text-align: center;
+  color: var(--ra-color-text-secondary);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .submit {
+    transition: none;
+  }
+}

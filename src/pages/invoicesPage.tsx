@@ -1,36 +1,49 @@
-import { useState, useCallback, useEffect } from "react";
-import {
-  Container,
-  Paper,
-  Title,
-  Text,
-  Stack,
-  Group,
-  Button,
-  SimpleGrid,
-  ActionIcon,
-  Tooltip,
-  ThemeIcon,
-} from "@mantine/core";
+import { useState, useCallback, useEffect, useMemo } from "react";
+import { Link } from "react-router-dom";
+import { Button, Select, TextInput, Tooltip } from "@mantine/core";
 import {
   IconRefresh,
-  IconFileInvoice,
   IconDownload,
-  IconCurrencyDollar,
   IconFileExport,
   IconCheck,
+  IconSearch,
+  IconPlus,
+  IconChevronDown,
 } from "@tabler/icons-react";
 import { useAuth } from "../Context/useAuth";
 import { notifications } from "@mantine/notifications";
 import { useInvoices } from "../hooks/useInvoices";
+import {
+  pickBestPlan,
+  useSubscriptionStatus,
+} from "../hooks/useSubscriptionStatus";
 import InvoiceList from "../Components/Invoice/InvoiceList";
 import InvoiceDetailsModal from "../Components/Invoice/InvoiceDetailsModal";
 import InvoiceExportModal from "../Components/Invoice/InvoiceExportModal";
 import MainLayout from "../layout/Main";
+import {
+  AppCard,
+  PageHeader,
+  appButton,
+  cx,
+  ui,
+} from "../Components/AppUi";
+import { PATH_APPS } from "../routes";
 import { downloadInvoiceDocument } from "../Services/invoice-services";
-import { getSubscriptionStatus } from "../Services/stripeService";
+import classes from "./InvoicesPage.module.scss";
 
 const LIMIT = 20;
+
+const PENDING_STATUSES = new Set(["PENDING", "DRAFT"]);
+const ACCEPTED_STATUSES = new Set(["ACCEPTED", "PAID", "SUBMITTED"]);
+
+const statusOf = (inv: any): string =>
+  String(inv.invoiceStatus || inv.status || "").toUpperCase();
+
+const compactNumber = new Intl.NumberFormat("en-US", {
+  notation: "compact",
+  maximumFractionDigits: 1,
+});
 
 export default function InvoicesPage() {
   const { token } = useAuth();
@@ -42,42 +55,22 @@ export default function InvoicesPage() {
   const [exportOpened, setExportOpened] = useState(false);
   const [downloadingAll, setDownloadingAll] = useState(false);
 
+  // Ledger filters (applied to the invoices on the current page)
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string | null>(null);
+
   // Subscription info — used to gate/configure the export modal
-  const [activePlan, setActivePlan] = useState<string | null>(null);
-  const [subLoading, setSubLoading] = useState(true);
+  const { data: subscription, isLoading: subLoading } = useSubscriptionStatus();
+  const activePlan = useMemo(
+    () => pickBestPlan(subscription?.activePlans || []),
+    [subscription],
+  );
 
   // Real stats from the backend (total amounts across all pages + usage limits)
   const [stats, setStats] = useState<any>(null);
 
   useEffect(() => {
     if (!token) return;
-    setSubLoading(true);
-    getSubscriptionStatus()
-      .then((data) => {
-        // activePlans = ['starter', 'growth', ...]  — pick highest
-        const plans: string[] = data.activePlans || [];
-        const PLAN_RANK: Record<string, number> = {
-          free: 0,
-          starter: 1,
-          pro: 2,
-          growth: 3,
-          scale: 4,
-          enterprise: 5,
-        };
-        const best = plans.reduce<string | null>((acc, p) => {
-          if (!acc) return p;
-          const currentPlan = p.toLowerCase();
-          const accPlan = acc.toLowerCase();
-          return (PLAN_RANK[currentPlan] ?? -1) > (PLAN_RANK[accPlan] ?? -1)
-            ? p
-            : acc;
-        }, null);
-        setActivePlan(best);
-      })
-      .catch(() => setActivePlan(null))
-      .finally(() => setSubLoading(false));
-
-    // Fetch the real usage and revenue stats
     import("../Services/invoice-services").then(({ fetchInvoiceStats }) => {
       fetchInvoiceStats(token)
         .then((res) => setStats(res.payload))
@@ -91,6 +84,26 @@ export default function InvoicesPage() {
   });
 
   const totalPages = pagination ? Math.ceil(pagination.total / LIMIT) : 1;
+
+  const visibleInvoices = useMemo(() => {
+    const term = search.trim().toLowerCase();
+    return invoices.filter((inv: any) => {
+      if (statusFilter) {
+        const s = statusOf(inv);
+        const match =
+          statusFilter === "ACCEPTED"
+            ? ACCEPTED_STATUSES.has(s)
+            : statusFilter === "PENDING"
+              ? PENDING_STATUSES.has(s)
+              : s === statusFilter;
+        if (!match) return false;
+      }
+      if (!term) return true;
+      return [inv.invoiceNumber, inv.invoiceId, inv.amazonOrderId, inv.buyerName]
+        .filter(Boolean)
+        .some((v: string) => String(v).toLowerCase().includes(term));
+    });
+  }, [invoices, search, statusFilter]);
 
   const handleInvoiceClick = useCallback((invoiceId: string) => {
     setSelectedInvoiceId(invoiceId);
@@ -146,7 +159,9 @@ export default function InvoicesPage() {
     }
   };
 
-  // ── Stats fallback to page data if backend fails ────────────
+  // ── KPIs (backend stats, falling back to the loaded page) ────────────────
+  const totalInvoices =
+    stats?.totalInvoices ?? pagination?.total ?? invoices.length;
   const totalRevenue =
     stats?.totalRevenue ??
     invoices.reduce(
@@ -154,12 +169,16 @@ export default function InvoicesPage() {
         acc + (inv.totalAmount?.amount || inv.totalAmount || 0),
       0,
     );
-  const paidCount = invoices.filter(
-    (inv: any) =>
-      (inv.invoiceStatus || inv.status || "") === "Paid" ||
-      (inv.invoiceStatus || inv.status || "") === "Submitted" ||
-      "SUBMITTED",
+  const pendingCount = invoices.filter((inv: any) =>
+    PENDING_STATUSES.has(statusOf(inv)),
   ).length;
+  const acceptedCount = invoices.filter((inv: any) =>
+    ACCEPTED_STATUSES.has(statusOf(inv)),
+  ).length;
+  const successRate =
+    invoices.length > 0
+      ? `${((acceptedCount / invoices.length) * 100).toFixed(1)}% success`
+      : "—";
 
   const usageLimit = stats?.usage?.limit || 20;
   const usageGenerated = stats?.usage?.generatedThisMonth || 0;
@@ -167,150 +186,166 @@ export default function InvoicesPage() {
 
   return (
     <MainLayout>
-      <Container fluid py="xl">
-        <Stack gap="lg">
-          {/* ── Header ──────────────────────────────────────────── */}
-          <Group justify="space-between" align="flex-start">
-            <div>
-              <Title order={2}>Invoices</Title>
-              <Text c="dimmed" size="sm" mt={4}>
-                View, download, and manage your Amazon invoices
-              </Text>
-            </div>
-            <Group gap="sm">
-              <Tooltip label="Refresh invoices">
-                <ActionIcon
-                  variant="default"
-                  size="lg"
-                  onClick={refetch}
-                  loading={loading}
-                >
-                  <IconRefresh size={18} />
-                </ActionIcon>
-              </Tooltip>
-
+      <PageHeader
+        title="Invoices"
+        subtitle="A financial command center for compliant Amazon documents."
+        actions={
+          <>
+            <Tooltip label="Refresh invoices">
               <Button
-                leftSection={<IconDownload size={16} />}
-                variant="light"
-                color="green"
-                onClick={handleDownloadAll}
-                loading={downloadingAll}
-                disabled={invoices.length === 0}
+                className={appButton("light")}
+                onClick={() => refetch()}
+                loading={loading}
+                aria-label="Refresh invoices"
+                px={12}
               >
-                Download All
+                <IconRefresh size={16} />
               </Button>
+            </Tooltip>
+            <Button
+              className={appButton("light")}
+              leftSection={<IconDownload size={16} />}
+              onClick={handleDownloadAll}
+              loading={downloadingAll}
+              disabled={invoices.length === 0}
+            >
+              Download all
+            </Button>
+            <Button
+              className={appButton("light")}
+              leftSection={<IconFileExport size={16} />}
+              onClick={handleOpenExport}
+              loading={subLoading}
+            >
+              Export invoices
+            </Button>
+          </>
+        }
+      />
 
-              <Button
-                leftSection={<IconFileExport size={16} />}
-                variant="filled"
-                color="blue"
-                onClick={handleOpenExport}
-                loading={subLoading}
-              >
-                Export Invoices
-              </Button>
-            </Group>
-          </Group>
+      {/* ── KPIs ───────────────────────────────────────────────── */}
+      <AppCard className={classes.kpis}>
+        <div className={classes.kpiGrid}>
+          <div className={classes.kpi}>
+            <span className={ui.eyebrow}>Total invoices</span>
+            <span className={classes.kpiValue}>
+              {Number(totalInvoices).toLocaleString("en-US")}
+            </span>
+            <span className={cx(classes.kpiMeta, classes.metaInfo)}>
+              All generated
+            </span>
+          </div>
+          <div className={classes.kpi}>
+            <span className={ui.eyebrow}>Pending review</span>
+            <span className={classes.kpiValue}>{pendingCount}</span>
+            <span
+              className={cx(
+                classes.kpiMeta,
+                pendingCount > 0 ? classes.metaWarning : classes.metaInfo,
+              )}
+            >
+              {pendingCount > 0 ? "Needs attention" : "All clear"}
+            </span>
+          </div>
+          <div className={classes.kpi}>
+            <span className={ui.eyebrow}>Accepted</span>
+            <span className={classes.kpiValue}>{acceptedCount}</span>
+            <span className={cx(classes.kpiMeta, classes.metaSuccess)}>
+              {successRate}
+            </span>
+          </div>
+          <div className={classes.kpi}>
+            <span className={ui.eyebrow}>Revenue covered</span>
+            <span className={classes.kpiValue}>
+              {stats?.currencyCode || "USD"}{" "}
+              {compactNumber.format(Number(totalRevenue) || 0)}
+            </span>
+            <span className={cx(classes.kpiMeta, classes.metaBrand)}>
+              Across all invoices
+            </span>
+          </div>
+        </div>
+      </AppCard>
 
-          {/* ── Quick Stats ──────────────────────────────────────── */}
-          <SimpleGrid cols={{ base: 1, sm: 3 }}>
-            <Paper p="md" radius="md" withBorder>
-              <Group>
-                <ThemeIcon size="xl" variant="light" color="blue" radius="md">
-                  <IconFileInvoice size={22} />
-                </ThemeIcon>
-                <div>
-                  <Text size="xs" c="dimmed" tt="uppercase" fw={600} lts={0.5}>
-                    Total Invoices
-                  </Text>
-                  <Text fw={700} size="xl" lh={1.2}>
-                    {pagination?.total ?? invoices.length}
-                  </Text>
-                </div>
-              </Group>
-            </Paper>
+      {/* ── Toolbar ────────────────────────────────────────────── */}
+      <AppCard className={classes.toolbar}>
+        <TextInput
+          className={classes.search}
+          placeholder="Search invoice or order"
+          aria-label="Search invoice or order"
+          value={search}
+          onChange={(e) => setSearch(e.currentTarget.value)}
+          leftSection={<IconSearch size={16} />}
+        />
+        <Select
+          className={classes.chipSelect}
+          aria-label="Filter by status"
+          placeholder="All statuses"
+          value={statusFilter}
+          onChange={setStatusFilter}
+          data={[
+            { value: "ACCEPTED", label: "Accepted" },
+            { value: "PENDING", label: "Pending" },
+            { value: "REJECTED", label: "Rejected" },
+          ]}
+          clearable
+          allowDeselect
+        />
+        <Tooltip label="Date range filtering is coming soon">
+          <span
+            className={cx(classes.chip, classes.chipDisabled)}
+            aria-disabled="true"
+          >
+            Last 30 days
+            <IconChevronDown size={12} />
+          </span>
+        </Tooltip>
 
-            <Paper p="md" radius="md" withBorder>
-              <Group>
-                <ThemeIcon size="xl" variant="light" color="green" radius="md">
-                  <IconCurrencyDollar size={22} />
-                </ThemeIcon>
-                <div>
-                  <Text size="xs" c="dimmed" tt="uppercase" fw={600} lts={0.5}>
-                    Total Revenue
-                  </Text>
-                  <Text fw={700} size="xl" lh={1.2}>
-                    {stats?.currencyCode || "USD"}{" "}
-                    {totalRevenue.toLocaleString("en-US", {
-                      minimumFractionDigits: 2,
-                    })}
-                  </Text>
-                </div>
-              </Group>
-            </Paper>
+        <span className={classes.toolbarNote}>
+          Invoices are generated against linked orders
+          <span
+            className={cx(
+              classes.usage,
+              isLimitReached && classes.usageLimit,
+            )}
+          >
+            {" "}
+            · {usageGenerated} / {usageLimit !== 99999 ? usageLimit : "∞"} used
+            this month
+          </span>
+        </span>
 
-            <Paper p="md" radius="md" withBorder>
-              <Group>
-                <ThemeIcon size="xl" variant="light" color="teal" radius="md">
-                  <IconCheck size={22} />
-                </ThemeIcon>
-                <div>
-                  <Text size="xs" c="dimmed" tt="uppercase" fw={600} lts={0.5}>
-                    Submitted Invoices
-                  </Text>
-                  <Text fw={700} size="xl" lh={1.2}>
-                    {paidCount}
-                    <Text component="span" size="sm" c="dimmed" ml={6}>
-                      /{" "}
-                      {stats?.totalInvoices ??
-                        (pagination?.total || invoices.length)}
-                    </Text>
-                  </Text>
-                </div>
-              </Group>
-            </Paper>
+        <Button
+          className={appButton("dark")}
+          component={Link}
+          to={PATH_APPS.orders}
+          rightSection={<IconPlus size={14} />}
+        >
+          Generate invoice
+        </Button>
+      </AppCard>
 
-            <Paper p="md" radius="md" withBorder>
-              <Group>
-                <ThemeIcon
-                  size="xl"
-                  variant="light"
-                  color={isLimitReached ? "red" : "orange"}
-                  radius="md"
-                >
-                  <IconFileExport size={22} />
-                </ThemeIcon>
-                <div>
-                  <Text size="xs" c="dimmed" tt="uppercase" fw={600} lts={0.5}>
-                    Current Plan Limit
-                  </Text>
-                  <Text
-                    fw={700}
-                    size="xl"
-                    lh={1.2}
-                    c={isLimitReached ? "red" : "inherit"}
-                  >
-                    {usageGenerated}
-                    <Text component="span" size="sm" c="dimmed" ml={6}>
-                      / {usageLimit !== 99999 ? usageLimit : "∞"} used
-                    </Text>
-                  </Text>
-                </div>
-              </Group>
-            </Paper>
-          </SimpleGrid>
+      {/* ── Ledger ─────────────────────────────────────────────── */}
+      <AppCard className={classes.ledger}>
+        <div className={cx(ui.eyebrow, classes.ledgerTitle)}>Invoice ledger</div>
+        <InvoiceList
+          invoices={visibleInvoices as any}
+          loading={loading}
+          totalPages={totalPages}
+          currentPage={page}
+          onPageChange={setPage}
+          onInvoiceClick={handleInvoiceClick}
+          emptyMessage={
+            invoices.length > 0
+              ? "No invoices match your filters"
+              : "No invoices found"
+          }
+        />
+      </AppCard>
 
-          {/* ── Invoice Table ────────────────────────────────────── */}
-          <InvoiceList
-            invoices={invoices as any}
-            loading={loading}
-            totalPages={totalPages}
-            currentPage={page}
-            onPageChange={setPage}
-            onInvoiceClick={handleInvoiceClick}
-          />
-        </Stack>
-      </Container>
+      <p className={ui.pageFootnote}>
+        Invoices stay separated by marketplace, status, and tax workflow.
+      </p>
 
       {/* ── Modals ───────────────────────────────────────────────── */}
       <InvoiceDetailsModal

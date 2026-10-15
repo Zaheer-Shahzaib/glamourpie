@@ -1,35 +1,22 @@
-import {
-  Modal,
-  Stack,
-  Group,
-  Text,
-  Badge,
-  Table,
-  Divider,
-  Paper,
-  Grid,
-  Button,
-  Loader,
-  Center,
-} from "@mantine/core";
-import {
-  IconFileDownload,
-  IconCalendar,
-  IconUser,
-  IconBuilding,
-} from "@tabler/icons-react";
-import { Invoice, InvoiceStatus, InvoiceType } from "../../types/invoice.types";
+import { Button, Loader, Paper, Table } from "@mantine/core";
+import { IconFileDownload, IconEye } from "@tabler/icons-react";
+import { useNavigate } from "react-router-dom";
 import { useInvoiceDetails } from "../../hooks/useInvoices";
 import { useAuth } from "../../Context/useAuth";
 import { notifications } from "@mantine/notifications";
 import { useState } from "react";
 import { downloadInvoiceDocument } from "../../Services/invoice-services";
+import { formatCurrency, formatDate } from "../../utils/helperFunctions";
+import { PATH_APPS } from "../../routes";
 import {
-  formatCurrency,
-  formatDate,
-  getStatusColor,
-  getTypeColor,
-} from "../../utils/helperFunctions";
+  AppModal,
+  StatusPill,
+  appButton,
+  cx,
+  invoiceStatusTone,
+  ui,
+} from "../AppUi";
+import classes from "./InvoiceDetailsModal.module.scss";
 
 interface InvoiceDetailsModalProps {
   invoiceId: string | null;
@@ -37,6 +24,7 @@ interface InvoiceDetailsModalProps {
   onClose: () => void;
 }
 
+/** Invoice details modal (Figma "04 Auth & Modals › Invoice Details Modal"). */
 export default function InvoiceDetailsModal({
   invoiceId,
   opened,
@@ -44,9 +32,9 @@ export default function InvoiceDetailsModal({
 }: InvoiceDetailsModalProps) {
   const { invoice, loading } = useInvoiceDetails(invoiceId);
   const { token } = useAuth();
+  const navigate = useNavigate();
   const [downloading, setDownloading] = useState(false);
 
-  console.log("invoice", invoice);
   const handleDownload = async () => {
     if (!token || !invoiceId) return;
 
@@ -70,171 +58,136 @@ export default function InvoiceDetailsModal({
     }
   };
 
+  const handleView = () => {
+    if (!invoiceId) return;
+    onClose();
+    navigate(PATH_APPS.invoices.preview(invoiceId));
+  };
+
+  const ready = !loading && invoice;
+
   return (
-    <Modal
+    <AppModal
       opened={opened}
       onClose={onClose}
-      title="Invoice Details"
-      size="xl"
-      padding="lg"
+      title="Invoice details"
+      subtitle={
+        ready && invoice.amazonOrderId
+          ? `Linked to order #${invoice.amazonOrderId}`
+          : undefined
+      }
+      aside={
+        ready ? (
+          <StatusPill tone={invoiceStatusTone(invoice.status)}>
+            {String(invoice.status).toUpperCase()}
+          </StatusPill>
+        ) : undefined
+      }
+      size={700}
     >
-      {loading || !invoice ? (
-        <Center h={400}>
-          <Stack align="center" gap="md">
-            <Loader size="lg" />
-            <Text c="dimmed">Loading invoice details...</Text>
-          </Stack>
-        </Center>
+      {!ready ? (
+        <div className={classes.loading}>
+          <Loader size="md" />
+          <span className={ui.modalMuted}>Loading invoice details…</span>
+        </div>
       ) : (
-        <Stack gap="lg">
+        <div className={classes.stack}>
           {/* Header */}
-          <Paper p="md" withBorder>
-            <Group justify="space-between" mb="md">
-              <div>
-                <Text size="md" fw={550}>
-                  {invoice.invoiceNumber}
-                </Text>
-                <Group gap="xs" mt="xs">
-                  <IconCalendar size={16} />
-                  <Text size="xs" c="dimmed">
-                    {formatDate(invoice.issueDate)}
-                  </Text>
-                </Group>
-              </div>
-              <Stack gap="xs" align="flex-end">
-                <Badge
-                  size="md"
-                  color={getStatusColor(invoice.status)}
-                  variant="filled"
-                >
-                  {invoice.status}
-                </Badge>
-                {invoice.invoiceType && (
-                  <Badge
-                    size="md"
-                    color={getTypeColor(invoice.invoiceType)}
-                    variant="light"
-                  >
-                    {invoice.invoiceType}
-                  </Badge>
-                )}
-              </Stack>
-            </Group>
-
-            <Group justify="space-between">
-              <Text size="xs" c="dimmed">
-                Order ID: {invoice.amazonOrderId}
-              </Text>
-              <Text size="xs" c="dimmed">
-                Marketplace: {invoice?.marketplaceId}
-              </Text>
-            </Group>
+          <Paper className={ui.modalCard}>
+            <div className={ui.modalRow}>
+              <h3 className={ui.modalSectionTitle} style={{ marginBottom: 0 }}>
+                Invoice header
+              </h3>
+              {invoice.marketplaceId && (
+                <span className={classes.marketplace}>
+                  {invoice.marketplaceId}
+                </span>
+              )}
+            </div>
+            <div className={classes.invoiceNumber}>{invoice.invoiceNumber}</div>
+            <div className={ui.modalMuted}>
+              Issued {formatDate(invoice.issueDate)}
+              {invoice.currency ? ` · ${invoice.currency}` : ""}
+              {invoice.invoiceType
+                ? ` · ${String(invoice.invoiceType).replace(/_/g, " ")}`
+                : ""}
+            </div>
           </Paper>
 
           {/* Seller & Buyer Information */}
-          <Grid>
-            <Grid.Col span={6}>
-              <Paper p="md" withBorder>
-                <Group gap="xs" mb="sm">
-                  <IconBuilding size={16} />
-                  <Text size="md" fw={550}>
-                    Seller Information
-                  </Text>
-                </Group>
-                <Stack gap="xs">
-                  <Text size="sm">{invoice.seller?.name || "-"}</Text>
-                  <Text size="xs" c="dimmed">
-                    Tax ID: {invoice.seller?.taxId || "-"}
-                  </Text>
-                  <Text size="xs" c="dimmed">
-                    {invoice.seller?.address || "-"}
-                  </Text>
-                  {invoice.seller?.email && (
-                    <Text size="xs" c="dimmed">
-                      {invoice.seller?.email}
-                    </Text>
-                  )}
-                </Stack>
-              </Paper>
-            </Grid.Col>
+          <div className={classes.parties}>
+            <Paper className={ui.modalCard}>
+              <h3 className={ui.modalSectionTitle}>Seller information</h3>
+              <div className={ui.modalValue}>{invoice.seller?.name || "-"}</div>
+              <div className={ui.modalMuted}>
+                Tax ID: {invoice.seller?.taxId || "-"}
+              </div>
+              {invoice.seller?.address && (
+                <div className={ui.modalMuted}>{invoice.seller.address}</div>
+              )}
+              {invoice.seller?.email && (
+                <div className={ui.modalMuted}>{invoice.seller.email}</div>
+              )}
+            </Paper>
 
-            <Grid.Col span={6}>
-              <Paper p="md" withBorder>
-                <Group gap="xs" mb="sm">
-                  <IconUser size={16} />
-                  <Text size="md" fw={550}>
-                    Buyer Information
-                  </Text>
-                </Group>
-                <Stack gap="xs">
-                  <Text size="sm">
-                    {invoice.buyer?.name || invoice.buyerName || "-"}
-                  </Text>
-                  {invoice.buyer?.taxId && (
-                    <Text size="xs" c="dimmed">
-                      Tax ID: {invoice.buyer.taxId}
-                    </Text>
-                  )}
-                  <Text size="xs" c="dimmed">
-                    {invoice.buyer?.address || "-"}
-                  </Text>
-                  {invoice.buyer?.email && (
-                    <Text size="xs" c="dimmed">
-                      {invoice.buyer.email}
-                    </Text>
-                  )}
-                </Stack>
-              </Paper>
-            </Grid.Col>
-          </Grid>
+            <Paper className={ui.modalCard}>
+              <h3 className={ui.modalSectionTitle}>Buyer information</h3>
+              <div className={ui.modalValue}>
+                {invoice.buyer?.name || invoice.buyerName || "-"}
+              </div>
+              {invoice.buyer?.taxId && (
+                <div className={ui.modalMuted}>
+                  Tax ID: {invoice.buyer.taxId}
+                </div>
+              )}
+              <div className={ui.modalMuted}>
+                {invoice.buyer?.address || "-"}
+              </div>
+              {invoice.buyer?.email && (
+                <div className={ui.modalMuted}>{invoice.buyer.email}</div>
+              )}
+            </Paper>
+          </div>
 
           {/* Line Items */}
-          <Paper p="md" withBorder>
-            <Text fw={600} mb="md">
-              Line Items
-            </Text>
-            <Table.ScrollContainer minWidth={500}>
-              <Table striped>
+          <Paper className={ui.modalCard}>
+            <h3 className={ui.modalSectionTitle}>Line items</h3>
+            <Table.ScrollContainer minWidth={480}>
+              <Table>
                 <Table.Thead>
                   <Table.Tr>
                     <Table.Th>Description</Table.Th>
-                    <Table.Th>HSN Code</Table.Th>
                     <Table.Th>Qty</Table.Th>
-                    <Table.Th>Unit Price</Table.Th>
-                    <Table.Th>Tax Rate</Table.Th>
-                    <Table.Th>Tax Amount</Table.Th>
-                    <Table.Th>Total</Table.Th>
+                    <Table.Th>Unit price</Table.Th>
+                    <Table.Th>Tax</Table.Th>
+                    <Table.Th style={{ textAlign: "right" }}>Total</Table.Th>
                   </Table.Tr>
                 </Table.Thead>
                 <Table.Tbody>
                   {invoice.lineItems?.map((item) => (
                     <Table.Tr key={item.itemId}>
                       <Table.Td>
-                        <Text size="sm">{item.description}</Text>
+                        <div className={ui.modalValue}>{item.description}</div>
+                        {item.hsnCode && (
+                          <div className={ui.modalMuted}>
+                            HSN: {item.hsnCode}
+                          </div>
+                        )}
+                      </Table.Td>
+                      <Table.Td>{item.quantity}</Table.Td>
+                      <Table.Td>
+                        {formatCurrency(item.unitPrice, invoice.currency)}
                       </Table.Td>
                       <Table.Td>
-                        <Text size="sm">{item.hsnCode || "-"}</Text>
-                      </Table.Td>
-                      <Table.Td>
-                        <Text size="sm">{item.quantity}</Text>
-                      </Table.Td>
-                      <Table.Td>
-                        <Text size="sm">
-                          {formatCurrency(item.unitPrice, invoice.currency)}
-                        </Text>
-                      </Table.Td>
-                      <Table.Td>
-                        <Text size="sm">{(item.taxRate ?? 5).toFixed(0)}%</Text>
-                      </Table.Td>
-                      <Table.Td>
-                        <Text size="sm">
+                        <div>{(item.taxRate ?? 5).toFixed(0)}%</div>
+                        <div className={ui.modalMuted}>
                           {formatCurrency(item.taxAmount, invoice.currency)}
-                        </Text>
+                        </div>
                       </Table.Td>
-                      <Table.Td>
-                        <Text size="sm" fw={600}>
+                      <Table.Td style={{ textAlign: "right" }}>
+                        <span className={ui.modalRowValue}>
                           {formatCurrency(item.lineTotal, invoice.currency)}
-                        </Text>
+                        </span>
                       </Table.Td>
                     </Table.Tr>
                   ))}
@@ -244,92 +197,88 @@ export default function InvoiceDetailsModal({
           </Paper>
 
           {/* Financial Summary */}
-          <Paper p="md" withBorder>
-            <Text fw={600} mb="md">
-              Financial Summary
-            </Text>
-            <Stack gap="xs">
-              <Group justify="space-between">
-                <Text size="sm">Subtotal:</Text>
-                <Text size="sm" fw={600}>
-                  {formatCurrency(invoice.subtotal || 0, invoice.currency)}
-                </Text>
-              </Group>
-              {(invoice.discounts ?? 0) > 0 && (
-                <Group justify="space-between">
-                  <Text size="sm">Discounts:</Text>
-                  <Text size="sm" c="red">
-                    -{formatCurrency(invoice.discounts || 0, invoice.currency)}
-                  </Text>
-                </Group>
-              )}
-              <Group justify="space-between">
-                <Text size="sm">Tax Amount ({invoice.taxRate ?? 5}%):</Text>
-                <Text size="sm" fw={600}>
-                  {formatCurrency(invoice.taxAmount ?? 0, invoice.currency)}
-                </Text>
-              </Group>
-              {(invoice.shippingCharges ?? 0) > 0 && (
-                <Group justify="space-between">
-                  <Text size="sm">Shipping:</Text>
-                  <Text size="sm" fw={600}>
-                    {formatCurrency(
-                      invoice.shippingCharges || 0,
-                      invoice.currency,
-                    )}
-                  </Text>
-                </Group>
-              )}
-              <Divider />
-              <Group justify="space-between">
-                <Text fw={600} size="md">
-                  Total Amount:
-                </Text>
-                <Text fw={600} size="md">
-                  {formatCurrency(invoice.totalAmount ?? 0, invoice.currency)}
-                </Text>
-              </Group>
-            </Stack>
+          <Paper className={ui.modalCard}>
+            <h3 className={ui.modalSectionTitle}>Financial summary</h3>
+            <div className={ui.modalRow}>
+              <span className={ui.modalRowLabel}>Subtotal:</span>
+              <span className={ui.modalRowValue}>
+                {formatCurrency(invoice.subtotal || 0, invoice.currency)}
+              </span>
+            </div>
+            {(invoice.discounts ?? 0) > 0 && (
+              <div className={ui.modalRow}>
+                <span className={ui.modalRowLabel}>Discounts:</span>
+                <span className={ui.modalRowNegative}>
+                  − {formatCurrency(invoice.discounts || 0, invoice.currency)}
+                </span>
+              </div>
+            )}
+            <div className={ui.modalRow}>
+              <span className={ui.modalRowLabel}>
+                Tax amount ({invoice.taxRate ?? 5}%):
+              </span>
+              <span className={ui.modalRowValue}>
+                {formatCurrency(invoice.taxAmount ?? 0, invoice.currency)}
+              </span>
+            </div>
+            {(invoice.shippingCharges ?? 0) > 0 && (
+              <div className={ui.modalRow}>
+                <span className={ui.modalRowLabel}>Shipping:</span>
+                <span className={ui.modalRowValue}>
+                  {formatCurrency(invoice.shippingCharges || 0, invoice.currency)}
+                </span>
+              </div>
+            )}
+            <div className={ui.modalDivider} />
+            <div className={cx(ui.modalRow, ui.modalRowValue)}>
+              <span>Total amount:</span>
+              <span>
+                {formatCurrency(invoice.totalAmount ?? 0, invoice.currency)}
+              </span>
+            </div>
           </Paper>
 
           {/* Payment Information */}
           {invoice.paymentMethod && (
-            <Paper p="md" withBorder>
-              <Text fw={600} mb="sm">
-                Payment Information
-              </Text>
-              <Group gap="xl">
+            <Paper className={ui.modalCard}>
+              <h3 className={ui.modalSectionTitle}>Payment information</h3>
+              <div className={classes.parties}>
                 <div>
-                  <Text size="sm" c="dimmed">
-                    Payment Method
-                  </Text>
-                  <Text size="sm">{invoice.paymentMethod}</Text>
+                  <div className={ui.modalLabel}>Payment method</div>
+                  <div className={ui.modalValue}>{invoice.paymentMethod}</div>
                 </div>
                 {invoice.paymentDueDate && (
                   <div>
-                    <Text size="sm" c="dimmed">
-                      Due Date
-                    </Text>
-                    <Text size="sm">{formatDate(invoice.paymentDueDate)}</Text>
+                    <div className={ui.modalLabel}>Due date</div>
+                    <div className={ui.modalValue}>
+                      {formatDate(invoice.paymentDueDate)}
+                    </div>
                   </div>
                 )}
-              </Group>
+              </div>
             </Paper>
           )}
 
           {/* Actions */}
-          <Group justify="flex-end">
+          <div className={classes.actions}>
             <Button
-              variant="filled"
-              leftSection={<IconFileDownload size={18} />}
+              className={appButton("light")}
+              leftSection={<IconEye size={16} />}
+              onClick={handleView}
+            >
+              View document
+            </Button>
+            <Button
+              className={appButton("primary")}
+              leftSection={<IconFileDownload size={16} />}
               onClick={handleDownload}
               loading={downloading}
             >
-              Download Document
+              Download document
             </Button>
-          </Group>
-        </Stack>
+          </div>
+        </div>
       )}
-    </Modal>
+    </AppModal>
   );
 }

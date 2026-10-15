@@ -1,0 +1,72 @@
+// Invoice ledger rows — Figma "Invoices › Invoice ledger".
+
+.row {
+  cursor: pointer;
+}
+
+.invoiceId {
+  display: block;
+  color: var(--ra-color-text-primary);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 18px;
+}
+
+.buyer {
+  display: block;
+  color: var(--ra-color-text-muted);
+  font-size: 11px;
+  line-height: 16px;
+}
+
+.muted {
+  color: var(--ra-color-text-muted);
+  font-size: 12px;
+}
+
+.amount {
+  color: var(--ra-color-text-primary);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.orderLink {
+  color: var(--ra-color-brand-tertiary);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.viewBtn {
+  display: inline-flex;
+  align-items: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ra-color-brand-tertiary);
+  font-family: var(--ra-font-body);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    text-decoration: underline;
+  }
+
+  &:disabled {
+    cursor: wait;
+    opacity: 0.6;
+  }
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 16px;
+}

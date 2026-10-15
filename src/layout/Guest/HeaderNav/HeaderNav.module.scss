@@ -1,104 +1,326 @@
+@use "../../../styles/public-site" as ps;
+
+$nav-breakpoint-default: 62em; // md
+$nav-breakpoint-landing: 75em; // lg – landing nav labels are longer
+
 .header {
-  height: 60px;
-
-  .inner {
-    background-color: var(--mantine-color-black);
-    padding: 0 var(--mantine-spacing-xl);
-    color: var(--mantine-color-white);
-    height: 60px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: var(--mantine-spacing-md);
-  }
-
-  .logoLink {
-    display: flex;
-    align-items: center;
-    text-decoration: none;
-
-    .logo {
-      object-fit: contain;
-      object-position: left center;
-    }
-  }
+  width: 100%;
+  font-family: var(--ra-font-body);
 }
 
-.links {
-  text-transform: capitalize;
+/* ---------- Announcement bar (landing only) ---------- */
+.announcement {
+  background-color: var(--ra-color-surface-low);
+  height: 36px;
+}
 
-  @media (max-width: 640px) {
-    display: none;
+.announcementInner {
+  @include ps.page-container;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 100%;
+}
+
+.announcementBadge {
+  flex: none;
+  padding: 4px 12px;
+  border-radius: var(--ra-radius-full);
+  background-color: var(--ra-color-surface-high);
+  color: var(--ra-color-brand);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 15px;
+}
+
+.announcementText {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--ra-color-text-secondary);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.announcementArrow {
+  flex: none;
+  padding: 0 4px;
+  border: 0;
+  background: transparent;
+  color: var(--ra-color-brand);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  @include ps.focus-ring;
+}
+
+/* ---------- Main bar ---------- */
+.bar {
+  width: 100%;
+}
+
+.inner {
+  @include ps.page-container;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  height: 100%;
+}
+
+.default {
+  .bar {
+    height: 76px;
+    background-color: var(--ra-color-surface-inverse);
+    border-bottom: 1px solid var(--ra-color-border);
+  }
+
+  .inner {
+    padding-inline: clamp(1rem, 3vw, 2.625rem);
+  }
+
+  .nav {
+    @media (min-width: $nav-breakpoint-default) {
+      display: flex;
+    }
+  }
+
+  .actions {
+    @media (min-width: $nav-breakpoint-default) {
+      display: flex;
+    }
+  }
+
+  .burger {
+    @media (min-width: $nav-breakpoint-default) {
+      display: none;
+    }
   }
 
   .link {
-    display: flex;
-    align-items: center;
-    padding: 8px 12px;
-    border-radius: var(--mantine-radius-default);
-    text-decoration: none;
-    color: var(--mantine-color-white);
-    font-size: var(--mantine-font-size-sm);
-    font-weight: 500;
-    height: 38px;
-    text-transform: capitalize;
-
-    @media (max-width: 640px) {
-      color: var(--mantine-color-white);
-    }
+    color: var(--ra-color-surface-white);
+    font-size: 13px;
 
     &:hover {
-      transition: all ease 150ms;
-      background-color: var(--mantine-color-dark-5) !important;
+      background-color: rgba(255, 255, 255, 0.08);
+    }
+
+    // Design uses the brand teal for the current page, which has too little contrast on
+    // navy; the lighter "fixed-dim" brand tone keeps the same hue and is readable.
+    &[data-active] {
+      color: var(--ra-color-brand-fixed-dim);
+    }
+  }
+
+  .signIn {
+    min-height: 38px;
+    padding: 0 18px;
+    border: 1px solid var(--ra-color-brand);
+    border-radius: 9px;
+    background-color: var(--ra-color-surface-white);
+    color: var(--ra-color-surface-inverse);
+    font-size: 14px;
+    font-weight: 600;
+
+    &:hover {
+      background-color: var(--ra-color-surface-low);
     }
   }
 }
 
-.drawerContent {
-  background-color: #000 !important;
-  color: #fff !important;
+.landing {
+  .bar {
+    height: 80px;
+    background-color: var(--ra-color-surface-white);
+    border-bottom: 1px solid var(--ra-color-surface-variant);
+  }
+
+  .nav {
+    @media (min-width: $nav-breakpoint-landing) {
+      display: flex;
+    }
+  }
+
+  .actions {
+    @media (min-width: $nav-breakpoint-landing) {
+      display: flex;
+    }
+  }
+
+  .burger {
+    @media (min-width: $nav-breakpoint-landing) {
+      display: none;
+    }
+  }
+
+  .link {
+    color: var(--ra-color-text-secondary);
+    font-size: 12px;
+
+    &:hover {
+      background-color: var(--ra-color-surface-low);
+    }
+
+    &[data-active] {
+      background-color: var(--ra-color-brand);
+      color: var(--ra-color-surface-white);
+      border-radius: var(--ra-radius-full);
+      font-weight: 600;
+    }
+  }
+
+  .signIn {
+    min-height: 38px;
+    padding: 0 12px;
+    color: var(--ra-color-text-secondary);
+    font-size: 12px;
+    font-weight: 500;
+
+    &:hover {
+      color: var(--ra-color-brand);
+    }
+  }
 }
 
-.drawerHeader {
-  background-color: #000;
-  color: #fff;
+.nav {
+  display: none;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 0;
 }
 
-// .drawerBody {
-//   background-color: #000 !important;   
-// }
+.link {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: var(--ra-radius-sm);
+  text-decoration: none;
+  white-space: nowrap;
+  font-weight: 500;
+  line-height: 20px;
+  transition: background-color 150ms ease, color 150ms ease;
+  @include ps.focus-ring(var(--ra-color-brand-fixed-dim));
+}
+
+.actions {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.signIn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+  font-family: inherit;
+  transition: background-color 150ms ease, color 150ms ease;
+  @include ps.focus-ring;
+}
+
+.cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  padding: 0 18px;
+  border-radius: var(--ra-radius-md);
+  background-color: var(--ra-color-brand);
+  color: var(--ra-color-surface-white);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background-color 150ms ease;
+  @include ps.focus-ring;
+
+  &:hover {
+    background-color: var(--ra-color-brand-container);
+  }
+}
+
 .burger {
-  @media (min-width: 1024px) {
-    display: none;
+  margin-left: auto;
+}
+
+/* ---------- Mobile drawer ---------- */
+.drawerContent {
+  &.default {
+    background-color: var(--ra-color-surface-inverse);
+  }
+
+  &.landing {
+    background-color: var(--ra-color-surface-white);
   }
 }
 
-.hiddenMobile {
-  @media (max-width: 640px) {
-    display: none;
-  }
+/* Scoped under .drawerContent so they out-rank Mantine's own single-class rules. */
+.drawerContent .drawerHeader {
+  background-color: transparent;
 }
 
-.hiddenDesktop {
-  @media (min-width: 920px) {
-    display: none;
-  }
-
+.drawerContent .drawerClose {
+  color: inherit;
 }
 
+.drawerContent.default .drawerClose {
+  color: var(--ra-color-surface-white);
+}
 
-
-.lgoo {
+.drawerNav {
   display: flex;
-  justify-content: right;
-  height: 70px;
-  width: 200px;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+
+  .link {
+    padding: 12px;
+    font-size: 15px;
+  }
 }
 
-.logMobile {
-  width: 54px;
-  height: 54px;
-  object-position: left center;
-  background-color: #000;
+.drawerContent.default .link {
+  color: var(--ra-color-surface-white);
 
+  &[data-active] {
+    color: var(--ra-color-brand-fixed-dim);
+  }
+}
+
+.drawerContent.landing .link {
+  color: var(--ra-color-text-secondary);
+
+  &[data-active] {
+    background-color: var(--ra-color-brand);
+    color: var(--ra-color-surface-white);
+  }
+}
+
+.drawerActions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 16px;
+
+  .signIn,
+  .cta {
+    width: 100%;
+    min-height: 44px;
+  }
+}
+
+.drawerContent.default .drawerActions .signIn {
+  border: 1px solid var(--ra-color-brand);
+  border-radius: 9px;
+  background-color: var(--ra-color-surface-white);
+  color: var(--ra-color-surface-inverse);
+  font-weight: 600;
 }

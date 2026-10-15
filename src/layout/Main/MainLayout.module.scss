@@ -1,0 +1,38 @@
+// Seller Center app shell — Figma "01 Product UI":
+// 232px navy sidebar, 68px white topbar, light (#f8f9ff) canvas.
+
+.navbar {
+  border: 0;
+  background-color: var(--ra-color-surface-inverse);
+}
+
+.header {
+  border: 0;
+  background-color: var(--ra-color-surface-white);
+}
+
+.main {
+  background-color: var(--ra-color-surface);
+}
+
+.content {
+  width: 100%;
+  max-width: 1400px;
+  padding: 32px 32px 24px 40px;
+
+  @media (max-width: 992px) {
+    padding: 24px 20px 16px;
+  }
+
+  @media (max-width: 600px) {
+    padding: 20px 16px 12px;
+  }
+}
+
+.footer {
+  padding: 0 32px 24px 40px;
+
+  @media (max-width: 992px) {
+    padding: 0 20px 20px;
+  }
+}

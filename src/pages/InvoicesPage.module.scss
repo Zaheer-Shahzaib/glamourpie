@@ -1,0 +1,137 @@
+// Invoices — Figma "01 Product UI › Invoices".
+
+.kpis {
+  margin-bottom: 16px;
+  padding: 20px;
+}
+
+.kpiGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 24px;
+
+  @media (max-width: 992px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @media (max-width: 480px) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.kpi {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  padding: 4px 16px;
+}
+
+.kpiValue {
+  color: var(--ra-color-text-primary);
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 28px;
+}
+
+.kpiMeta {
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 16px;
+}
+
+.metaInfo {
+  color: var(--ra-color-brand-tertiary);
+}
+
+.metaWarning {
+  color: var(--ra-color-warning);
+}
+
+.metaSuccess {
+  color: var(--ra-color-brand);
+}
+
+.metaBrand {
+  color: var(--ra-color-brand-container);
+}
+
+// ── Toolbar ─────────────────────────────────────────────────────────────────
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+  padding: 20px;
+}
+
+.search {
+  flex: 0 1 280px;
+  min-width: 200px;
+
+  :global(.mantine-Input-input) {
+    background-color: var(--ra-color-surface);
+    border-color: transparent;
+  }
+}
+
+.chipSelect {
+  width: 140px;
+
+  :global(.mantine-Input-input) {
+    min-height: 28px;
+    height: 28px;
+    border-radius: 999px;
+    border-color: var(--ra-color-border);
+    background-color: var(--ra-color-surface-white);
+    font-size: 11px;
+    font-weight: 600;
+  }
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 14px;
+  border: 1px solid var(--ra-color-border);
+  border-radius: 999px;
+  background-color: var(--ra-color-surface-white);
+  color: var(--ra-color-text-primary);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.chipDisabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.toolbarNote {
+  flex: 1 1 220px;
+  color: var(--ra-color-text-muted);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 16px;
+  text-align: center;
+}
+
+.usage {
+  white-space: nowrap;
+}
+
+.usageLimit {
+  color: var(--ra-color-danger);
+  font-weight: 600;
+}
+
+// ── Ledger ──────────────────────────────────────────────────────────────────
+.ledger {
+  padding: 24px;
+}
+
+.ledgerTitle {
+  margin-bottom: 16px;
+}

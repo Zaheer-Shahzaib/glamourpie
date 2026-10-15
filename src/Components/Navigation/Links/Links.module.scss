@@ -1,132 +1,97 @@
-button.control {
-  font-weight: 500;
-  display: block;
+// Sidebar items — Figma "01 Product UI" sidebar (232px, navy).
+
+.item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   width: 100%;
-  padding: var(--mantine-spacing-xs) var(--mantine-spacing-md);
-  font-size: var(--mantine-font-size-sm);
-  color: var(--mantine-color-white);
-  transition: all ease 0.2s;
-  border-radius: var(--mantine-radius-sm);
-  margin-bottom: 2px;
+  height: 40px;
+  margin-bottom: 6px;
+  padding: 0 14px 0 18px;
+  border: 0;
+  border-radius: var(--ra-radius-sm);
+  background: transparent;
+  color: var(--ra-color-surface-variant);
+  font-family: var(--ra-font-body);
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 20px;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
 
   &:hover {
-    transition: all ease 0.2s;
+    background-color: var(--ra-color-cta-secondary);
+    color: var(--ra-color-surface-white);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--ra-color-brand-tertiary-fixed-dim);
+    outline-offset: 2px;
   }
 
   &[data-active] {
-    background-color: var(--mantine-color-white);
-    color: var(--mantine-primary-color-filled);
-
-    &:hover {
-      background-color: var(--mantine-color-white);
-      color: var(--mantine-primary-color-filled);
-    }
-
-    &[data-mini="true"] {
-      width: 67px;
-    }
+    background-color: var(--ra-color-brand);
+    color: var(--ra-color-surface-white);
+    font-weight: 600;
   }
 
-  &[data-mini="true"] {
-    text-align: center;
+  &[data-soon] {
+    cursor: not-allowed;
+    opacity: 0.7;
+
+    &:hover {
+      background: transparent;
+      color: var(--ra-color-surface-variant);
+    }
   }
 }
 
-.link {
-  font-weight: 400;
-  display: block;
-  text-decoration: none;
-  padding: 4px 10px 2px 40px;
-  // font-size: 14px;
-  transition: all ease 0.2s;
-  cursor: pointer;
-  background: none;
-  border: none;
-  text-align: left;
-  width: 100%;
-  color: rgba(255, 255, 255, 0.85);
-
-  &:hover {
-    background-color: rgba(255, 255, 255, 0.08);
-    color: var(--mantine-color-white);
-  }
-
-  &[data-active] {
-    background-color: rgba(255, 255, 255, 0.12);
-    color: var(--mantine-color-white);
-    font-weight: 500;
-
-    &:hover {
-      background-color: rgba(255, 255, 255, 0.15);
-    }
-  }
+.soonTag {
+  padding: 2px 6px;
+  border-radius: var(--ra-radius-full);
+  background-color: var(--ra-color-cta-secondary);
+  color: var(--ra-color-text-inverse-soft);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 .chevron {
-  transition: transform 200ms ease;
-}
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
 
-// Theme overrides
-html[data-mantine-color-scheme="light"] {
-  .control {
-    color: var(--mantine-color-white);
-
-    &:hover {
-      background-color: rgba(255, 255, 255, 0.15);
-      color: var(--mantine-color-white);
-    }
-
-    &[data-active],
-    &[data-active]:hover {
-      background-color: var(--mantine-color-white);
-      color: var(--mantine-primary-color-filled);
-    }
-  }
-
-  .link {
-    color: rgba(255, 255, 255, 0.85);
-
-    &:hover {
-      background-color: rgba(255, 255, 255, 0.1);
-      color: var(--mantine-color-white);
-    }
-
-    &[data-active],
-    &[data-active]:hover {
-      background-color: rgba(255, 255, 255, 0.15);
-      color: var(--mantine-color-white);
-    }
+  &[data-open] {
+    transform: rotate(90deg);
   }
 }
 
-html[data-mantine-color-scheme="dark"] {
-  .control {
-    color: var(--mantine-color-white);
+.subList {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 6px;
+}
 
-    &:hover {
-      background-color: rgba(255, 255, 255, 0.1);
-      color: var(--mantine-color-white);
-    }
+.subItem {
+  display: block;
+  padding: 7px 14px 7px 36px;
+  border-radius: var(--ra-radius-sm);
+  color: var(--ra-color-text-muted);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 20px;
+  text-decoration: none;
+  transition: color 0.15s ease;
 
-    &[data-active],
-    &[data-active]:hover {
-      background-color: var(--mantine-color-dark-4);
-      color: var(--mantine-primary-color-light-color);
-    }
+  &:hover {
+    color: var(--ra-color-surface-white);
   }
 
-  .link {
-    color: rgba(255, 255, 255, 0.7);
-
-    &:hover {
-      background-color: var(--mantine-color-dark-5);
-      color: var(--mantine-color-white);
-    }
-
-    &[data-active],
-    &[data-active]:hover {
-      background-color: var(--mantine-primary-color-filled);
-      color: var(--mantine-color-white);
-    }
+  &[data-active] {
+    color: var(--ra-color-surface-white);
   }
 }

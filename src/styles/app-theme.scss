@@ -1,0 +1,135 @@
+// Seller Center (authenticated app) theme.
+// Figma: "RunAnalytic SellerCenter — New Product System" › "01 Product UI".
+//
+// Everything here is scoped to `body.ra-app`, a class that `MainLayout` adds while it is
+// mounted. Scoping to <body> (instead of the layout root) means Mantine portals — modals,
+// select dropdowns, date pickers, notifications — pick the theme up as well, while the
+// public site and auth pages are left untouched.
+//
+// Colours / fonts / radii come from the `--ra-*` variables generated from
+// `src/theme/publicSiteTokens.ts` and `src/theme/appTokens.ts`.
+
+body.ra-app {
+  // ── Mantine variable remap ────────────────────────────────────────────────
+  --mantine-font-family: var(--ra-font-body);
+  --mantine-font-family-headings: var(--ra-font-body);
+  --mantine-radius-default: 8px;
+
+  --mantine-color-body: var(--ra-color-surface);
+  --mantine-color-text: var(--ra-color-text-primary);
+  --mantine-color-dimmed: var(--ra-color-text-muted);
+  --mantine-color-default-border: var(--ra-color-border);
+  --mantine-color-anchor: var(--ra-color-brand-tertiary);
+
+  // Primary colour -> brand teal
+  --mantine-primary-color-filled: var(--ra-color-brand);
+  --mantine-primary-color-filled-hover: var(--ra-color-brand-hover);
+  --mantine-primary-color-light: rgb(0 104 95 / 8%);
+  --mantine-primary-color-light-hover: rgb(0 104 95 / 14%);
+  --mantine-primary-color-light-color: var(--ra-color-brand);
+  --mantine-primary-color-outline: var(--ra-color-brand);
+  --mantine-primary-color-outline-hover: rgb(0 104 95 / 8%);
+
+  // Components that explicitly ask for `color="blue"` follow the brand colour too.
+  --mantine-color-blue-filled: var(--ra-color-brand);
+  --mantine-color-blue-filled-hover: var(--ra-color-brand-hover);
+  --mantine-color-blue-light: rgb(0 104 95 / 8%);
+  --mantine-color-blue-light-hover: rgb(0 104 95 / 14%);
+  --mantine-color-blue-light-color: var(--ra-color-brand);
+  --mantine-color-blue-outline: var(--ra-color-brand);
+  --mantine-color-blue-outline-hover: rgb(0 104 95 / 8%);
+  --mantine-color-blue-text: var(--ra-color-brand);
+
+  background-color: var(--ra-color-surface);
+  color: var(--ra-color-text-primary);
+  font-family: var(--ra-font-body);
+
+  // ── Form fields ───────────────────────────────────────────────────────────
+  .mantine-InputWrapper-label {
+    margin-bottom: 6px;
+    color: var(--ra-color-text-muted);
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 16px;
+  }
+
+  .mantine-InputWrapper-description {
+    color: var(--ra-color-text-muted);
+    font-size: 11px;
+    line-height: 16px;
+  }
+
+  .mantine-Input-input {
+    min-height: 42px;
+    border: 1px solid var(--ra-color-border);
+    border-radius: var(--ra-radius-sm);
+    background-color: var(--ra-color-surface-white);
+    color: var(--ra-color-text-primary);
+    font-size: 13px;
+
+    &::placeholder {
+      color: var(--ra-color-text-muted);
+    }
+
+    &:focus,
+    &:focus-within {
+      border-color: var(--ra-color-brand);
+    }
+
+    &:disabled,
+    &[data-disabled] {
+      border-color: transparent;
+      background-color: var(--ra-color-field-disabled);
+      color: var(--ra-color-field-disabled-text);
+      opacity: 1;
+    }
+  }
+
+  // ── Tables ────────────────────────────────────────────────────────────────
+  .mantine-Table-table {
+    --table-striped-color: transparent;
+    --table-highlight-on-hover-color: var(--ra-color-surface-low);
+    --table-border-color: var(--ra-color-surface-variant);
+  }
+
+  .mantine-Table-th {
+    border-bottom: 1px solid var(--ra-color-surface-variant);
+    color: var(--ra-color-text-muted);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .mantine-Table-td {
+    border-top: 0;
+    border-bottom: 1px solid var(--ra-color-surface-variant);
+    font-size: 12px;
+  }
+
+  // ── Cards, modals ─────────────────────────────────────────────────────────
+  .mantine-Paper-root {
+    border-radius: 12px;
+  }
+
+  .mantine-Modal-content {
+    border-radius: 14px;
+  }
+
+  .mantine-Modal-title {
+    font-size: 17px;
+    font-weight: 600;
+  }
+
+  // ── Switch ────────────────────────────────────────────────────────────────
+  .mantine-Switch-label {
+    color: var(--ra-color-text-primary);
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  .mantine-Switch-description {
+    color: var(--ra-color-text-muted);
+    font-size: 12px;
+  }
+}

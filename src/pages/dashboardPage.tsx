@@ -1,42 +1,65 @@
 "use client";
 
-import {
-  Button,
-  Container,
-  Stack,
-  Text,
-  Group,
-  Title,
-  Alert,
-} from "@mantine/core";
-import { IconFileExport, IconPlus, IconAlertCircle } from "@tabler/icons-react";
-import { useState, useEffect } from "react";
+import { Alert, Button, Text, Tooltip } from "@mantine/core";
+import { IconFileExport, IconAlertCircle } from "@tabler/icons-react";
+import { useState, useEffect, useMemo } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import MainLayout from "../layout/Main";
 import { useAuth } from "../Context/useAuth";
-import InvoiceStatsGrid from "../Components/Invoice/InvoiceStatsGrid";
 import InvoiceList from "../Components/Invoice/InvoiceList";
 import InvoiceFilters from "../Components/Invoice/InvoiceFilters";
 import InvoiceDetailsModal from "../Components/Invoice/InvoiceDetailsModal";
-import InvoiceRevenueChart from "../Components/Invoice/InvoiceRevenueChart";
 import InvoiceExportModal from "../Components/Invoice/InvoiceExportModal";
+import {
+  AppCard,
+  CardHeader,
+  ComingSoon,
+  PageHeader,
+  StatusPill,
+  appButton,
+  cx,
+  orderStatusTone,
+  ui,
+} from "../Components/AppUi";
 import { useInvoices } from "../hooks/useInvoices";
-import { InvoiceQueryParams, InvoiceStats } from "../types/invoice.types";
+import { useOrders, useOrderStats } from "../hooks/useOrders";
 import {
-  fetchInvoiceStats,
-  fetchRevenueData,
-} from "../Services/invoice-services";
-import { RevenueDataPoint } from "../types/invoice.types";
-import RevenueChart from "../Components/RevenueChart/RevenueChart";
-import DetailedStatsGrid from "../Components/StatsGrid/detailsStatsGrid";
+  pickBestPlan,
+  useSubscriptionStatus,
+} from "../hooks/useSubscriptionStatus";
+import { InvoiceQueryParams, RevenueDataPoint } from "../types/invoice.types";
+import { fetchRevenueData } from "../Services/invoice-services";
+import { getCustomerInvoicesDetails } from "../Services/stripeService";
 import {
-  getSubscriptionStatus,
-  getCustomerInvoicesDetails,
-} from "../Services/stripeService";
-import { useNavigate } from "react-router-dom";
+  formatStatusLabel,
+  getBuyerName,
+  getOrderStatus,
+  getOrderTotal,
+} from "../utils/orderFields";
+import { PATH_APPS } from "../routes";
 import { notifications } from "@mantine/notifications";
+import classes from "./DashboardPage.module.scss";
+
+const compactNumber = new Intl.NumberFormat("en-US", {
+  maximumFractionDigits: 0,
+});
+
+const greeting = (): string => {
+  const hour = new Date().getHours();
+  if (hour < 12) return "Good morning";
+  if (hour < 18) return "Good afternoon";
+  return "Good evening";
+};
+
+const formatShortDate = (value: string): string => {
+  const d = new Date(value);
+  return Number.isNaN(d.getTime())
+    ? value
+    : d.toLocaleDateString("en-US", { day: "numeric", month: "short" });
+};
 
 function DashBoard() {
-  const { token } = useAuth();
+  const { token, profile } = useAuth();
   const navigate = useNavigate();
   const [filters, setFilters] = useState<InvoiceQueryParams>({
     limit: 10,
@@ -48,8 +71,6 @@ function DashBoard() {
   );
   const [detailsModalOpened, setDetailsModalOpened] = useState(false);
   const [exportModalOpened, setExportModalOpened] = useState(false);
-  const [stats, setStats] = useState<InvoiceStats | null>(null);
-  const [statsLoading, setStatsLoading] = useState(true);
   const [revenueData, setRevenueData] = useState<RevenueDataPoint[]>([]);
   const [revenueLoading, setRevenueLoading] = useState(true);
 
@@ -57,71 +78,31 @@ function DashBoard() {
     invoices,
     loading,
     pagination,
-    refetch,
     setFilters: updateFilters,
   } = useInvoices(filters);
 
-  const [hasPastDue, setHasPastDue] = useState(false);
-  const [activePlan, setActivePlan] = useState<string | null>(null);
-  const [subLoading, setSubLoading] = useState(true);
+  const { data: subscription, isLoading: subLoading } = useSubscriptionStatus();
+  const hasPastDue = Boolean(subscription?.hasPastDue);
+  const activePlan = useMemo(
+    () => pickBestPlan(subscription?.activePlans || []),
+    [subscription],
+  );
 
-  // Fetch billing status to check for past due subscriptions and active plan
-  useEffect(() => {
-    if (!token) return;
-    setSubLoading(true);
-    getSubscriptionStatus()
-      .then((data) => {
-        setHasPastDue(data.hasPastDue || false);
-        const plans: string[] = data.activePlans || [];
-        const PLAN_RANK: Record<string, number> = {
-          free: 0,
-          starter: 1,
-          pro: 2,
-          growth: 3,
-          scale: 4,
-          enterprise: 5,
-        };
-        const best = plans.reduce<string | null>((acc, p) => {
-          if (!acc) return p;
-          const currentPlan = p.toLowerCase();
-          const accPlan = acc.toLowerCase();
-          return (PLAN_RANK[currentPlan] ?? -1) > (PLAN_RANK[accPlan] ?? -1)
-            ? p
-            : acc;
-        }, null);
-        setActivePlan(best);
-      })
-      .catch(() => {
-        setHasPastDue(false);
-        setActivePlan(null);
-      })
-      .finally(() => setSubLoading(false));
-  }, [token]);
+  const { data: orderStats } = useOrderStats();
+  const { data: ordersData } = useOrders();
+  const recentOrders = (ordersData?.payload?.orders ?? [])
+    .slice()
+    .sort(
+      (a: any, b: any) =>
+        new Date(b.createdTime).getTime() - new Date(a.createdTime).getTime(),
+    )
+    .slice(0, 3);
 
   useEffect(() => {
     if (!token) return;
-    getCustomerInvoicesDetails()
-      .then((data) => console.log("Stripe Invoices Fetched:", data))
-      .catch((err) => console.error("Failed to fetch customer invoices:", err));
-  }, [token]);
-
-  // Fetch invoice statistics
-  useEffect(() => {
-    const loadStats = async () => {
-      if (!token) return;
-
-      try {
-        setStatsLoading(true);
-        const data = await fetchInvoiceStats(token);
-        setStats(data.payload);
-      } catch (error) {
-        console.error("Error fetching stats:", error);
-      } finally {
-        setStatsLoading(false);
-      }
-    };
-
-    loadStats();
+    getCustomerInvoicesDetails().catch((err) =>
+      console.error("Failed to fetch customer invoices:", err),
+    );
   }, [token]);
 
   // Fetch revenue chart data
@@ -192,6 +173,29 @@ function DashBoard() {
 
   const totalPages = pagination ? Math.ceil(pagination.total / 10) : 1;
 
+  // ── Derived metrics (real order stats where available) ───────────────────
+  const currency = orderStats?.currencyCode ?? "USD";
+  const totalOrders = orderStats?.totalOrders ?? 0;
+  const totalRevenue = orderStats?.totalRevenue ?? 0;
+  const aov = totalOrders > 0 ? totalRevenue / totalOrders : 0;
+  const shippedPct =
+    totalOrders > 0
+      ? Math.round(((orderStats?.shippedOrders ?? 0) / totalOrders) * 100)
+      : 0;
+
+  const chartPoints = useMemo(() => revenueData.slice(-12), [revenueData]);
+  const chartMax = useMemo(
+    () => Math.max(...chartPoints.map((p) => p.revenue), 1),
+    [chartPoints],
+  );
+  const sparkPoints = useMemo(() => revenueData.slice(-10), [revenueData]);
+  const sparkMax = useMemo(
+    () => Math.max(...sparkPoints.map((p) => p.revenue), 1),
+    [sparkPoints],
+  );
+
+  const firstName = profile?.firstname || profile?.username || "";
+
   return (
     <>
       <>
@@ -202,62 +206,272 @@ function DashBoard() {
         />
       </>
       <MainLayout>
-        <Container fluid>
-          <Stack gap="lg">
-            {/* Header */}
-            <Group justify="space-between">
-              <div>
-                <Title order={2} size="xl" fw={550}>
-                  Invoice Dashboard
-                </Title>
-                <Text c="dimmed" size="sm">
-                  Manage and track your Amazon marketplace invoices
-                </Text>
-              </div>
-              <Group>
-                <Button
-                  leftSection={<IconFileExport size={18} />}
-                  variant="light"
-                  onClick={handleOpenExport}
-                >
-                  Export Invoices
-                </Button>
-              </Group>
-            </Group>
-
-            {hasPastDue && (
-              <Alert
-                icon={<IconAlertCircle size={16} />}
-                title="Payment Action Required"
-                color="red"
-                variant="filled"
+        <PageHeader
+          title={firstName ? `${greeting()}, ${firstName}` : greeting()}
+          subtitle="Here is the pulse of your Amazon business."
+          actions={
+            <>
+              <Tooltip label="Period comparison is coming soon">
+                <span>
+                  <Button className={appButton("light")} disabled>
+                    Compare period
+                  </Button>
+                </span>
+              </Tooltip>
+              <Button
+                className={appButton("dark")}
+                leftSection={<IconFileExport size={16} />}
+                onClick={handleOpenExport}
               >
-                Your recent subscription payment failed. The ability to export
-                and generate invoices may be restricted.{" "}
-                <Text
-                  span
-                  bg="transparent"
-                  td="underline"
-                  style={{ cursor: "pointer", fontWeight: 600 }}
-                  onClick={() => navigate("/dashboard/settings?tab=billing")}
-                >
-                  Update your payment details
-                </Text>
-              </Alert>
+                Export report
+              </Button>
+            </>
+          }
+        />
+
+        {hasPastDue && (
+          <Alert
+            mb="lg"
+            icon={<IconAlertCircle size={16} />}
+            title="Payment Action Required"
+            color="red"
+            variant="filled"
+          >
+            Your recent subscription payment failed. The ability to export and
+            generate invoices may be restricted.{" "}
+            <Text
+              span
+              bg="transparent"
+              td="underline"
+              style={{ cursor: "pointer", fontWeight: 600 }}
+              onClick={() => navigate(PATH_APPS.settings.billing)}
+            >
+              Update your payment details
+            </Text>
+          </Alert>
+        )}
+
+        {/* ── Metric row ─────────────────────────────────────── */}
+        <div className={classes.metricGrid}>
+          <AppCard tone="dark" className={classes.revenueCard}>
+            <div>
+              <span className={cx(ui.eyebrow, classes.revenueEyebrow)}>
+                Net revenue
+              </span>
+              <div className={classes.revenueValue}>
+                {currency} {compactNumber.format(totalRevenue)}
+              </div>
+              <div className={classes.revenueMeta}>
+                Across {compactNumber.format(totalOrders)} synced orders
+              </div>
+            </div>
+            {sparkPoints.length > 0 && (
+              <div className={classes.trend}>
+                <span className={classes.trendLabel}>Trend</span>
+                <div className={classes.spark} aria-hidden="true">
+                  {sparkPoints.map((p) => (
+                    <span
+                      key={p.date}
+                      className={classes.sparkBar}
+                      style={{
+                        height: `${Math.max(12, (p.revenue / sparkMax) * 44)}px`,
+                      }}
+                    />
+                  ))}
+                </div>
+              </div>
             )}
+          </AppCard>
 
-            <InvoiceStatsGrid stats={stats} loading={statsLoading} />
+          <AppCard className={classes.metricCard}>
+            <span className={ui.eyebrow}>Orders</span>
+            <span className={classes.metricValue}>
+              {compactNumber.format(totalOrders)}
+            </span>
+            <span className={cx(classes.metricMeta, classes.metaTertiary)}>
+              {shippedPct}% shipped
+            </span>
+            <span className={classes.progressTrack}>
+              <span
+                className={cx(classes.progress, classes.progressTertiary)}
+                style={{ width: `${shippedPct}%` }}
+              />
+            </span>
+          </AppCard>
 
-            {/* Revenue Chart */}
-            {/* <InvoiceRevenueChart data={revenueData} loading={revenueLoading} /> */}
+          <AppCard className={classes.metricCard}>
+            <span className={ui.eyebrow}>Units sold</span>
+            <span className={classes.metricValue}>—</span>
+            <span className={cx(classes.metricMeta, classes.metaMuted)}>
+              Coming soon
+            </span>
+            <span className={classes.progressTrack} />
+          </AppCard>
 
-            {/* Filters */}
-            <InvoiceFilters
-              onFilterChange={handleFilterChange}
-              onClearFilters={handleClearFilters}
+          <AppCard className={classes.metricCard}>
+            <span className={ui.eyebrow}>AOV</span>
+            <span className={classes.metricValue}>
+              {currency} {aov.toFixed(2)}
+            </span>
+            <span className={cx(classes.metricMeta, classes.metaBrand)}>
+              Revenue ÷ orders
+            </span>
+            <span className={classes.progressTrack}>
+              <span
+                className={cx(classes.progress, classes.progressBrand)}
+                style={{ width: aov > 0 ? "100%" : "0%" }}
+              />
+            </span>
+          </AppCard>
+        </div>
+
+        {/* ── Sales performance + breakdown ───────────────────── */}
+        <div className={classes.chartRow}>
+          <AppCard>
+            <CardHeader
+              title="Sales performance"
+              subtitle="Net revenue and orders over time"
+              right={
+                <div className={classes.legend}>
+                  <span className={classes.legendActive}>Revenue</span>
+                  <Tooltip label="Orders over time is coming soon">
+                    <span className={classes.legendMuted}>Orders</span>
+                  </Tooltip>
+                </div>
+              }
             />
+            {revenueLoading ? (
+              <Text c="dimmed" size="sm" ta="center" py="xl">
+                Loading revenue...
+              </Text>
+            ) : chartPoints.length === 0 ? (
+              <ComingSoon
+                title="No revenue data yet"
+                description="Revenue will chart here once invoices are generated."
+                minHeight={200}
+              />
+            ) : (
+              <div className={classes.chart}>
+                <div className={classes.bars}>
+                  {chartPoints.map((p, i) => (
+                    <div
+                      key={p.date}
+                      className={classes.barSlot}
+                      title={`${formatShortDate(p.date)} · ${currency} ${compactNumber.format(p.revenue)}`}
+                    >
+                      <span
+                        className={cx(
+                          classes.bar,
+                          i === chartPoints.length - 1 && classes.barLatest,
+                        )}
+                        style={{
+                          height: `${Math.max(4, (p.revenue / chartMax) * 100)}%`,
+                        }}
+                      />
+                    </div>
+                  ))}
+                </div>
+                <div className={classes.axis}>
+                  {chartPoints.map((p, i) => (
+                    <span key={p.date} className={classes.axisLabel}>
+                      {i % 2 === 0 || i === chartPoints.length - 1
+                        ? formatShortDate(p.date)
+                        : ""}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </AppCard>
 
-            {/* Invoice List */}
+          <AppCard>
+            <CardHeader
+              title="Revenue breakdown"
+              subtitle="Where your revenue went"
+            />
+            <ComingSoon
+              title="Fees, refunds & taxes"
+              description="Gross-to-net revenue breakdown will appear here."
+              minHeight={220}
+            />
+          </AppCard>
+        </div>
+
+        {/* ── Orders overview + top products ──────────────────── */}
+        <div className={classes.chartRow}>
+          <AppCard>
+            <CardHeader
+              title="Orders overview"
+              subtitle="Latest activity across the selected marketplace"
+            />
+            <table className={classes.miniTable}>
+              <thead>
+                <tr>
+                  <th>Order</th>
+                  <th>Customer</th>
+                  <th>Status</th>
+                  <th className={classes.alignEnd}>Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                {recentOrders.length === 0 ? (
+                  <tr>
+                    <td colSpan={4} className={classes.emptyCell}>
+                      No orders found
+                    </td>
+                  </tr>
+                ) : (
+                  recentOrders.map((order: any) => {
+                    const status = getOrderStatus(order);
+                    return (
+                      <tr key={order.orderId}>
+                        <td className={classes.strong}>{order.orderId}</td>
+                        <td className={classes.mutedCell}>
+                          {getBuyerName(order)}
+                        </td>
+                        <td>
+                          <StatusPill tone={orderStatusTone(status)}>
+                            {formatStatusLabel(status)}
+                          </StatusPill>
+                        </td>
+                        <td className={cx(classes.strong, classes.alignEnd)}>
+                          {getOrderTotal(order)}
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+            <Link to={PATH_APPS.orders} className={cx(ui.linkText, classes.viewAll)}>
+              View all orders →
+            </Link>
+          </AppCard>
+
+          <AppCard>
+            <CardHeader
+              title="Top products"
+              subtitle="By net revenue this period"
+            />
+            <ComingSoon
+              title="Product performance"
+              description="Your best-selling products will be ranked here."
+              minHeight={160}
+            />
+          </AppCard>
+        </div>
+
+        {/* ── Invoice activity (existing dashboard functionality) ─ */}
+        <AppCard className={classes.invoiceCard}>
+          <CardHeader
+            title="Invoice activity"
+            subtitle="Filter, review and download your invoices"
+          />
+          <InvoiceFilters
+            onFilterChange={handleFilterChange}
+            onClearFilters={handleClearFilters}
+          />
+          <div className={classes.invoiceList}>
             <InvoiceList
               invoices={invoices}
               loading={loading}
@@ -266,8 +480,8 @@ function DashBoard() {
               onPageChange={handlePageChange}
               onInvoiceClick={handleInvoiceClick}
             />
-          </Stack>
-        </Container>
+          </div>
+        </AppCard>
 
         {/* Modals */}
         <InvoiceDetailsModal

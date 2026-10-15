@@ -1,0 +1,306 @@
+// Auth layout — Figma "04 Auth & Modals › Login / Sign up / Forgot password / OTP".
+
+.root {
+  display: grid;
+  grid-template-columns: minmax(360px, 540px) minmax(0, 1fr);
+  column-gap: 60px;
+  min-height: 100vh;
+  background-color: var(--ra-color-surface);
+
+  @media (max-width: 992px) {
+    grid-template-columns: minmax(0, 1fr);
+    column-gap: 0;
+  }
+}
+
+// ── Brand panel ─────────────────────────────────────────────────────────────
+.brand {
+  display: flex;
+  flex-direction: column;
+  padding: 60px 64px;
+  background-color: var(--ra-color-surface-inverse);
+
+  @media (max-width: 992px) {
+    padding: 24px;
+  }
+}
+
+.logo {
+  display: inline-flex;
+  flex-direction: column;
+  align-self: flex-start;
+  gap: 2px;
+  text-decoration: none;
+}
+
+.logoName {
+  color: var(--ra-color-surface-white);
+  font-family: var(--ra-font-body);
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.logoTag {
+  color: var(--ra-color-brand-fixed);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.brandBody {
+  margin-top: 120px;
+
+  @media (max-width: 992px) {
+    display: none;
+  }
+}
+
+.eyebrow {
+  margin: 0 0 18px;
+  color: var(--ra-color-text-muted);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 20px;
+}
+
+.headline {
+  margin: 0;
+  max-width: 390px;
+  color: var(--ra-color-surface-white);
+  font-family: var(--ra-font-body);
+  font-size: 42px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.copy {
+  margin: 40px 0 0;
+  max-width: 360px;
+  color: var(--ra-color-text-muted);
+  font-size: 17px;
+  line-height: 1.45;
+}
+
+.metric {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-width: 360px;
+  margin-top: auto;
+  padding: 24px;
+  border-radius: 12px;
+  background-color: var(--ra-color-surface-inverse-deep);
+
+  @media (max-width: 992px) {
+    display: none;
+  }
+}
+
+.metricLabel {
+  color: var(--ra-color-text-muted);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.metricValue {
+  color: var(--ra-color-surface-white);
+  font-size: 25px;
+  font-weight: 700;
+  line-height: 36px;
+}
+
+.metricDelta {
+  color: var(--ra-color-brand-fixed-dim);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+// ── Form panel ──────────────────────────────────────────────────────────────
+.panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  background-color: var(--ra-color-surface-white);
+}
+
+.card {
+  width: 100%;
+  max-width: 500px;
+  padding: 48px;
+  border-radius: 16px;
+  background-color: var(--ra-color-surface-white);
+
+  @media (max-width: 600px) {
+    padding: 24px 8px;
+  }
+}
+
+.cardHeader {
+  margin-bottom: 48px;
+}
+
+.title {
+  margin: 0;
+  color: var(--ra-color-text-primary);
+  font-family: var(--ra-font-body);
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.subtitle {
+  margin: 4px 0 0;
+  color: var(--ra-color-text-muted);
+  font-size: 14px;
+  line-height: 20px;
+}
+
+// ── Shared form pieces ──────────────────────────────────────────────────────
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+
+  @media (max-width: 480px) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.between {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.submit {
+  &#{&} {
+    height: 46px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+}
+
+// Dark SSO button; stays navy (dimmed) while it is disabled.
+.sso {
+  &#{&},
+  &#{&}:disabled,
+  &#{&}[data-disabled] {
+    border-color: transparent;
+    background-color: var(--ra-color-surface-inverse);
+    color: var(--ra-color-surface-white);
+  }
+
+  &#{&}:disabled,
+  &#{&}[data-disabled] {
+    opacity: 0.6;
+  }
+}
+
+.link {
+  color: var(--ra-color-brand);
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  font-family: inherit;
+
+  &:hover:not(:disabled) {
+    text-decoration: underline;
+  }
+
+  &:disabled {
+    color: var(--ra-color-text-muted);
+    cursor: not-allowed;
+  }
+}
+
+.mutedLink {
+  @extend .link;
+
+  display: block;
+  color: var(--ra-color-text-muted);
+  font-weight: 500;
+  text-align: center;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  color: var(--ra-color-text-muted);
+  font-size: 11px;
+  font-weight: 600;
+
+  &::before,
+  &::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background-color: var(--ra-color-surface-variant);
+  }
+}
+
+.note {
+  margin: 0;
+  color: var(--ra-color-text-muted);
+  font-size: 11px;
+  line-height: 20px;
+  text-align: center;
+
+  a {
+    color: var(--ra-color-text-secondary);
+    text-decoration: underline;
+  }
+}
+
+.footerText {
+  margin: 0;
+  color: var(--ra-color-text-muted);
+  font-size: 12px;
+  line-height: 20px;
+  text-align: center;
+
+  a {
+    color: var(--ra-color-text-secondary);
+    font-weight: 600;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+.back {
+  display: block;
+  color: var(--ra-color-brand);
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.pinRow {
+  display: flex;
+  justify-content: center;
+}

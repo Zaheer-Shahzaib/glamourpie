@@ -9,6 +9,7 @@ import ProfileCredentialsPage from "./pages/profile/ProfileCredentialsPage";
 import ProfileStatisticsPage from "./pages/profile/ProfileStatisticsPage";
 import OrdersPage from "./pages/ordersPage";
 import InvoicesPage from "./pages/invoicesPage";
+import InvoicePreviewPage from "./pages/invoicePreviewPage";
 import SettingsSpApiPage from "./pages/settings/SettingsSpApiPage";
 import SettingsMarketplacePage from "./pages/settings/SettingsMarketplacePage";
 import SettingsInvoicesPage from "./pages/settings/SettingsInvoicesPage";
@@ -157,6 +158,10 @@ export default function App() {
       </Route>
       <Route path={PATH_APPS.invoices.root} element={<ProtectedRoute />}>
         <Route index element={<InvoicesPage />} />
+        <Route
+          path={PATH_APPS.invoices.previewPattern}
+          element={<InvoicePreviewPage />}
+        />
       </Route>
       {/* Settings Child Routes */}
       <Route path={PATH_APPS.settings.root} element={<ProtectedRoute />}>

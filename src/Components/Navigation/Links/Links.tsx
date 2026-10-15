@@ -1,177 +1,108 @@
-import { useEffect, useMemo, useState } from "react";
-
-import {
-  Box,
-  Collapse,
-  Group,
-  Menu,
-  Text,
-  Tooltip,
-  UnstyledButton,
-} from "@mantine/core";
+import { useEffect, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { IconChevronRight } from "@tabler/icons-react";
 import classes from "./Links.module.scss";
-import { useLocation, useNavigate } from "react-router-dom";
-import * as _ from "lodash";
 
 export interface LinksGroupProps {
-  icon?: any;
   label: string;
-  initiallyOpened?: boolean;
+  /** Destination for a simple item */
   link?: string;
-  links?: {
-    label: string;
-    link: string;
-  }[];
-  closeSidebar: () => void;
-  isMini?: boolean;
+  /** Path prefix that keeps the item highlighted on nested routes */
+  matchPrefix?: string;
+  /** Items without a route yet are rendered disabled with a "Soon" tag */
+  soon?: boolean;
+  /** Nested items (e.g. Settings › Marketplace) */
+  links?: { label: string; link: string }[];
+  /** Called after a navigation click (used to close the mobile drawer) */
+  onNavigate?: () => void;
 }
 
-export function LinksGroup(props: LinksGroupProps) {
-  const {
-    icon: Icon,
-    label,
-    initiallyOpened,
-    link,
-    links,
-    closeSidebar,
-    isMini,
-  } = props;
-  const navigate = useNavigate();
-  const location = useLocation();
-  const hasLinks = Array.isArray(links);
-  const [opened, setOpened] = useState(initiallyOpened || false);
-  const ChevronIcon = IconChevronRight;
+/**
+ * One entry of the Seller Center sidebar: a plain link, a disabled "soon" item,
+ * or an expandable group with sub-links.
+ */
+export function LinksGroup({
+  label,
+  link,
+  matchPrefix,
+  soon,
+  links,
+  onNavigate,
+}: LinksGroupProps) {
+  const { pathname } = useLocation();
+  const path = pathname.toLowerCase();
+  const hasLinks = Array.isArray(links) && links.length > 0;
 
-  const LinkItem = ({ linkData }: { linkData: { label: string; link: string } }) => {
-    return (
-      <Text
-        component='button'
-        size="sm"
-        className={classes.link}
-        onClick={() => {
-          navigate(linkData.link);
-          closeSidebar();
-        }}
-        data-active={linkData.link.toLowerCase() === location.pathname.toLowerCase() || undefined}
-        data-mini={isMini}
-        style={{
-          padding: "4px 10px 2px 40px",
-        }}
-      >
-        {linkData.label}
-      </Text>
-    );
-  };
+  const isActive = matchPrefix
+    ? path.startsWith(matchPrefix.toLowerCase())
+    : !!link && path === link.toLowerCase();
 
-  const items = (hasLinks ? links : []).map((linkData) =>
-    isMini ? (
-      <Menu.Item key={`menu-${linkData.label}`}>
-        <LinkItem linkData={linkData} />
-      </Menu.Item>
-    ) : (
-      <LinkItem
-        key={linkData.label}
-        linkData={linkData}
-      />
-    )
-  );
+  const [opened, setOpened] = useState(isActive && hasLinks);
 
-  const content: React.ReactElement = useMemo(() => {
-    let view: React.ReactElement;
-    if (isMini) {
-      view = (
-        <>
-          <Menu
-            position='right-start'
-            withArrow
-            arrowPosition='center'
-            trigger='hover'
-            openDelay={100}
-            closeDelay={400}
-          >
-            <Menu.Target>
-              <UnstyledButton
-                onClick={() => {
-                  setOpened((o) => !o);
-                  link && navigate(link || "#");
-                  closeSidebar();
-                }}
-                className={classes.control}
-                data-active={opened || undefined}
-                data-mini={isMini}
-              >
-                <Tooltip
-                  label={label}
-                  position='right'
-                  transitionProps={{ duration: 0 }}
-                >
-                  <Icon size={24} />
-                </Tooltip>
-              </UnstyledButton>
-            </Menu.Target>
-            <Menu.Dropdown>{items}</Menu.Dropdown>
-          </Menu>
-        </>
-      );
-    } else {
-      view = (
-        <>
-          <UnstyledButton
-            onClick={() => {
-              setOpened((o) => !o);
-              link && navigate(link || "#");
-              closeSidebar();
-            }}
-            className={classes.control}
-            data-active={opened || undefined}
-            data-mini={isMini}
-          >
-            <Group
-              justify='space-between'
-              gap={0}
-            >
-              <Box style={{ display: "flex", alignItems: "center" }}>
-                <Icon size={18} />
-                {!isMini && <Box ml='md'>{label}</Box>}
-              </Box>
-              {hasLinks && (
-                <ChevronIcon
-                  className={classes.chevron}
-                  size='1rem'
-                  stroke={1.5}
-                  style={{
-                    transform: opened ? `rotate(90deg)` : "none",
-                  }}
-                />
-              )}
-            </Group>
-          </UnstyledButton>
-          {hasLinks ? <Collapse in={opened}>{items}</Collapse> : null}
-        </>
-      );
-    }
-
-    return view;
-  }, [
-    ChevronIcon,
-    Icon,
-    closeSidebar,
-    hasLinks,
-    isMini,
-    items,
-    label,
-    link,
-    opened,
-    navigate,
-  ]);
-
+  // Expand the group automatically when one of its routes becomes active.
   useEffect(() => {
-    const paths = location.pathname.split("/");
-    setOpened(paths.includes(label.toLowerCase()));
-  }, [location.pathname, label]);
+    if (hasLinks && isActive) setOpened(true);
+  }, [hasLinks, isActive]);
 
-  return <div className='menu_content'>{content}</div>;
+  if (soon) {
+    return (
+      <span
+        className={classes.item}
+        data-soon="true"
+        aria-disabled="true"
+        title="Coming soon"
+      >
+        <span>{label}</span>
+        <span className={classes.soonTag}>Soon</span>
+      </span>
+    );
+  }
+
+  if (hasLinks) {
+    return (
+      <div>
+        <button
+          type="button"
+          className={classes.item}
+          data-active={isActive || undefined}
+          aria-expanded={opened}
+          onClick={() => setOpened((o) => !o)}
+        >
+          <span>{label}</span>
+          <IconChevronRight
+            size={14}
+            className={classes.chevron}
+            data-open={opened || undefined}
+          />
+        </button>
+        {opened && (
+          <div className={classes.subList}>
+            {links!.map((child) => (
+              <Link
+                key={child.link}
+                to={child.link}
+                className={classes.subItem}
+                data-active={path === child.link.toLowerCase() || undefined}
+                onClick={onNavigate}
+              >
+                {child.label}
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <Link
+      to={link || "#"}
+      className={classes.item}
+      data-active={isActive || undefined}
+      aria-current={isActive ? "page" : undefined}
+      onClick={onNavigate}
+    >
+      <span>{label}</span>
+    </Link>
+  );
 }
-
-

@@ -1,0 +1,123 @@
+// Subscription & billing — Figma "01 Product UI › Billing & Subscription".
+
+.planRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+
+  @media (max-width: 900px) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.planCard {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 124px;
+  padding: 20px 24px;
+}
+
+.planEyebrow {
+  color: var(--ra-color-text-muted);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.planTop {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.planName {
+  color: var(--ra-color-surface-white);
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 32px;
+  text-transform: capitalize;
+}
+
+.planRenew {
+  color: var(--ra-color-surface-white);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.planBottom {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.upper {
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.usageCard {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 16px;
+  padding: 20px 24px;
+}
+
+.usageText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.usageValue {
+  color: var(--ra-color-brand);
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 32px;
+}
+
+.usageTrack {
+  display: block;
+  height: 6px;
+  border-radius: 3px;
+  background-color: var(--ra-color-surface-low);
+  overflow: hidden;
+}
+
+.usageBar {
+  display: block;
+  height: 100%;
+  border-radius: 3px;
+  background-color: var(--ra-color-brand);
+}
+
+// ── Tables ──────────────────────────────────────────────────────────────────
+.tableCard {
+  margin-bottom: 24px;
+  padding: 24px;
+}
+
+.tableTitle {
+  margin: 0 0 16px;
+  color: var(--ra-color-text-primary);
+  font-family: var(--ra-font-body);
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 24px;
+}
+
+.strong {
+  color: var(--ra-color-text-primary);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.rowActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
