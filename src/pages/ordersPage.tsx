@@ -38,6 +38,7 @@ import { useOrders, useOrderStats } from "../hooks/useOrders";
 import { useInvoices } from "../hooks/useInvoices";
 import { fetchOrderDetails } from "../Services/order-services";
 import { generateManualInvoice } from "../Services/invoice-services";
+import { getInvoiceGenerationError } from "../utils/vatDisplay";
 import { OrderStatus, OrderQueryParams } from "../types/order.types";
 import MainLayout from "../layout/Main";
 import CountUp from "react-countup";
@@ -280,22 +281,21 @@ export default function OrdersPage() {
         icon: <IconCheck size={16} />,
       });
     } catch (error: any) {
-      let message = "Failed to generate invoice";
+      let parsedError = error;
 
-      if (error.response?.data?.error === "Blob") {
+      if (error.response?.data instanceof Blob) {
         try {
           const text = await error.response.data.text();
-          const parse = JSON.parse(text);
-          if (parse.error) message = parse.error;
+          parsedError = {
+            response: { data: JSON.parse(text) },
+          };
         } catch (e) {}
-      } else if (error.response?.data?.error) {
-        message = error.response.data.error;
-      } else if (error.response?.data?.message) {
-        message = error.response.data.message;
       }
 
+      const { title, message } = getInvoiceGenerationError(parsedError);
+
       notifications.show({
-        title: "Generation Failed",
+        title,
         message,
         color: "red",
         icon: <IconX size={16} />,

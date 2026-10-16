@@ -30,6 +30,14 @@ import {
   getStatusColor,
   getTypeColor,
 } from "../../utils/helperFunctions";
+import {
+  formatTaxRate,
+  getAmountBeforeVatLabel,
+  getGrandTotalLabel,
+  getSubtotalLabel,
+  getVatLineLabel,
+  isVatApplied,
+} from "../../utils/vatDisplay";
 
 interface InvoiceDetailsModalProps {
   invoiceId: string | null;
@@ -211,6 +219,22 @@ export default function InvoiceDetailsModal({
                     <Table.Tr key={item.itemId}>
                       <Table.Td>
                         <Text size="sm">{item.description}</Text>
+                        {isVatApplied({
+                          taxAmount: item.taxAmount,
+                          taxRate: item.taxRate,
+                          priceIncludesVat: invoice.priceIncludesVat,
+                          vatStatus: invoice.vatStatus,
+                        }) && (
+                          <Text size="xs" c="dimmed">
+                            {getVatLineLabel({
+                              taxAmount: item.taxAmount,
+                              taxRate: item.taxRate,
+                              priceIncludesVat: invoice.priceIncludesVat,
+                              vatStatus: invoice.vatStatus,
+                            })}
+                            : {formatCurrency(item.taxAmount, invoice.currency)}
+                          </Text>
+                        )}
                       </Table.Td>
                       <Table.Td>
                         <Text size="sm">{item.hsnCode || "-"}</Text>
@@ -224,7 +248,9 @@ export default function InvoiceDetailsModal({
                         </Text>
                       </Table.Td>
                       <Table.Td>
-                        <Text size="sm">{(item.taxRate ?? 5).toFixed(0)}%</Text>
+                        <Text size="sm">
+                          {formatTaxRate(item.taxRate) || "—"}
+                        </Text>
                       </Table.Td>
                       <Table.Td>
                         <Text size="sm">
@@ -249,41 +275,83 @@ export default function InvoiceDetailsModal({
               Financial Summary
             </Text>
             <Stack gap="xs">
-              <Group justify="space-between">
-                <Text size="sm">Subtotal:</Text>
-                <Text size="sm" fw={600}>
-                  {formatCurrency(invoice.subtotal || 0, invoice.currency)}
-                </Text>
-              </Group>
-              {(invoice.discounts ?? 0) > 0 && (
-                <Group justify="space-between">
-                  <Text size="sm">Discounts:</Text>
-                  <Text size="sm" c="red">
-                    -{formatCurrency(invoice.discounts || 0, invoice.currency)}
-                  </Text>
-                </Group>
-              )}
-              <Group justify="space-between">
-                <Text size="sm">Tax Amount ({invoice.taxRate ?? 5}%):</Text>
-                <Text size="sm" fw={600}>
-                  {formatCurrency(invoice.taxAmount ?? 0, invoice.currency)}
-                </Text>
-              </Group>
-              {(invoice.shippingCharges ?? 0) > 0 && (
-                <Group justify="space-between">
-                  <Text size="sm">Shipping:</Text>
-                  <Text size="sm" fw={600}>
-                    {formatCurrency(
-                      invoice.shippingCharges || 0,
-                      invoice.currency,
+              {(() => {
+                const vatInfo = {
+                  taxAmount: invoice.taxAmount,
+                  taxRate: invoice.taxRate,
+                  priceIncludesVat: invoice.priceIncludesVat,
+                  vatStatus: invoice.vatStatus,
+                };
+                const vatApplied = isVatApplied(vatInfo);
+                const grossAmount = invoice.totalAmount ?? 0;
+                const amountBeforeVat = vatApplied
+                  ? invoice.subtotal ?? 0
+                  : invoice.subtotal || 0;
+
+                return (
+                  <>
+                    <Group justify="space-between">
+                      <Text size="sm">{getSubtotalLabel(vatInfo)}:</Text>
+                      <Text size="sm" fw={600}>
+                        {formatCurrency(
+                          vatApplied ? grossAmount : amountBeforeVat,
+                          invoice.currency,
+                        )}
+                      </Text>
+                    </Group>
+                    <Group justify="space-between">
+                      <Text size="sm">Shipping:</Text>
+                      <Text size="sm" fw={600}>
+                        {formatCurrency(
+                          invoice.shippingCharges || 0,
+                          invoice.currency,
+                        )}
+                      </Text>
+                    </Group>
+                    {(invoice.discounts ?? 0) > 0 && (
+                      <Group justify="space-between">
+                        <Text size="sm">Discounts:</Text>
+                        <Text size="sm" c="red">
+                          -
+                          {formatCurrency(
+                            invoice.discounts || 0,
+                            invoice.currency,
+                          )}
+                        </Text>
+                      </Group>
                     )}
-                  </Text>
-                </Group>
-              )}
+                    {vatApplied && (
+                      <>
+                        <Group justify="space-between">
+                          <Text size="sm">{getAmountBeforeVatLabel()}:</Text>
+                          <Text size="sm" fw={600}>
+                            {formatCurrency(amountBeforeVat, invoice.currency)}
+                          </Text>
+                        </Group>
+                        <Group justify="space-between">
+                          <Text size="sm">{getVatLineLabel(vatInfo)}:</Text>
+                          <Text size="sm" fw={600}>
+                            {formatCurrency(
+                              invoice.taxAmount ?? 0,
+                              invoice.currency,
+                            )}
+                          </Text>
+                        </Group>
+                      </>
+                    )}
+                  </>
+                );
+              })()}
               <Divider />
               <Group justify="space-between">
                 <Text fw={600} size="md">
-                  Total Amount:
+                  {getGrandTotalLabel({
+                    taxAmount: invoice.taxAmount,
+                    taxRate: invoice.taxRate,
+                    priceIncludesVat: invoice.priceIncludesVat,
+                    vatStatus: invoice.vatStatus,
+                  })}
+                  :
                 </Text>
                 <Text fw={600} size="md">
                   {formatCurrency(invoice.totalAmount ?? 0, invoice.currency)}

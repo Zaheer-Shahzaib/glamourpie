@@ -13,6 +13,7 @@ import {
   NumberInput,
   Divider,
   Skeleton,
+  Alert,
 } from "@mantine/core";
 import { useAuth } from "../../Context/useAuth";
 import { notifications } from "@mantine/notifications";
@@ -30,7 +31,7 @@ export default function SettingsInvoicesPage() {
   const [settings, setSettings] = useState({
     autoGenerateInvoices: false,
     invoicePrefix: "INV",
-    includeVAT: true,
+    includeVAT: false,
     vatRate: 5,
     invoiceTemplate: "simple" as "simple" | "premium",
     autoUploadToAmazon: false,
@@ -168,6 +169,7 @@ export default function SettingsInvoicesPage() {
 
                 <Switch
                   label="Include VAT in invoices"
+                  description="When enabled, invoices use Amazon's reported tax first. If Amazon does not report VAT on a UAE order, VAT is extracted from the VAT-inclusive price at the standard 5% rate (VAT = Gross × 5 / 105). A TRN must be saved in Business Information. Invoices are not generated if the tax treatment cannot be established."
                   checked={settings.includeVAT}
                   onChange={(e) =>
                     setSettings({
@@ -180,6 +182,7 @@ export default function SettingsInvoicesPage() {
                 {settings.includeVAT && (
                   <NumberInput
                     label="VAT Rate (%)"
+                    description="UAE standard VAT is 5%. A different rate cannot be used to derive VAT from VAT-inclusive prices."
                     placeholder="Enter VAT rate"
                     value={settings.vatRate}
                     onChange={(value) =>
@@ -190,6 +193,14 @@ export default function SettingsInvoicesPage() {
                     step={0.1}
                     size="sm"
                   />
+                )}
+
+                {settings.includeVAT && Number(settings.vatRate) !== 5 && (
+                  <Alert color="yellow" title="VAT rate is not 5%">
+                    UAE VAT-inclusive extraction only applies at the standard
+                    5% rate. If Amazon does not report a tax amount, invoice
+                    generation will stop instead of inventing a VAT figure.
+                  </Alert>
                 )}
               </>
             )}

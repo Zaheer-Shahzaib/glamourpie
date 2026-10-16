@@ -43,6 +43,9 @@ export interface Invoice {
     subtotal: number;
     taxAmount: number;
     taxRate: number;
+    vatStatus?: string | null;
+    vatSource?: string | null;
+    priceIncludesVat?: boolean;
     discounts: number;
     shippingCharges: number;
     totalAmount: number;
@@ -74,6 +77,8 @@ export interface InvoiceListItem {
     taxAmount: number;
     subtotal: number;
     currency: string;
+    vatStatus?: string | null;
+    priceIncludesVat?: boolean;
     amazonOrderId: string;
     buyerName?: string;          // Decrypted buyer name for the Customer column
     createdAt?: string;
