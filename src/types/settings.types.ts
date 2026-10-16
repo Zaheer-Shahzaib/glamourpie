@@ -33,6 +33,7 @@ export interface SellerSettings {
         vatRate: number;
         invoiceTemplate: 'simple' | 'premium';
         autoUploadToAmazon: boolean;
+        letterheadUrl?: string | null;
     };
 
     // Notification Settings

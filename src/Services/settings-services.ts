@@ -60,6 +60,37 @@ export const syncAmazonOrders = async (token: string): Promise<{ message: string
 };
 
 /**
+ * Upload a custom invoice letterhead image
+ */
+export const uploadInvoiceLetterhead = async (
+    token: string,
+    file: File
+): Promise<{ success: boolean; message: string; data: { letterheadUrl: string } }> => {
+    const formData = new FormData();
+    formData.append('letterhead', file);
+
+    const response = await api.post('/api/settings/letterhead', formData, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data',
+        },
+    });
+    return response.data;
+};
+
+/**
+ * Remove the custom invoice letterhead
+ */
+export const deleteInvoiceLetterhead = async (
+    token: string
+): Promise<{ success: boolean; message: string }> => {
+    const response = await api.delete('/api/settings/letterhead', {
+        headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data;
+};
+
+/**
  * Reset settings to default
  */
 export const resetSettings = async (token: string): Promise<{ message: string }> => {

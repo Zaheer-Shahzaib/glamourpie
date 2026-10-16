@@ -14,19 +14,26 @@ import {
   Divider,
   Skeleton,
   Alert,
+  FileButton,
+  Image,
 } from "@mantine/core";
+import { IconTrash, IconUpload } from "@tabler/icons-react";
 import { useAuth } from "../../Context/useAuth";
 import { notifications } from "@mantine/notifications";
 import MainLayout from "../../layout/Main";
 import {
+  deleteInvoiceLetterhead,
   fetchSellerSettings,
   updateSellerSettings,
+  uploadInvoiceLetterhead,
 } from "../../Services/settings-services";
+import { getAvatarUrl } from "../../utils/helperFunctions";
 
 export default function SettingsInvoicesPage() {
   const { token } = useAuth();
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [uploadingLetterhead, setUploadingLetterhead] = useState(false);
 
   const [settings, setSettings] = useState({
     autoGenerateInvoices: false,
@@ -35,6 +42,7 @@ export default function SettingsInvoicesPage() {
     vatRate: 5,
     invoiceTemplate: "simple" as "simple" | "premium",
     autoUploadToAmazon: false,
+    letterheadUrl: null as string | null,
   });
 
   // Load saved settings from backend on mount
@@ -51,6 +59,7 @@ export default function SettingsInvoicesPage() {
           includeVAT: inv.includeVAT ?? false,
           vatRate: inv.vatRate ?? 5,
           invoiceTemplate: inv.invoiceTemplate ?? "simple",
+          letterheadUrl: inv.letterheadUrl ?? null,
         }));
       })
       .catch((err: any) => {
@@ -85,6 +94,74 @@ export default function SettingsInvoicesPage() {
       });
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleLetterheadUpload = async (file: File | null) => {
+    if (!file || !token) return;
+
+    const allowed = /\.(jpe?g|png|gif|webp|bmp|tiff?)$/i;
+    if (!allowed.test(file.name)) {
+      notifications.show({
+        title: "Invalid file",
+        message: "Please upload a PNG, JPEG, BMP, GIF, WebP, or TIFF image",
+        color: "red",
+      });
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      notifications.show({
+        title: "File too large",
+        message: "Letterhead images must be 5 MB or smaller",
+        color: "red",
+      });
+      return;
+    }
+
+    try {
+      setUploadingLetterhead(true);
+      const response = await uploadInvoiceLetterhead(token, file);
+      setSettings((prev) => ({
+        ...prev,
+        letterheadUrl: response?.data?.letterheadUrl || null,
+      }));
+      notifications.show({
+        title: "Success",
+        message: response.message || "Letterhead uploaded",
+        color: "green",
+      });
+    } catch (error: any) {
+      notifications.show({
+        title: "Error",
+        message:
+          error?.response?.data?.message || "Failed to upload letterhead",
+        color: "red",
+      });
+    } finally {
+      setUploadingLetterhead(false);
+    }
+  };
+
+  const handleLetterheadDelete = async () => {
+    if (!token) return;
+    try {
+      setUploadingLetterhead(true);
+      await deleteInvoiceLetterhead(token);
+      setSettings((prev) => ({ ...prev, letterheadUrl: null }));
+      notifications.show({
+        title: "Success",
+        message: "Letterhead removed",
+        color: "green",
+      });
+    } catch (error: any) {
+      notifications.show({
+        title: "Error",
+        message:
+          error?.response?.data?.message || "Failed to remove letterhead",
+        color: "red",
+      });
+    } finally {
+      setUploadingLetterhead(false);
     }
   };
 
@@ -202,6 +279,61 @@ export default function SettingsInvoicesPage() {
                     generation will stop instead of inventing a VAT figure.
                   </Alert>
                 )}
+
+                <Divider />
+
+                <div>
+                  <Text size="sm" fw={500}>
+                    Custom letterhead
+                  </Text>
+                  <Text size="xs" c="dimmed" mb="sm">
+                    Optional. Upload a PNG, JPEG, BMP, GIF, WebP, or TIFF image
+                    (max 5 MB). It is scaled to fit the top of every generated
+                    invoice PDF, including automatic and manual invoices.
+                  </Text>
+                  {settings.letterheadUrl && (
+                    <Image
+                      src={getAvatarUrl(settings.letterheadUrl)}
+                      alt="Invoice letterhead preview"
+                      mah={96}
+                      maw="100%"
+                      w="auto"
+                      fit="contain"
+                      mb="sm"
+                      radius="sm"
+                    />
+                  )}
+                  <Group gap="sm">
+                    <FileButton
+                      onChange={handleLetterheadUpload}
+                      accept="image/png,image/jpeg,image/jpg,image/bmp,image/gif,image/webp,image/tiff"
+                    >
+                      {(props) => (
+                        <Button
+                          {...props}
+                          variant="light"
+                          leftSection={<IconUpload size={16} />}
+                          loading={uploadingLetterhead}
+                        >
+                          {settings.letterheadUrl
+                            ? "Replace letterhead"
+                            : "Upload letterhead"}
+                        </Button>
+                      )}
+                    </FileButton>
+                    {settings.letterheadUrl && (
+                      <Button
+                        variant="subtle"
+                        color="red"
+                        leftSection={<IconTrash size={16} />}
+                        onClick={handleLetterheadDelete}
+                        loading={uploadingLetterhead}
+                      >
+                        Remove
+                      </Button>
+                    )}
+                  </Group>
+                </div>
               </>
             )}
 
