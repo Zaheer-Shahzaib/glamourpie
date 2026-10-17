@@ -32,8 +32,8 @@ import {
 } from "../../utils/helperFunctions";
 import {
   formatTaxRate,
-  getAmountBeforeVatLabel,
   getGrandTotalLabel,
+  getNetUnitPrice,
   getSubtotalLabel,
   getVatLineLabel,
   isVatApplied,
@@ -228,7 +228,20 @@ export default function InvoiceDetailsModal({
                       </Table.Td>
                       <Table.Td>
                         <Text size="sm">
-                          {formatCurrency(item.unitPrice, invoice.currency)}
+                          {formatCurrency(
+                            getNetUnitPrice(
+                              item.unitPrice,
+                              item.taxAmount,
+                              item.quantity,
+                              {
+                                taxAmount: item.taxAmount,
+                                taxRate: item.taxRate,
+                                priceIncludesVat: invoice.priceIncludesVat,
+                                vatStatus: invoice.vatStatus,
+                              },
+                            ),
+                            invoice.currency,
+                          )}
                         </Text>
                       </Table.Td>
                       <Table.Td>
@@ -267,7 +280,6 @@ export default function InvoiceDetailsModal({
                   vatStatus: invoice.vatStatus,
                 };
                 const vatApplied = isVatApplied(vatInfo);
-                const grossAmount = invoice.totalAmount ?? 0;
                 const amountBeforeVat = vatApplied
                   ? invoice.subtotal ?? 0
                   : invoice.subtotal || 0;
@@ -277,10 +289,7 @@ export default function InvoiceDetailsModal({
                     <Group justify="space-between">
                       <Text size="sm">{getSubtotalLabel(vatInfo)}:</Text>
                       <Text size="sm" fw={600}>
-                        {formatCurrency(
-                          vatApplied ? grossAmount : amountBeforeVat,
-                          invoice.currency,
-                        )}
+                        {formatCurrency(amountBeforeVat, invoice.currency)}
                       </Text>
                     </Group>
                     <Group justify="space-between">
@@ -305,23 +314,15 @@ export default function InvoiceDetailsModal({
                       </Group>
                     )}
                     {vatApplied && (
-                      <>
-                        <Group justify="space-between">
-                          <Text size="sm">{getAmountBeforeVatLabel()}:</Text>
-                          <Text size="sm" fw={600}>
-                            {formatCurrency(amountBeforeVat, invoice.currency)}
-                          </Text>
-                        </Group>
-                        <Group justify="space-between">
-                          <Text size="sm">{getVatLineLabel(vatInfo)}:</Text>
-                          <Text size="sm" fw={600}>
-                            {formatCurrency(
-                              invoice.taxAmount ?? 0,
-                              invoice.currency,
-                            )}
-                          </Text>
-                        </Group>
-                      </>
+                      <Group justify="space-between">
+                        <Text size="sm">{getVatLineLabel(vatInfo)}:</Text>
+                        <Text size="sm" fw={600}>
+                          {formatCurrency(
+                            invoice.taxAmount ?? 0,
+                            invoice.currency,
+                          )}
+                        </Text>
+                      </Group>
                     )}
                   </>
                 );
