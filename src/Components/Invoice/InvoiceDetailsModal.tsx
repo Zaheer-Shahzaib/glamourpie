@@ -219,22 +219,6 @@ export default function InvoiceDetailsModal({
                     <Table.Tr key={item.itemId}>
                       <Table.Td>
                         <Text size="sm">{item.description}</Text>
-                        {isVatApplied({
-                          taxAmount: item.taxAmount,
-                          taxRate: item.taxRate,
-                          priceIncludesVat: invoice.priceIncludesVat,
-                          vatStatus: invoice.vatStatus,
-                        }) && (
-                          <Text size="xs" c="dimmed">
-                            {getVatLineLabel({
-                              taxAmount: item.taxAmount,
-                              taxRate: item.taxRate,
-                              priceIncludesVat: invoice.priceIncludesVat,
-                              vatStatus: invoice.vatStatus,
-                            })}
-                            : {formatCurrency(item.taxAmount, invoice.currency)}
-                          </Text>
-                        )}
                       </Table.Td>
                       <Table.Td>
                         <Text size="sm">{item.hsnCode || "-"}</Text>

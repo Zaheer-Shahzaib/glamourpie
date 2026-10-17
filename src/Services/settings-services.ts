@@ -79,6 +79,19 @@ export const uploadInvoiceLetterhead = async (
 };
 
 /**
+ * Load the current letterhead image as a blob URL for preview.
+ */
+export const fetchInvoiceLetterheadPreview = async (
+    token: string
+): Promise<string> => {
+    const response = await api.get('/api/settings/letterhead', {
+        headers: { Authorization: `Bearer ${token}` },
+        responseType: 'blob',
+    });
+    return URL.createObjectURL(response.data);
+};
+
+/**
  * Remove the custom invoice letterhead
  */
 export const deleteInvoiceLetterhead = async (

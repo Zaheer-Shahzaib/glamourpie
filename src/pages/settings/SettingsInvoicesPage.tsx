@@ -23,27 +23,40 @@ import { notifications } from "@mantine/notifications";
 import MainLayout from "../../layout/Main";
 import {
   deleteInvoiceLetterhead,
+  fetchInvoiceLetterheadPreview,
   fetchSellerSettings,
   updateSellerSettings,
   uploadInvoiceLetterhead,
 } from "../../Services/settings-services";
-import { getAvatarUrl } from "../../utils/helperFunctions";
 
 export default function SettingsInvoicesPage() {
   const { token } = useAuth();
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [uploadingLetterhead, setUploadingLetterhead] = useState(false);
+  const [letterheadPreview, setLetterheadPreview] = useState<string | null>(null);
 
   const [settings, setSettings] = useState({
     autoGenerateInvoices: false,
     invoicePrefix: "INV",
+    invoiceStartNumber: 1,
+    invoiceNumberPadding: 6,
+    nextInvoiceNumber: "INV-000001",
     includeVAT: false,
     vatRate: 5,
     invoiceTemplate: "simple" as "simple" | "premium",
     autoUploadToAmazon: false,
     letterheadUrl: null as string | null,
   });
+
+  const previewPrefix = (settings.invoicePrefix || "INV").trim().toUpperCase() || "INV";
+  const previewSerial = String(settings.invoiceStartNumber || 1).padStart(
+    settings.invoiceNumberPadding || 6,
+    "0",
+  );
+  const previewInvoiceNumber = /[/-]$/.test(previewPrefix)
+    ? `${previewPrefix}${previewSerial}`
+    : `${previewPrefix}-${previewSerial}`;
 
   // Load saved settings from backend on mount
   useEffect(() => {
@@ -54,6 +67,9 @@ export default function SettingsInvoicesPage() {
         setSettings((prev) => ({
           ...prev,
           invoicePrefix: inv.invoicePrefix ?? "INV",
+          invoiceStartNumber: inv.invoiceStartNumber ?? inv.invoiceNextNumber ?? 1,
+          invoiceNumberPadding: inv.invoiceNumberPadding ?? 6,
+          nextInvoiceNumber: inv.nextInvoiceNumber ?? "INV-000001",
           autoGenerateInvoices: inv.autoGenerateInvoices ?? false,
           autoUploadToAmazon: inv.autoUploadToAmazon ?? false,
           includeVAT: inv.includeVAT ?? false,
@@ -68,12 +84,47 @@ export default function SettingsInvoicesPage() {
       .finally(() => setLoading(false));
   }, [token]);
 
+  useEffect(() => {
+    if (!token || !settings.letterheadUrl) {
+      setLetterheadPreview((prev) => {
+        if (prev) URL.revokeObjectURL(prev);
+        return null;
+      });
+      return;
+    }
+
+    let cancelled = false;
+    let objectUrl = "";
+    fetchInvoiceLetterheadPreview(token)
+      .then((url) => {
+        if (cancelled) {
+          URL.revokeObjectURL(url);
+          return;
+        }
+        objectUrl = url;
+        setLetterheadPreview((prev) => {
+          if (prev) URL.revokeObjectURL(prev);
+          return url;
+        });
+      })
+      .catch(() => {
+        if (!cancelled) setLetterheadPreview(null);
+      });
+
+    return () => {
+      cancelled = true;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [token, settings.letterheadUrl]);
+
   const handleSave = async () => {
     try {
       setSaving(true);
-      await updateSellerSettings(token!, {
+      const saved: any = await updateSellerSettings(token!, {
         invoiceSettings: {
           invoicePrefix: settings.invoicePrefix,
+          invoiceStartNumber: settings.invoiceStartNumber,
+          invoiceNumberPadding: settings.invoiceNumberPadding,
           autoGenerateInvoices: settings.autoGenerateInvoices,
           autoUploadToAmazon: settings.autoUploadToAmazon,
           includeVAT: settings.includeVAT,
@@ -81,6 +132,17 @@ export default function SettingsInvoicesPage() {
           invoiceTemplate: settings.invoiceTemplate,
         },
       });
+      const inv = saved?.data?.invoiceSettings;
+      if (inv) {
+        setSettings((prev) => ({
+          ...prev,
+          invoicePrefix: inv.invoicePrefix ?? prev.invoicePrefix,
+          invoiceStartNumber:
+            inv.invoiceStartNumber ?? inv.invoiceNextNumber ?? prev.invoiceStartNumber,
+          invoiceNumberPadding: inv.invoiceNumberPadding ?? prev.invoiceNumberPadding,
+          nextInvoiceNumber: inv.nextInvoiceNumber ?? prev.nextInvoiceNumber,
+        }));
+      }
       notifications.show({
         title: "Success",
         message: "Invoice settings saved",
@@ -121,6 +183,11 @@ export default function SettingsInvoicesPage() {
     try {
       setUploadingLetterhead(true);
       const response = await uploadInvoiceLetterhead(token, file);
+      const localPreview = URL.createObjectURL(file);
+      setLetterheadPreview((prev) => {
+        if (prev) URL.revokeObjectURL(prev);
+        return localPreview;
+      });
       setSettings((prev) => ({
         ...prev,
         letterheadUrl: response?.data?.letterheadUrl || null,
@@ -147,6 +214,10 @@ export default function SettingsInvoicesPage() {
     try {
       setUploadingLetterhead(true);
       await deleteInvoiceLetterhead(token);
+      setLetterheadPreview((prev) => {
+        if (prev) URL.revokeObjectURL(prev);
+        return null;
+      });
       setSettings((prev) => ({ ...prev, letterheadUrl: null }));
       notifications.show({
         title: "Success",
@@ -214,8 +285,8 @@ export default function SettingsInvoicesPage() {
 
                 <TextInput
                   label="Invoice Prefix"
-                  description={`Invoice numbers will be formatted as: ${settings.invoicePrefix || "INV"}-2026-0001`}
-                  placeholder="e.g., GP or INV"
+                  description={`Next invoice number: ${previewInvoiceNumber}`}
+                  placeholder="e.g., GP, INV, or INV/"
                   value={settings.invoicePrefix}
                   onChange={(e) =>
                     setSettings({ ...settings, invoicePrefix: e.target.value })
@@ -223,6 +294,39 @@ export default function SettingsInvoicesPage() {
                   size="sm"
                   maxLength={20}
                 />
+
+                <Group grow align="flex-start">
+                  <NumberInput
+                    label="Starting serial"
+                    description="First number in this seller's series. Existing invoices are not renumbered."
+                    value={settings.invoiceStartNumber}
+                    onChange={(value) =>
+                      setSettings({
+                        ...settings,
+                        invoiceStartNumber: Number(value) || 1,
+                      })
+                    }
+                    min={1}
+                    max={999999999}
+                    step={1}
+                    size="sm"
+                  />
+                  <NumberInput
+                    label="Zero padding"
+                    description="Width of the serial, e.g. 6 → 000001"
+                    value={settings.invoiceNumberPadding}
+                    onChange={(value) =>
+                      setSettings({
+                        ...settings,
+                        invoiceNumberPadding: Number(value) || 6,
+                      })
+                    }
+                    min={1}
+                    max={10}
+                    step={1}
+                    size="sm"
+                  />
+                </Group>
 
                 <Select
                   label="Invoice Template"
@@ -286,21 +390,34 @@ export default function SettingsInvoicesPage() {
                   <Text size="sm" fw={500}>
                     Custom letterhead
                   </Text>
-                  <Text size="xs" c="dimmed" mb="sm">
-                    Optional. Upload a PNG, JPEG, BMP, GIF, WebP, or TIFF image
-                    (max 5 MB). It is scaled to fit the top of every generated
-                    invoice PDF, including automatic and manual invoices.
+                  <Text size="xs" c="dimmed" mb="xs">
+                    Optional. The image is placed as a banner across the top
+                    of the invoice and fitted to <b>512 × 80 pt</b> (about{" "}
+                    <b>18 cm × 2.8 cm</b>). Invoice number and date stay on
+                    the right underneath. A wide letterhead fills the top; a
+                    logo sits on the left.
                   </Text>
-                  {settings.letterheadUrl && (
+                  <Text size="xs" c="dimmed" mb="sm">
+                    Recommended upload size: <b>1600 × 250 px</b> for a full
+                    letterhead (logo + name + contact), or <b>400 × 400 px</b>{" "}
+                    for a logo only. PNG or JPEG, max 5 MB.
+                  </Text>
+                  {settings.letterheadUrl && letterheadPreview && (
                     <Image
-                      src={getAvatarUrl(settings.letterheadUrl)}
+                      src={letterheadPreview}
                       alt="Invoice letterhead preview"
-                      mah={96}
+                      w={512}
+                      h={80}
                       maw="100%"
-                      w="auto"
                       fit="contain"
                       mb="sm"
                       radius="sm"
+                      style={{
+                        display: "block",
+                        objectPosition: "left center",
+                        background: "var(--mantine-color-gray-0)",
+                        border: "1px solid var(--mantine-color-gray-3)",
+                      }}
                     />
                   )}
                   <Group gap="sm">
