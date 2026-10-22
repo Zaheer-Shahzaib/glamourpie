@@ -50,6 +50,7 @@ export interface Invoice {
     shippingCharges: number;
     totalAmount: number;
     currency: string;
+    fulfillmentChannel?: 'FBA' | 'MFN' | string | null;
 
     // Decrypted relational info
     seller?: InvoiceHeader;

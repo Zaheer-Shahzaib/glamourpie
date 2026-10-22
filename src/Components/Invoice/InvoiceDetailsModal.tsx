@@ -292,16 +292,19 @@ export default function InvoiceDetailsModal({
                         {formatCurrency(amountBeforeVat, invoice.currency)}
                       </Text>
                     </Group>
-                    <Group justify="space-between">
-                      <Text size="sm">Shipping:</Text>
-                      <Text size="sm" fw={600}>
-                        {formatCurrency(
-                          invoice.shippingCharges || 0,
-                          invoice.currency,
-                        )}
-                      </Text>
-                    </Group>
-                    {(invoice.discounts ?? 0) > 0 && (
+                    {invoice.fulfillmentChannel !== "FBA" && (
+                      <Group justify="space-between">
+                        <Text size="sm">Shipping:</Text>
+                        <Text size="sm" fw={600}>
+                          {formatCurrency(
+                            invoice.shippingCharges || 0,
+                            invoice.currency,
+                          )}
+                        </Text>
+                      </Group>
+                    )}
+                    {invoice.fulfillmentChannel !== "FBA" &&
+                      (invoice.discounts ?? 0) > 0 && (
                       <Group justify="space-between">
                         <Text size="sm">Discounts:</Text>
                         <Text size="sm" c="red">

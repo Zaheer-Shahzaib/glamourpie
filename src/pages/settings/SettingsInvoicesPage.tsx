@@ -159,6 +159,25 @@ export default function SettingsInvoicesPage() {
     }
   };
 
+  const LETTERHEAD_MIN_WIDTH = 595;
+  const LETTERHEAD_ASPECT_MIN = 4;
+  const LETTERHEAD_ASPECT_MAX = 12;
+
+  const readImageDimensions = (file: File) =>
+    new Promise<{ width: number; height: number }>((resolve, reject) => {
+      const url = URL.createObjectURL(file);
+      const img = new window.Image();
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        resolve({ width: img.naturalWidth, height: img.naturalHeight });
+      };
+      img.onerror = () => {
+        URL.revokeObjectURL(url);
+        reject(new Error("Could not read the image"));
+      };
+      img.src = url;
+    });
+
   const handleLetterheadUpload = async (file: File | null) => {
     if (!file || !token) return;
 
@@ -175,6 +194,31 @@ export default function SettingsInvoicesPage() {
       notifications.show({
         title: "File too large",
         message: "Letterhead images must be 5 MB or smaller",
+        color: "red",
+      });
+      return;
+    }
+
+    try {
+      const { width, height } = await readImageDimensions(file);
+      const aspect = width / height;
+      if (
+        width < LETTERHEAD_MIN_WIDTH ||
+        aspect < LETTERHEAD_ASPECT_MIN ||
+        aspect > LETTERHEAD_ASPECT_MAX
+      ) {
+        notifications.show({
+          title: "Letterhead does not fit A4",
+          message:
+            `Use a wide banner for the top of an A4 page (210 mm). Recommended 2480 × 400 px. This file is ${width} × ${height} px.`,
+          color: "red",
+        });
+        return;
+      }
+    } catch {
+      notifications.show({
+        title: "Invalid letterhead",
+        message: "Could not read the image dimensions. Please try another file.",
         color: "red",
       });
       return;
@@ -388,33 +432,31 @@ export default function SettingsInvoicesPage() {
 
                 <div>
                   <Text size="sm" fw={500}>
-                    Custom letterhead
+                    Custom Header
                   </Text>
                   <Text size="xs" c="dimmed" mb="xs">
-                    Optional. The image is placed as a banner across the top
-                    of the invoice and fitted to <b>512 × 80 pt</b> (about{" "}
-                    <b>18 cm × 2.8 cm</b>). Invoice number and date stay on
-                    the right underneath. A wide letterhead fills the top; a
-                    logo sits on the left.
+                    Optional. The image is drawn across the full width of the
+                    A4 page (210 mm) at the top. Invoice number and date stay
+                    on the right underneath.
                   </Text>
                   <Text size="xs" c="dimmed" mb="sm">
-                    Recommended upload size: <b>1600 × 250 px</b> for a full
-                    letterhead (logo + name + contact), or <b>400 × 400 px</b>{" "}
-                    for a logo only. PNG or JPEG, max 5 MB.
+                    Required: a wide A4 header banner. Recommended{" "}
+                    <b>2480 × 400 px</b> (300 DPI). Minimum width{" "}
+                    <b>595 px</b>. Do not upload a square logo or a full-page
+                    poster. PNG or JPEG, max 5 MB.
                   </Text>
                   {settings.letterheadUrl && letterheadPreview && (
                     <Image
                       src={letterheadPreview}
-                      alt="Invoice letterhead preview"
-                      w={512}
-                      h={80}
-                      maw="100%"
-                      fit="contain"
-                      mb="sm"
-                      radius="sm"
+                      alt="Invoice header preview"
+                      w="50%"
+                      mah={100}  
+                      fit="cover"
+                      mb="sm" 
+                      radius="sm" 
                       style={{
                         display: "block",
-                        objectPosition: "left center",
+                        // objectPosition: "center top",
                         background: "var(--mantine-color-gray-0)",
                         border: "1px solid var(--mantine-color-gray-3)",
                       }}
