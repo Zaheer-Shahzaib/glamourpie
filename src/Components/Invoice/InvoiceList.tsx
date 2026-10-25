@@ -1,5 +1,6 @@
 import { useState } from "react";
 import {
+  Box,
   Paper,
   Table,
   Badge,
@@ -30,6 +31,8 @@ interface InvoiceListProps {
   currentPage?: number;
   onPageChange?: (page: number) => void;
   onInvoiceClick?: (invoiceId: string) => void;
+  /** When true, omit outer Paper (e.g. inside Invoices page tab card). */
+  embedded?: boolean;
 }
 
 export default function InvoiceList({
@@ -39,7 +42,12 @@ export default function InvoiceList({
   currentPage = 1,
   onPageChange,
   onInvoiceClick,
+  embedded = false,
 }: InvoiceListProps) {
+  const shell = embedded ? Box : Paper;
+  const shellProps = embedded
+    ? {}
+    : { p: "md" as const, radius: "md" as const, withBorder: true };
   const { token } = useAuth();
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
   console.log("Dashboard", invoices);
@@ -75,21 +83,23 @@ export default function InvoiceList({
   };
 
   if (loading) {
+    const LoadingShell = shell;
     return (
-      <Paper p="md" radius="md" withBorder>
+      <LoadingShell {...shellProps}>
         <Center h={300}>
           <Stack align="center" gap="md">
             <Loader size="lg" />
             <Text c="dimmed">Loading invoices...</Text>
           </Stack>
         </Center>
-      </Paper>
+      </LoadingShell>
     );
   }
 
   if (invoices.length === 0) {
+    const EmptyShell = shell;
     return (
-      <Paper p="md" radius="md" withBorder>
+      <EmptyShell {...shellProps}>
         <Center h={300}>
           <Stack align="center" gap="md">
             <Text size="xl" c="dimmed">
@@ -100,13 +110,18 @@ export default function InvoiceList({
             </Text>
           </Stack>
         </Center>
-      </Paper>
+      </EmptyShell>
     );
   }
 
+  const TableShell = shell;
+  const tableShellProps = embedded
+    ? {}
+    : { radius: "md" as const, withBorder: true };
+
   return (
     <Stack gap="md">
-      <Paper radius="md" withBorder>
+      <TableShell {...tableShellProps}>
         <Table.ScrollContainer minWidth={800}>
           <Table striped highlightOnHover>
             <Table.Thead>
@@ -147,14 +162,21 @@ export default function InvoiceList({
                       </Text>
                     </Table.Td>
                     <Table.Td>
-                      <Badge
-                        color={getStatusColor(
-                          invoice.status,
-                        ).toLocaleUpperCase()}
-                        variant="filled"
-                      >
-                        {invoice.status || "Pending"}
-                      </Badge>
+                      <Group gap={6}>
+                        <Badge
+                          color={getStatusColor(
+                            invoice.status,
+                          ).toLocaleUpperCase()}
+                          variant="filled"
+                        >
+                          {invoice.status || "Pending"}
+                        </Badge>
+                        {invoice.isPastInvoice && (
+                          <Badge size="xs" variant="outline" color="grape">
+                            Historical
+                          </Badge>
+                        )}
+                      </Group>
                     </Table.Td>
                     <Table.Td>
                       <Text fw={500} size="sm">
@@ -199,7 +221,7 @@ export default function InvoiceList({
             </Table.Tbody>
           </Table>
         </Table.ScrollContainer>
-      </Paper>
+      </TableShell>
 
       {totalPages > 1 && (
         <Group justify="center">

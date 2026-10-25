@@ -11,6 +11,7 @@ import {
   ActionIcon,
   Tooltip,
   ThemeIcon,
+  Tabs,
 } from "@mantine/core";
 import {
   IconRefresh,
@@ -29,12 +30,16 @@ import InvoiceExportModal from "../Components/Invoice/InvoiceExportModal";
 import MainLayout from "../layout/Main";
 import { downloadInvoiceDocument } from "../Services/invoice-services";
 import { getSubscriptionStatus } from "../Services/stripeService";
+import { getPastInvoiceBalance } from "../Services/past-invoice-services";
 
 const LIMIT = 20;
 
 export default function InvoicesPage() {
   const { token } = useAuth();
   const [page, setPage] = useState(1);
+  const [invoiceListTab, setInvoiceListTab] = useState<
+    "regular" | "historical"
+  >("regular");
   const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | null>(
     null,
   );
@@ -45,6 +50,7 @@ export default function InvoicesPage() {
   // Subscription info — used to gate/configure the export modal
   const [activePlan, setActivePlan] = useState<string | null>(null);
   const [subLoading, setSubLoading] = useState(true);
+  const [hasHistoricalAccess, setHasHistoricalAccess] = useState(false);
 
   // Real stats from the backend (total amounts across all pages + usage limits)
   const [stats, setStats] = useState<any>(null);
@@ -83,11 +89,30 @@ export default function InvoicesPage() {
         .then((res) => setStats(res.payload))
         .catch(console.error);
     });
+
+    getPastInvoiceBalance(token)
+      .then((res) => {
+        setHasHistoricalAccess(
+          Boolean(
+            res.hasHistoricalAccess ??
+              (res.pastInvoiceBalance?.purchasedQuantity ?? 0) > 0,
+          ),
+        );
+      })
+      .catch(() => setHasHistoricalAccess(false));
   }, [token]);
+
+  useEffect(() => {
+    if (!hasHistoricalAccess && invoiceListTab === "historical") {
+      setInvoiceListTab("regular");
+      setPage(1);
+    }
+  }, [hasHistoricalAccess, invoiceListTab]);
 
   const { invoices, loading, pagination, refetch } = useInvoices({
     limit: LIMIT,
     offset: (page - 1) * LIMIT,
+    invoiceSeries: invoiceListTab === "historical" ? "historical" : "regular",
   });
 
   const totalPages = pagination ? Math.ceil(pagination.total / LIMIT) : 1;
@@ -300,15 +325,57 @@ export default function InvoicesPage() {
             </Paper>
           </SimpleGrid>
 
-          {/* ── Invoice Table ────────────────────────────────────── */}
-          <InvoiceList
-            invoices={invoices as any}
-            loading={loading}
-            totalPages={totalPages}
-            currentPage={page}
-            onPageChange={setPage}
-            onInvoiceClick={handleInvoiceClick}
-          />
+          {hasHistoricalAccess ? (
+            <Paper withBorder radius="md">
+              <Tabs
+                value={invoiceListTab}
+                onChange={(v) => {
+                  setInvoiceListTab(
+                    (v as "regular" | "historical") || "regular",
+                  );
+                  setPage(1);
+                }}
+              >
+                <Tabs.List px="md" pt="sm">
+                  <Tabs.Tab value="regular">Regular invoices</Tabs.Tab>
+                  <Tabs.Tab value="historical">
+                    Historical Amazon invoices
+                  </Tabs.Tab>
+                </Tabs.List>
+                <Tabs.Panel value="regular" px="md" pb="md" pt="md">
+                  <InvoiceList
+                    embedded
+                    invoices={invoices as any}
+                    loading={loading}
+                    totalPages={totalPages}
+                    currentPage={page}
+                    onPageChange={setPage}
+                    onInvoiceClick={handleInvoiceClick}
+                  />
+                </Tabs.Panel>
+                <Tabs.Panel value="historical" px="md" pb="md" pt="md">
+                  <InvoiceList
+                    embedded
+                    invoices={invoices as any}
+                    loading={loading}
+                    totalPages={totalPages}
+                    currentPage={page}
+                    onPageChange={setPage}
+                    onInvoiceClick={handleInvoiceClick}
+                  />
+                </Tabs.Panel>
+              </Tabs>
+            </Paper>
+          ) : (
+            <InvoiceList
+              invoices={invoices as any}
+              loading={loading}
+              totalPages={totalPages}
+              currentPage={page}
+              onPageChange={setPage}
+              onInvoiceClick={handleInvoiceClick}
+            />
+          )}
         </Stack>
       </Container>
 

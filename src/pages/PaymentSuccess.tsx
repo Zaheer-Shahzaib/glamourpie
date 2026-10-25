@@ -18,14 +18,36 @@ export default function PaymentSuccess() {
   const navigate = useNavigate();
   const plan = searchParams.get('plan');        // set for free plan direct redirect
   const sessionId = searchParams.get('session_id'); // set for Stripe paid plans
+  const purchase = searchParams.get('purchase');
 
-  const [planLabel, setPlanLabel] = useState('');
+  const [headline, setHeadline] = useState('Your plan is now active.');
+  const [detail, setDetail] = useState('Start generating invoices and automating your Amazon seller workflow.');
 
   useEffect(() => {
-    // Derive a friendly label from whichever param arrived
-    const p = plan || 'your';
-    setPlanLabel(p.charAt(0).toUpperCase() + p.slice(1));
-  }, [plan]);
+    if (purchase === 'past_invoice') {
+      setHeadline('Your Past Invoice Add-on is now active.');
+      setDetail(
+        'Historical invoice allowance has been added to your account. Use Invoice Upload → Historical Amazon Invoice to get started.',
+      );
+      return;
+    }
+    if (plan) {
+      const label = plan.charAt(0).toUpperCase() + plan.slice(1);
+      setHeadline(`Your ${label} Plan is now active.`);
+      setDetail(
+        'Start generating invoices and automating your Amazon seller workflow.',
+      );
+      return;
+    }
+    if (sessionId) {
+      setHeadline('Your payment was successful.');
+      setDetail(
+        'Your subscription or add-on will appear on Billing within a moment.',
+      );
+      return;
+    }
+    setHeadline('Your plan is now active.');
+  }, [plan, purchase, sessionId]);
 
   return (
     <>
@@ -42,7 +64,7 @@ export default function PaymentSuccess() {
             </Title>
 
             <Text size="lg" ta="center" c="dimmed">
-              Your <strong>{planLabel} Plan</strong> is now active.
+              <strong>{headline}</strong>
               {sessionId && (
                 <>
                   {' '}
@@ -55,7 +77,7 @@ export default function PaymentSuccess() {
             </Text>
 
             <Text ta="center" size="sm" c="dimmed">
-              Start generating invoices and automating your Amazon seller workflow.
+              {detail}
             </Text>
 
             <Stack gap="sm" w="100%">

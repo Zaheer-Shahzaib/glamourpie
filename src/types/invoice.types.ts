@@ -68,6 +68,7 @@ export interface Invoice {
 }
 
 export interface InvoiceListItem {
+    isPastInvoice?: boolean;
     invoiceId: string;
     invoiceNumber: string;
     invoiceDate: string;
@@ -118,6 +119,8 @@ export interface InvoiceQueryParams {
     limit?: number;
     offset?: number;
     marketplaceId?: string;
+    /** regular (default) | historical | all */
+    invoiceSeries?: 'regular' | 'historical' | 'all';
 }
 
 export interface RevenueDataPoint {
