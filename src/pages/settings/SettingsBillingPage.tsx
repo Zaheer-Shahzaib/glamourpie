@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   Container,
   Paper,
@@ -17,6 +17,7 @@ import {
   Loader,
   Center,
   Box,
+  NumberInput,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import {
@@ -33,7 +34,12 @@ import {
   getSubscriptionStatus,
   getCustomerInvoicesDetails,
   cancelSubscription,
+  createPastInvoiceCheckout,
+  type PastInvoiceBalanceDto,
+  type PastInvoicePurchaseDto,
 } from "../../Services/stripeService";
+import { PATH_APPS } from "../../routes";
+import { estimateHistoricalCheckoutTotalAed } from "../../utils/historicalInvoiceCheckout";
 import MainLayout from "../../layout/Main";
 import { Link } from "react-router-dom";
 import { getBillingStatusColor } from "../../utils/helperFunctions";
@@ -55,6 +61,14 @@ export default function SettingsBillingPage() {
   const [invoicesGeneratedThisMonth, setInvoicesGeneratedThisMonth] =
     useState<number>(0);
   const [hasPastDue, setHasPastDue] = useState(false);
+  const [pastInvoice, setPastInvoice] = useState<PastInvoiceBalanceDto | null>(
+    null,
+  );
+  const [pastInvoicePurchases, setPastInvoicePurchases] = useState<
+    PastInvoicePurchaseDto[]
+  >([]);
+  const [pastPurchaseQty, setPastPurchaseQty] = useState<number | string>(100);
+  const [pastPurchaseLoading, setPastPurchaseLoading] = useState(false);
 
   // Modal
   const [opened, { open, close }] = useDisclosure(false);
@@ -90,6 +104,8 @@ export default function SettingsBillingPage() {
       setTotalAllowedInvoices(subData.totalAllowedInvoices || 0);
       setInvoicesGeneratedThisMonth(subData.invoicesGeneratedThisMonth || 0);
       setHasPastDue(subData.hasPastDue || false);
+      setPastInvoice(subData.pastInvoice || null);
+      setPastInvoicePurchases(subData.pastInvoicePurchases || []);
       setInvoices(invData.data || []);
     } catch (error) {
       console.error("Failed to fetch billing status", error);
@@ -166,7 +182,121 @@ export default function SettingsBillingPage() {
         return "gray";
     }
   };
-  console.log("subscriptions", subscriptions);
+  const activeSubscriptions = useMemo(
+    () =>
+      subscriptions.filter((s) =>
+        ["active", "trialing", "past_due"].includes(s.status),
+      ),
+    [subscriptions],
+  );
+
+  /** One badge per plan tier (avoid duplicate Pro rows in overview). */
+  const uniqueActivePlans = useMemo(() => {
+    const seen = new Set<string>();
+    return activeSubscriptions.filter((sub) => {
+      const key = (sub.plan || "").toLowerCase();
+      if (!key || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }, [activeSubscriptions]);
+
+  const hasPastInvoiceAddon = (pastInvoice?.purchasedQuantity ?? 0) > 0;
+  const hasAnyActiveEntitlement =
+    uniqueActivePlans.length > 0 || hasPastInvoiceAddon;
+
+  const formatPlanLabel = (plan: string) =>
+    plan.charAt(0).toUpperCase() + plan.slice(1);
+
+  const ACTIVE_SUB_STATUSES = ["active", "trialing", "past_due"];
+
+  type HistoryRow =
+    | {
+        key: string;
+        kind: "subscription";
+        sub: (typeof subscriptions)[0];
+        duplicateActiveCount?: number;
+      }
+    | {
+        key: string;
+        kind: "addon";
+        purchase: PastInvoicePurchaseDto;
+      };
+
+  const subscriptionHistoryRows = useMemo((): HistoryRow[] => {
+    const active = subscriptions.filter((s) =>
+      ACTIVE_SUB_STATUSES.includes(s.status),
+    );
+    const inactive = subscriptions.filter(
+      (s) => !ACTIVE_SUB_STATUSES.includes(s.status),
+    );
+
+    const activeByPlan = new Map<string, typeof active>();
+    for (const sub of active) {
+      const planKey = (sub.plan || "").toLowerCase();
+      if (!planKey) continue;
+      const group = activeByPlan.get(planKey) || [];
+      group.push(sub);
+      activeByPlan.set(planKey, group);
+    }
+
+    const dedupedActive: HistoryRow[] = Array.from(activeByPlan.values()).map(
+      (group) => {
+        const primary = [...group].sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+        )[0];
+        return {
+          key: `sub-active-${primary.id}`,
+          kind: "subscription",
+          sub: primary,
+          duplicateActiveCount: group.length,
+        };
+      },
+    );
+
+    const inactiveRows: HistoryRow[] = inactive.map((sub) => ({
+      key: `sub-${sub.id}`,
+      kind: "subscription",
+      sub,
+    }));
+
+    const addonRows: HistoryRow[] = pastInvoicePurchases.map((purchase) => ({
+      key: `addon-${purchase.id}`,
+      kind: "addon",
+      purchase,
+    }));
+
+    const sortTs = (row: HistoryRow) => {
+      if (row.kind === "subscription") {
+        return new Date(row.sub.createdAt).getTime();
+      }
+      const raw = row.purchase.createdAt || row.purchase.created_at;
+      return raw ? new Date(raw).getTime() : 0;
+    };
+
+    return [...dedupedActive, ...inactiveRows, ...addonRows].sort(
+      (a, b) => sortTs(b) - sortTs(a),
+    );
+  }, [subscriptions, pastInvoicePurchases]);
+
+  const planBadgeColor = (plan: string) => {
+    switch ((plan || "").toLowerCase()) {
+      case "pro":
+        return "blue";
+      case "growth":
+        return "violet";
+      case "scale":
+        return "grape";
+      case "starter":
+        return "cyan";
+      case "free":
+        return "gray";
+      default:
+        return "blue";
+    }
+  };
+
   return (
     <MainLayout>
       <Container size="lg" py="xl">
@@ -204,20 +334,13 @@ export default function SettingsBillingPage() {
                 <Text c="dimmed" size="sm" fw={500} tt="uppercase">
                   Active Plan & Status
                 </Text>
-                <Group gap="md" mt="xs">
-                  {subscriptions.filter((s) =>
-                    ["active", "trialing", "past_due"].includes(s.status),
-                  ).length > 0 ? (
-                    subscriptions
-                      .filter((s) =>
-                        ["active", "trialing", "past_due"].includes(s.status),
-                      )
-                      .map((sub: any) => (
-                        <Stack gap={4} key={`active-${sub.id}`} justify="space-between">
-                          <Group gap="xs" justify="space-between">
-                            <Badge size="lg" color="blue" variant="light">
-                            {sub.plan.charAt(0).toUpperCase() +
-                              sub.plan.slice(1)}
+                <Group gap="md" mt="xs" wrap="wrap">
+                  {hasAnyActiveEntitlement ? (
+                    <>
+                      {uniqueActivePlans.map((sub: any) => (
+                        <Group gap="xs" key={`plan-${sub.plan}`} wrap="nowrap">
+                          <Badge size="lg" color="blue" variant="light">
+                            {formatPlanLabel(sub.plan)}
                           </Badge>
                           {sub.plan.toLowerCase() === "free" && (
                             <Button
@@ -229,9 +352,19 @@ export default function SettingsBillingPage() {
                               Upgrade Plan
                             </Button>
                           )}
-                            </Group>
-                        </Stack>
-                      ))
+                        </Group>
+                      ))}
+                      {hasPastInvoiceAddon && (
+                        <Tooltip
+                          label={`${(pastInvoice?.remaining ?? 0).toLocaleString()} historical invoices remaining`}
+                          withArrow
+                        >
+                          <Badge size="lg" color="teal" variant="filled">
+                            Past Invoice Add-on
+                          </Badge>
+                        </Tooltip>
+                      )}
+                    </>
                   ) : (
                     <Group>
                       <Text c="dimmed" size="sm" fw={500} tt="uppercase">
@@ -273,6 +406,80 @@ export default function SettingsBillingPage() {
                   {totalAllowedInvoices.toLocaleString()} limit
                 </Text>
               </Paper>
+
+              <Paper
+                withBorder
+                p="md"
+                radius="md"
+                bg="var(--mantine-color-gray-0)"
+              >
+                <Text c="dimmed" size="sm" fw={500} tt="uppercase">
+                  Past Invoice add-on (historical)
+                </Text>
+                <Text size="sm" mt="xs">
+                  Separate from your monthly subscription invoice limit. Purchase
+                  in the section below.
+                </Text>
+                <Text size="xl" fw={700} mt="xs" c="teal">
+                  {(pastInvoice?.remaining ?? 0).toLocaleString()} remaining
+                </Text>
+                <Text size="sm" c="dimmed" mt={4}>
+                  {(pastInvoice?.usedQuantity ?? 0).toLocaleString()} used of{" "}
+                  {(pastInvoice?.purchasedQuantity ?? 0).toLocaleString()}{" "}
+                  purchased
+                </Text>
+                <Group mt="md" align="flex-end">
+                  <NumberInput
+                    label="Historical invoices to add"
+                    min={1}
+                    max={100000}
+                    value={pastPurchaseQty}
+                    onChange={setPastPurchaseQty}
+                    w={200}
+                  />
+                  <Text size="sm" mb={6}>
+                    Total:{" "}
+                    <strong>
+                      AED{" "}
+                      {estimateHistoricalCheckoutTotalAed(
+                        Number(pastPurchaseQty) || 0,
+                      ).toFixed(2)}
+                    </strong>
+                  </Text>
+                  <Button
+                    size="sm"
+                    loading={pastPurchaseLoading}
+                    onClick={async () => {
+                      const q = Number(pastPurchaseQty);
+                      if (!Number.isInteger(q) || q < 1) return;
+                      setPastPurchaseLoading(true);
+                      try {
+                        const { url } = await createPastInvoiceCheckout(q);
+                        window.location.href = url;
+                      } catch (err: any) {
+                        notifications.show({
+                          title: "Checkout failed",
+                          message:
+                            err?.response?.data?.error || "Could not start checkout.",
+                          color: "red",
+                        });
+                      } finally {
+                        setPastPurchaseLoading(false);
+                      }
+                    }}
+                  >
+                    Checkout
+                  </Button>
+                  <Button
+                    component={Link}
+                    to={PATH_APPS.invoices.upload.historical}
+                    variant="light"
+                    size="sm"
+                  >
+                    Open Past invoices
+                  </Button>
+                </Group>
+              </Paper>
             </Group>
 
             {/* Subscriptions History Table */}
@@ -292,11 +499,11 @@ export default function SettingsBillingPage() {
                 <Center py="xl">
                   <Loader />
                 </Center>
-              ) : subscriptions.length > 0 ? (
+              ) : subscriptionHistoryRows.length > 0 ? (
                 <Table striped highlightOnHover withTableBorder>
                   <Table.Thead>
                     <Table.Tr>
-                      <Table.Th>Plan Tier</Table.Th>
+                      <Table.Th>Product</Table.Th>
                       <Table.Th>Status</Table.Th>
                       <Table.Th>Activation Date</Table.Th>
                       <Table.Th>Current Period End</Table.Th>
@@ -304,43 +511,95 @@ export default function SettingsBillingPage() {
                     </Table.Tr>
                   </Table.Thead>
                   <Table.Tbody>
-                    {subscriptions.map((sub: any) => (
-                      <Table.Tr key={sub.id}>
-                        <Table.Td fw={500} tt="capitalize">
-                          {sub.plan}
-                        </Table.Td>
-                        <Table.Td>
-                          <Badge
-                            color={getStatusColor(
-                              sub.status,
-                              sub.cancel_at_period_end,
-                            )}
-                            variant={
-                              sub.status === "canceled" ? "outline" : "light"
-                            }
-                          >
-                            {sub.cancel_at_period_end
-                              ? "Cancels at Period End"
-                              : sub.status}
-                          </Badge>
-                        </Table.Td>
-                        <Table.Td>{formatDate(sub.createdAt)}</Table.Td>
-                        <Table.Td>{formatDate(sub.currentPeriodEnd)}</Table.Td>
-                        <Table.Td>
-                          {sub.status === "active" &&
-                            !sub.cancel_at_period_end && (
-                              <Button
-                                size="xs"
-                                color="red"
-                                variant="subtle"
-                                onClick={() => handleCancelClick(sub.id)}
+                    {subscriptionHistoryRows.map((row) => {
+                      if (row.kind === "addon") {
+                        const { purchase } = row;
+                        const purchasedAt =
+                          purchase.createdAt || purchase.created_at;
+                        return (
+                          <Table.Tr key={row.key}>
+                            <Table.Td>
+                              <Group gap="xs">
+                                <Badge size="lg" color="teal" variant="filled">
+                                  Past Invoice Add-on
+                                </Badge>
+                                <Text size="sm" c="dimmed">
+                                  {purchase.quantity.toLocaleString()} historical
+                                  invoices
+                                </Text>
+                              </Group>
+                            </Table.Td>
+                            <Table.Td>
+                              <Badge color="teal" variant="light">
+                                {purchase.status === "credited"
+                                  ? "Purchased"
+                                  : purchase.status}
+                              </Badge>
+                            </Table.Td>
+                            <Table.Td>{formatDate(purchasedAt ?? null)}</Table.Td>
+                            <Table.Td>—</Table.Td>
+                            <Table.Td />
+                          </Table.Tr>
+                        );
+                      }
+
+                      const { sub, duplicateActiveCount } = row;
+                      return (
+                        <Table.Tr key={row.key}>
+                          <Table.Td>
+                            <Group gap="xs">
+                              <Badge
+                                size="lg"
+                                color={planBadgeColor(sub.plan)}
+                                variant="light"
                               >
-                                Cancel Plan
-                              </Button>
-                            )}
-                        </Table.Td>
-                      </Table.Tr>
-                    ))}
+                                {formatPlanLabel(sub.plan)}
+                              </Badge>
+                              {(duplicateActiveCount ?? 0) > 1 && (
+                                <Tooltip
+                                  label={`${duplicateActiveCount} active billing records exist for this plan; canceling removes one record.`}
+                                  withArrow
+                                >
+                                  <Badge size="sm" color="orange" variant="outline">
+                                    ×{duplicateActiveCount}
+                                  </Badge>
+                                </Tooltip>
+                              )}
+                            </Group>
+                          </Table.Td>
+                          <Table.Td>
+                            <Badge
+                              color={getStatusColor(
+                                sub.status,
+                                sub.cancel_at_period_end,
+                              )}
+                              variant={
+                                sub.status === "canceled" ? "outline" : "light"
+                              }
+                            >
+                              {sub.cancel_at_period_end
+                                ? "Cancels at Period End"
+                                : sub.status}
+                            </Badge>
+                          </Table.Td>
+                          <Table.Td>{formatDate(sub.createdAt)}</Table.Td>
+                          <Table.Td>{formatDate(sub.currentPeriodEnd)}</Table.Td>
+                          <Table.Td>
+                            {sub.status === "active" &&
+                              !sub.cancel_at_period_end && (
+                                <Button
+                                  size="xs"
+                                  color="red"
+                                  variant="subtle"
+                                  onClick={() => handleCancelClick(sub.id)}
+                                >
+                                  Cancel Plan
+                                </Button>
+                              )}
+                          </Table.Td>
+                        </Table.Tr>
+                      );
+                    })}
                   </Table.Tbody>
                 </Table>
               ) : (
@@ -364,6 +623,7 @@ export default function SettingsBillingPage() {
                   <Table.Thead>
                     <Table.Tr>
                       <Table.Th>Date</Table.Th>
+                      <Table.Th>Product</Table.Th>
                       <Table.Th>Amount</Table.Th>
                       <Table.Th>Status</Table.Th>
                       <Table.Th>Actions</Table.Th>
@@ -373,6 +633,28 @@ export default function SettingsBillingPage() {
                     {invoices.map((inv: any) => (
                       <Table.Tr key={inv.id}>
                         <Table.Td>{formatUnix(inv.created)}</Table.Td>
+                        <Table.Td>
+                          <Badge
+                            color={
+                              inv.purchaseType === "addon"
+                                ? "teal"
+                                : inv.purchaseType === "subscription"
+                                  ? planBadgeColor(
+                                      (inv.displayName || "")
+                                        .toLowerCase()
+                                        .replace(/\s+plan$/i, ""),
+                                    )
+                                  : "gray"
+                            }
+                            variant={
+                              inv.purchaseType === "addon" ? "filled" : "light"
+                            }
+                          >
+                            {inv.displayName ||
+                              inv.lines?.data?.[0]?.description ||
+                              "Payment"}
+                          </Badge>
+                        </Table.Td>
                         <Table.Td>
                           {(inv.amount_paid / 100).toFixed(2)}{" "}
                           {inv.currency.toUpperCase()}

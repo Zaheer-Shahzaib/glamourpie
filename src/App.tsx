@@ -9,6 +9,8 @@ import ProfileCredentialsPage from "./pages/profile/ProfileCredentialsPage";
 import ProfileStatisticsPage from "./pages/profile/ProfileStatisticsPage";
 import OrdersPage from "./pages/ordersPage";
 import InvoicesPage from "./pages/invoicesPage";
+import MissingInvoicesPage from "./pages/missingInvoicesPage";
+import HistoricalOrdersPage from "./pages/historicalOrdersPage";
 import SettingsSpApiPage from "./pages/settings/SettingsSpApiPage";
 import SettingsMarketplacePage from "./pages/settings/SettingsMarketplacePage";
 import SettingsInvoicesPage from "./pages/settings/SettingsInvoicesPage";
@@ -157,6 +159,13 @@ export default function App() {
       </Route>
       <Route path={PATH_APPS.invoices.root} element={<ProtectedRoute />}>
         <Route index element={<InvoicesPage />} />
+        <Route path="upload">
+          <Route path="missing" element={<MissingInvoicesPage />} />
+          <Route path="historical" element={<HistoricalOrdersPage />} />
+        </Route>
+        <Route path="missing" element={<MissingInvoicesPage />} />
+        <Route path="historical" element={<HistoricalOrdersPage />} />
+        <Route path="past" element={<HistoricalOrdersPage />} />
       </Route>
       {/* Settings Child Routes */}
       <Route path={PATH_APPS.settings.root} element={<ProtectedRoute />}>

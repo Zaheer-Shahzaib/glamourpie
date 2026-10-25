@@ -31,7 +31,7 @@ export const fetchInvoiceDetails = async (
     token: string,
     invoiceId: string
 ): Promise<InvoiceDetailsResponse> => {
-    const response = await api.get(`/api/aws/invoices/${invoiceId}`, {
+    const response = await api.get(`/api/aws/invoices/${encodeURIComponent(invoiceId)}`, {
         headers: { Authorization: `Bearer ${token}` },
     });
     console.log("invoice details",response)
@@ -45,7 +45,7 @@ export const fetchInvoiceDocument = async (
     token: string,
     invoiceId: string
 ): Promise<{ payload: { documentUrl: string; generateUrl?: string; isSandbox?: boolean } }> => {
-    const response = await api.get(`/api/aws/invoices/${invoiceId}/document`, {
+    const response = await api.get(`/api/aws/invoices/${encodeURIComponent(invoiceId)}/document`, {
         headers: { Authorization: `Bearer ${token}` },
     });
     return response.data;
@@ -75,7 +75,7 @@ export const downloadInvoiceDocument = async (
         const url  = URL.createObjectURL(blob);
         const a    = document.createElement('a');
         a.href     = url;
-        a.download  = `${invoiceId}.pdf`;
+        a.download  = `${String(invoiceId).replace(/[\\/]/g, "-")}.pdf`;
         document.body.appendChild(a);
         a.click();
         setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 2000);

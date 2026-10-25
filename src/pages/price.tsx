@@ -17,7 +17,7 @@ import {
 } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import PricingCard from "../Components/PricingCard/PricingCard";
-import { createCheckoutSession, getSubscriptionStatus, createPortalSession } from "../Services/stripeService";
+import { createCheckoutSession, getSubscriptionStatus } from "../Services/stripeService";
 import { useAuth } from "../Context/useAuth";
 import { PATH_PAGES } from "../routes";
 
@@ -74,6 +74,7 @@ const PRICING: PricingTier[] = [
       "Auto-upload invoices to Amazon",
       "Standard invoice templates",
       "Email support",
+      "Historical invoice upload support (add-on in Billing)",
     ],
     preferred: false,
     actionText: "Get Starter Plan",
@@ -91,6 +92,7 @@ const PRICING: PricingTier[] = [
       "Auto-upload invoices to Amazon",
       "Everything in Starter plan",
       "Email support",
+      "Historical invoice upload support (add-on in Billing)",
     ],
     preferred: false,
     actionText: "Get Pro Plan",
@@ -108,6 +110,7 @@ const PRICING: PricingTier[] = [
       "Advanced invoice templates",
       "Faster processing speed",
       "Priority support",
+      "Historical invoice upload support (add-on in Billing)",
     ],
     preferred: true,
     actionText: "Get Growth Plan",
@@ -124,6 +127,7 @@ const PRICING: PricingTier[] = [
       "Advanced analytics & reporting",
       "Faster processing priority",
       "Dedicated support",
+      "Historical invoice upload support (add-on in Billing)",
     ],
     preferred: false,
     actionText: "Get Scale Plan",
@@ -160,7 +164,6 @@ function Pricing() {
 
   // Current active subscriptions of the logged-in user
   const [activePlans, setActivePlans] = useState<string[]>([]);
-
   // Fetch subscription status if user is logged in
   useEffect(() => {
     if (!isAuthenticated) return;
