@@ -40,8 +40,17 @@ import {
   isMissingLookupSuccess,
 } from "../types/missing-invoice.types";
 import { getInvoiceGenerationError } from "../utils/vatDisplay";
+import {
+  mergeUploadStatusIntoRows,
+  patchRowAfterBulkUploadResult,
+  patchRowAfterGenerate,
+  patchRowAfterUpload,
+  patchRowsAfterGenerate,
+  pollUploadStatusInBackground,
+} from "../utils/missingInvoiceRowUpdates";
 import InvoiceDetailsModal from "../Components/Invoice/InvoiceDetailsModal";
 import InvoiceUploadSubNav from "../Components/Invoice/InvoiceUploadSubNav";
+import { useMissingUploadSession } from "../Context/InvoiceUploadSessionContext";
 
 const MAX_MANUAL_IDS = 5;
 const MAX_EXCEL_IDS = 20;
@@ -81,8 +90,8 @@ const uploadStatusColor = (status: string | null) => {
 
 export default function MissingInvoicesPage() {
   const { token } = useAuth();
-  const [orderIdsText, setOrderIdsText] = useState("");
-  const [rows, setRows] = useState<MissingInvoiceRow[]>([]);
+  const { rows, setRows, orderIdsText, setOrderIdsText, lastLookup, setLastLookup } =
+    useMissingUploadSession();
   const [loading, setLoading] = useState(false);
   const [bulkGenLoading, setBulkGenLoading] = useState(false);
   const [bulkUploadLoading, setBulkUploadLoading] = useState(false);
@@ -90,11 +99,6 @@ export default function MissingInvoicesPage() {
   const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | null>(
     null,
   );
-  const [lastLookup, setLastLookup] = useState<
-    | { type: "manual"; orderIdsText: string }
-    | { type: "excel" }
-    | null
-  >(null);
   const eligibleOrderIds = useMemo(
     () => rows.filter((r) => r.generationEligible).map((r) => r.orderId),
     [rows],
@@ -119,44 +123,50 @@ export default function MissingInvoicesPage() {
     }
   };
 
+  const fetchUploadStatus = async (orderIds: string[], fullPoll = false) => {
+    if (!token || orderIds.length === 0) return [];
+    const statusRes = await refreshMissingUploadStatus(token, orderIds, {
+      fullPoll,
+    });
+    return statusRes.success ? statusRes.results : [];
+  };
+
+  const startUploadStatusPoll = (orderIds: string[]) => {
+    if (!token) return;
+    void pollUploadStatusInBackground(
+      orderIds,
+      (ids) => fetchUploadStatus(ids, false),
+      (hits) => {
+        setRows((prev) => mergeUploadStatusIntoRows(prev, hits));
+      },
+    );
+  };
+
+  const refreshLookup = async (orderIds: string[]) => {
+    if (!token || orderIds.length === 0) return;
+    const hits = await fetchUploadStatus(orderIds, true);
+    setRows((prev) => mergeUploadStatusIntoRows(prev, hits));
+  };
+
   const refreshTable = async () => {
-    if (!token || !lastLookup) return;
+    if (!token) return;
     setLoading(true);
     try {
-      if (lastLookup.type === "manual") {
+      if (lastLookup?.type === "manual") {
         const res = await lookupMissingInvoices(token, {
           orderIdsText: lastLookup.orderIdsText,
         });
         if (isMissingLookupSuccess(res)) setRows(res.results);
       } else if (rows.length > 0) {
-        const statusRes = await refreshMissingUploadStatus(
-          token,
+        const hits = await fetchUploadStatus(
           rows.map((r) => r.orderId),
+          true,
         );
-        if (statusRes.success) {
-          setRows((prev) =>
-            prev.map((row) => {
-              const hit = statusRes.results.find((r) => r.orderId === row.orderId);
-              if (!hit) return row;
-              return {
-                ...row,
-                uploadStatus: hit.uploadStatus ?? row.uploadStatus,
-                errorMessage: hit.errorMessage ?? row.errorMessage,
-              };
-            }),
-          );
-        }
-        await refreshLookup(rows.map((r) => r.orderId));
+        setRows((prev) => mergeUploadStatusIntoRows(prev, hits));
       }
     } finally {
       setLoading(false);
     }
-  };
-
-  const refreshLookup = async (orderIds: string[]) => {
-    if (!token || orderIds.length === 0) return;
-    const res = await lookupMissingInvoices(token, { orderIds });
-    if (isMissingLookupSuccess(res)) setRows(res.results);
   };
 
   const notifyLookupFailure = (
@@ -275,12 +285,16 @@ export default function MissingInvoicesPage() {
         });
         throw new Error(`${title}: ${message}`);
       }
+      setRows((prev) =>
+        prev.map((r) =>
+          r.orderId === row.orderId ? patchRowAfterGenerate(r, item) : r,
+        ),
+      );
       notifications.show({
         color: "green",
         title: item.alreadyExists ? "Already exists" : "Invoice generated",
         message: item.invoiceNumber || row.orderId,
       });
-      await refreshLookup([row.orderId]);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Generation failed";
       notifications.show({ color: "red", title: "Generate failed", message });
@@ -302,18 +316,24 @@ export default function MissingInvoicesPage() {
       if (!res.success) {
         throw new Error(res.message || "Upload failed");
       }
-      const done = res.uploadStatus === "UPLOADED";
+      setRows((prev) =>
+        prev.map((r) =>
+          r.orderId === row.orderId ? patchRowAfterUpload(r, res) : r,
+        ),
+      );
+      const done =
+        res.uploadStatus === "UPLOADED" ||
+        res.lifecycleStatus === "SUBMITTED";
       notifications.show({
         color: done ? "green" : "blue",
         title: done ? "Uploaded to Amazon" : "Submitted to Amazon",
-        message:
-          res.feedId && done
-            ? `Feed ${res.feedId} completed`
-            : res.feedId
-              ? `Feed ${res.feedId} — ${res.processingStatus || "processing"}`
-              : "Upload queued",
+        message: res.feedId
+          ? `Feed ${res.feedId}${done ? "" : " — processing on Amazon"}`
+          : "Upload queued",
       });
-      await refreshLookup([row.orderId]);
+      if (!done) {
+        startUploadStatusPoll([row.orderId]);
+      }
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Upload failed";
       notifications.show({ color: "red", title: "Upload failed", message });
@@ -332,12 +352,12 @@ export default function MissingInvoicesPage() {
     try {
       const res = await bulkGenerateMissingInvoices(token, eligibleOrderIds, true);
       const ok = res.results.filter((r) => r.success).length;
+      setRows((prev) => patchRowsAfterGenerate(prev, res.results));
       notifications.show({
         color: "green",
         title: "Bulk generate complete",
         message: `${ok}/${res.results.length} succeeded.`,
       });
-      await refreshLookup(rows.map((r) => r.orderId));
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Bulk generate failed";
       notifications.show({ color: "red", title: "Bulk generate failed", message });
@@ -352,12 +372,27 @@ export default function MissingInvoicesPage() {
     try {
       const res = await bulkUploadMissingInvoices(token, uploadableOrderIds);
       const ok = res.results.filter((r) => r.success).length;
+      setRows((prev) =>
+        prev.map((row) => {
+          const item = res.results.find((r) => r.orderId === row.orderId);
+          return item ? patchRowAfterBulkUploadResult(row, item) : row;
+        }),
+      );
       notifications.show({
         color: "green",
         title: "Bulk upload complete",
         message: `${ok}/${res.results.length} submitted.`,
       });
-      await refreshLookup(rows.map((r) => r.orderId));
+      const pending = res.results
+        .filter(
+          (r) =>
+            r.success &&
+            r.uploadStatus !== "UPLOADED" &&
+            r.uploadStatus !== "FAILED",
+        )
+        .map((r) => r.orderId)
+        .filter(Boolean) as string[];
+      if (pending.length) startUploadStatusPoll(pending);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Bulk upload failed";
       notifications.show({ color: "red", title: "Bulk upload failed", message });

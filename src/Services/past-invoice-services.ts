@@ -72,10 +72,20 @@ export const bulkUploadHistoricalInvoices = async (
 export const refreshHistoricalUploadStatus = async (
   token: string,
   orderIds: string[],
-): Promise<{ success: boolean; results: Array<{ orderId?: string; uploadStatus?: string; errorMessage?: string }> }> => {
+  options?: { fullPoll?: boolean },
+): Promise<{
+  success: boolean;
+  results: Array<{
+    orderId?: string;
+    uploadStatus?: string;
+    lifecycleStatus?: string | null;
+    errorMessage?: string;
+    feedId?: string;
+  }>;
+}> => {
   const response = await api.post(
     `${pastBase}/upload/status`,
-    { orderIds },
+    { orderIds, fullPoll: options?.fullPoll === true },
     { headers: { Authorization: `Bearer ${token}` } },
   );
   return response.data;

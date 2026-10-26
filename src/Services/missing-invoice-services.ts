@@ -73,10 +73,20 @@ export const bulkUploadMissingInvoices = async (
 export const refreshMissingUploadStatus = async (
   token: string,
   orderIds: string[],
-): Promise<{ success: boolean; results: Array<{ orderId?: string; uploadStatus?: string; errorMessage?: string }> }> => {
+  options?: { fullPoll?: boolean },
+): Promise<{
+  success: boolean;
+  results: Array<{
+    orderId?: string;
+    uploadStatus?: string;
+    lifecycleStatus?: string | null;
+    errorMessage?: string;
+    feedId?: string;
+  }>;
+}> => {
   const response = await api.post(
     "/api/aws/invoices/missing/upload/status",
-    { orderIds },
+    { orderIds, fullPoll: options?.fullPoll === true },
     { headers: { Authorization: `Bearer ${token}` } },
   );
   return response.data;
@@ -90,7 +100,8 @@ export const uploadInvoiceToAmazon = async (
   success: boolean;
   feedId?: string;
   uploadStatus?: string;
-  processingStatus?: string;
+  processingStatus?: string | null;
+  lifecycleStatus?: string | null;
   message?: string;
 }> => {
   const response = await api.post(

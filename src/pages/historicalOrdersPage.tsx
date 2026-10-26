@@ -40,8 +40,17 @@ import {
 import { Link, Navigate } from "react-router-dom";
 import { PATH_APPS } from "../routes";
 import { getInvoiceGenerationError } from "../utils/vatDisplay";
+import {
+  mergeUploadStatusIntoRows,
+  patchRowAfterBulkUploadResult,
+  patchRowAfterGenerate,
+  patchRowAfterUpload,
+  patchRowsAfterGenerate,
+  pollUploadStatusInBackground,
+} from "../utils/missingInvoiceRowUpdates";
 import InvoiceDetailsModal from "../Components/Invoice/InvoiceDetailsModal";
 import InvoiceUploadSubNav from "../Components/Invoice/InvoiceUploadSubNav";
+import { useHistoricalUploadSession } from "../Context/InvoiceUploadSessionContext";
 
 /** Mantine DatePickerInput may yield Date or ISO/date strings depending on version. */
 const toApiDateString = (value: Date | string | null | undefined): string | null => {
@@ -77,7 +86,20 @@ const uploadStatusColor = (status: string | null) => {
 
 export default function HistoricalOrdersPage() {
   const { token } = useAuth();
-  const [rows, setRows] = useState<MissingInvoiceRow[]>([]);
+  const {
+    rows,
+    setRows,
+    dateRange,
+    setDateRange,
+    lastLookup,
+    setLastLookup,
+    datePageTokens,
+    setDatePageTokens,
+    datePageIndex,
+    setDatePageIndex,
+    dateRangePagination,
+    setDateRangePagination,
+  } = useHistoricalUploadSession();
   const [accessChecked, setAccessChecked] = useState(false);
   const [hasHistoricalAccess, setHasHistoricalAccess] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -87,21 +109,6 @@ export default function HistoricalOrdersPage() {
   const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | null>(
     null,
   );
-  const [dateRange, setDateRange] = useState<DatesRangeValue<string>>([
-    null,
-    null,
-  ]);
-  const [lastLookup, setLastLookup] = useState<{
-    type: "dateRange";
-    start: string;
-    end: string;
-  } | null>(null);
-  const [datePageTokens, setDatePageTokens] = useState<(string | undefined)[]>([
-    undefined,
-  ]);
-  const [datePageIndex, setDatePageIndex] = useState(0);
-  const [dateRangePagination, setDateRangePagination] =
-    useState<MissingLookupPagination | null>(null);
   const [pastBalance, setPastBalance] = useState<PastInvoiceBalance | null>(
     null,
   );
@@ -188,33 +195,37 @@ export default function HistoricalOrdersPage() {
     );
   };
 
+  const fetchUploadStatus = async (
+    orderIds: string[],
+    fullPoll = false,
+  ) => {
+    if (!token || orderIds.length === 0) return [];
+    const statusRes = await refreshHistoricalUploadStatus(token, orderIds, {
+      fullPoll,
+    });
+    return statusRes.success ? statusRes.results : [];
+  };
+
+  const startUploadStatusPoll = (orderIds: string[]) => {
+    if (!token) return;
+    void pollUploadStatusInBackground(
+      orderIds,
+      (ids) => fetchUploadStatus(ids, false),
+      (hits) => {
+        setRows((prev) => mergeUploadStatusIntoRows(prev, hits));
+      },
+    );
+  };
+
   const refreshTable = async () => {
-    if (!token || !lastLookup) return;
+    if (!token || rows.length === 0) return;
     setLoading(true);
     try {
-      if (rows.length > 0) {
-        const statusRes = await refreshHistoricalUploadStatus(
-          token,
-          rows.map((r) => r.orderId),
-        );
-        if (statusRes.success) {
-          setRows((prev) =>
-            prev.map((row) => {
-              const hit = statusRes.results.find((r) => r.orderId === row.orderId);
-              if (!hit) return row;
-              return {
-                ...row,
-                uploadStatus: hit.uploadStatus ?? row.uploadStatus,
-                lifecycleStatus:
-                  (hit as { lifecycleStatus?: string }).lifecycleStatus ??
-                  row.lifecycleStatus,
-                errorMessage: hit.errorMessage ?? row.errorMessage,
-              };
-            }),
-          );
-        }
-      }
-      await refreshCurrentPage();
+      const hits = await fetchUploadStatus(
+        rows.map((r) => r.orderId),
+        true,
+      );
+      setRows((prev) => mergeUploadStatusIntoRows(prev, hits));
     } finally {
       setLoading(false);
     }
@@ -327,13 +338,17 @@ export default function HistoricalOrdersPage() {
         });
         throw new Error(`${title}: ${message}`);
       }
+      setRows((prev) =>
+        prev.map((r) =>
+          r.orderId === row.orderId ? patchRowAfterGenerate(r, item) : r,
+        ),
+      );
       notifications.show({
         color: "green",
         title: item.alreadyExists ? "Already exists" : "Invoice generated",
         message: item.invoiceNumber || row.orderId,
       });
-      await refreshCurrentPage();
-      await reloadPastBalance();
+      void reloadPastBalance();
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Generation failed";
       notifications.show({ color: "red", title: "Generate failed", message });
@@ -355,20 +370,24 @@ export default function HistoricalOrdersPage() {
       if (!res.success) {
         throw new Error(res.message || "Upload failed");
       }
+      setRows((prev) =>
+        prev.map((r) =>
+          r.orderId === row.orderId ? patchRowAfterUpload(r, res) : r,
+        ),
+      );
       const done =
         res.uploadStatus === "UPLOADED" ||
-        (res as { lifecycleStatus?: string }).lifecycleStatus === "SUBMITTED";
+        res.lifecycleStatus === "SUBMITTED";
       notifications.show({
         color: done ? "green" : "blue",
         title: done ? "Submitted to Amazon" : "Upload submitted",
-        message:
-          res.feedId && done
-            ? `Feed ${res.feedId} completed`
-            : res.feedId
-              ? `Feed ${res.feedId} — ${res.processingStatus || "processing"}`
-              : "Upload queued",
+        message: res.feedId
+          ? `Feed ${res.feedId}${done ? "" : " — processing on Amazon"}`
+          : "Upload queued",
       });
-      await refreshCurrentPage();
+      if (!done) {
+        startUploadStatusPoll([row.orderId]);
+      }
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Upload failed";
       notifications.show({ color: "red", title: "Upload failed", message });
@@ -387,13 +406,13 @@ export default function HistoricalOrdersPage() {
     try {
       const res = await bulkGenerateHistoricalInvoices(token, eligibleOrderIds, true);
       const ok = res.results.filter((r) => r.success).length;
+      setRows((prev) => patchRowsAfterGenerate(prev, res.results));
       notifications.show({
         color: "green",
         title: "Bulk generate complete",
         message: `${ok}/${res.results.length} succeeded.`,
       });
-      await refreshCurrentPage();
-      await reloadPastBalance();
+      void reloadPastBalance();
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Bulk generate failed";
       notifications.show({ color: "red", title: "Bulk generate failed", message });
@@ -408,12 +427,27 @@ export default function HistoricalOrdersPage() {
     try {
       const res = await bulkUploadHistoricalInvoices(token, uploadableOrderIds);
       const ok = res.results.filter((r) => r.success).length;
+      setRows((prev) =>
+        prev.map((row) => {
+          const item = res.results.find((r) => r.orderId === row.orderId);
+          return item ? patchRowAfterBulkUploadResult(row, item) : row;
+        }),
+      );
       notifications.show({
         color: "green",
         title: "Bulk upload complete",
         message: `${ok}/${res.results.length} submitted.`,
       });
-      await refreshCurrentPage();
+      const pending = res.results
+        .filter(
+          (r) =>
+            r.success &&
+            r.uploadStatus !== "UPLOADED" &&
+            r.uploadStatus !== "FAILED",
+        )
+        .map((r) => r.orderId)
+        .filter(Boolean) as string[];
+      if (pending.length) startUploadStatusPoll(pending);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Bulk upload failed";
       notifications.show({ color: "red", title: "Bulk upload failed", message });
@@ -479,7 +513,7 @@ export default function HistoricalOrdersPage() {
                 type="range"
                 label="Purchase date range"
                 placeholder="Start — End"
-                value={dateRange}
+                value={dateRange as DatesRangeValue<string>}
                 onChange={setDateRange}
                 required
               />
@@ -546,7 +580,7 @@ export default function HistoricalOrdersPage() {
                 {dateRangePagination?.pageSize
                   ? ` · up to ${dateRangePagination.pageSize} orders per page`
                   : ""}
-                {" · wait ~2–3 min between pages if Amazon throttles"}
+                {" · wait ~1-2 min between pages if Amazon throttles"}
               </Text>
               <Group>
                 <Button
