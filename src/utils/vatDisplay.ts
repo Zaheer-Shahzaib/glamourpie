@@ -40,7 +40,7 @@ export const getVatLineLabel = (input: VatDisplayInput): string => {
 };
 
 export const getSubtotalLabel = (input: VatDisplayInput): string =>
-  isVatApplied(input) ? "Subtotal (excl. VAT)" : "Subtotal";
+  isVatApplied(input) ? "Subtotal (excl. VAT)" : "Items Subtotal";
 
 export const getNetUnitPrice = (
   unitPrice?: number | null,

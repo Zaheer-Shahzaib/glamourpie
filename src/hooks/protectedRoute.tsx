@@ -1,14 +1,30 @@
-import { Navigate, Outlet } from "react-router-dom";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "../Context/useAuth";
 import { PATH_AUTH } from "../routes";
 import { LoadingOverlay, Box } from "@mantine/core";
+import MainLayout from "../layout/Main";
 
 interface ProtectedRouteProps {
   requireSeller?: boolean;
+  /** When true, wrap matched child routes in the main app shell (sidebar). */
+  withAppLayout?: boolean;
 }
 
-const ProtectedRoute = ({ requireSeller = true }: ProtectedRouteProps) => {
+const AUTH_PATH_PREFIX = `${PATH_AUTH.root}/`;
+
+function isPublicAuthPath(pathname: string) {
+  return (
+    pathname === PATH_AUTH.root ||
+    pathname.startsWith(AUTH_PATH_PREFIX)
+  );
+}
+
+const ProtectedRoute = ({
+  requireSeller = true,
+  withAppLayout = false,
+}: ProtectedRouteProps) => {
   const { isAuthenticated, isSellerConnected, loading } = useAuth();
+  const location = useLocation();
 
   if (loading) {
     return (
@@ -18,20 +34,28 @@ const ProtectedRoute = ({ requireSeller = true }: ProtectedRouteProps) => {
     );
   }
 
-  // 1. Basic Auth Check
+  // Pathless layout routes can still mount on /authentication/* — never redirect in a loop.
   if (!isAuthenticated) {
-    return <Navigate to={PATH_AUTH.signin} />;
+    if (isPublicAuthPath(location.pathname)) {
+      return null;
+    }
+    return <Navigate to={PATH_AUTH.signin} replace />;
   }
 
-  // 2. Seller Connection Check
-  // If we require a seller but none is connected -> go to setup
   if (requireSeller && isSellerConnected === false) {
-    return <Navigate to="/connect-amazon" />;
+    return <Navigate to="/connect-amazon" replace />;
   }
 
-  // 3. Prevent landing on Connect Page if already connected
   if (!requireSeller && isSellerConnected === true) {
-    return <Navigate to="/dashboard/default" />;
+    return <Navigate to="/dashboard/default" replace />;
+  }
+
+  if (withAppLayout) {
+    return (
+      <MainLayout>
+        <Outlet />
+      </MainLayout>
+    );
   }
 
   return <Outlet />;

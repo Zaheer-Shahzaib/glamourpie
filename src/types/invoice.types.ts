@@ -41,6 +41,7 @@ export interface Invoice {
 
     // Financial — plain numbers; use `currency` for the currency code
     subtotal: number;
+    itemSubtotalExclVat?: number;
     taxAmount: number;
     taxRate: number;
     vatStatus?: string | null;
@@ -48,6 +49,11 @@ export interface Invoice {
     priceIncludesVat?: boolean;
     discounts: number;
     shippingCharges: number;
+    shippingNetAmount?: number;
+    itemTaxAmount?: number;
+    shippingTaxAmount?: number;
+    hasShipping?: boolean;
+    shippingLineLabel?: string;
     totalAmount: number;
     currency: string;
     fulfillmentChannel?: 'FBA' | 'MFN' | string | null;

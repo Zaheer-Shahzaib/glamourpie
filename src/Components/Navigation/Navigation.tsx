@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 
 import {
   ActionIcon,
@@ -36,10 +36,8 @@ import UserProfileButton from "../UserButton";
 import { useNavigate } from "react-router-dom";
 import { PATH_DASHBOARD, PATH_APPS } from "../../routes";
 import { useAuth } from "../../Context/useAuth";
-import { fetchUserProfile } from "../../Services/user-services";
-import { getPastInvoiceBalance } from "../../Services/past-invoice-services";
-import { UserProfile } from "../../types/profile.types";
 import { getAvatarUrl } from "../../utils/helperFunctions";
+import { useHasHistoricalAccess } from "../../hooks/usePastInvoiceBalance";
 const mockdata = [
   {
     title: "Dashboard",
@@ -114,29 +112,8 @@ const Navigation = ({
 }: NavigationProps) => {
   const tablet_match = useMediaQuery("(max-width: 768px)");
   const navigate = useNavigate();
-  const { token } = useAuth();
-  const [profile, setProfile] = useState<UserProfile>();
-  const [loading, setLoading] = useState(true);
-  const [hasHistoricalAccess, setHasHistoricalAccess] = useState(false);
-
-  useEffect(() => {
-    if (token) {
-      fetchUserProfile(token)
-        .then((data) => setProfile(data))
-        .catch((err) => console.error(err))
-        .finally(() => setLoading(false));
-      getPastInvoiceBalance(token)
-        .then((res) => {
-          setHasHistoricalAccess(
-            Boolean(
-              res.hasHistoricalAccess ??
-                (res.pastInvoiceBalance?.purchasedQuantity ?? 0) > 0,
-            ),
-          );
-        })
-        .catch(() => setHasHistoricalAccess(false));
-    }
-  }, [token]);
+  const { profile } = useAuth();
+  const hasHistoricalAccess = useHasHistoricalAccess();
 
   useEffect(() => {
     if (tablet_match) {

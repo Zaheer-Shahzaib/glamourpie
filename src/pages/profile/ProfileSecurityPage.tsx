@@ -12,8 +12,6 @@ import { useAuth } from '../../Context/useAuth';
 import { notifications } from '@mantine/notifications';
 import { changePassword } from '../../Services/user-services';
 import { ChangePasswordData } from '../../types/profile.types';
-import MainLayout from '../../layout/Main';
-
 export default function ProfileSecurityPage() {
     const { token } = useAuth();
     const [saving, setSaving] = useState(false);
@@ -63,8 +61,7 @@ export default function ProfileSecurityPage() {
     };
 
     return (
-        <MainLayout>
-            <Container size="lg" py="xl">
+        <Container size="lg" py="xl">
                 <Paper p="xl" radius="md" withBorder>
                     <Title order={3} mb="lg">Change Password</Title>
 
@@ -106,6 +103,5 @@ export default function ProfileSecurityPage() {
                     </Stack>
                 </Paper>
             </Container>
-        </MainLayout>
     );
 }

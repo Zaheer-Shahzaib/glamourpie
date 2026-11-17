@@ -40,13 +40,13 @@ root.render(
       >
         <Notifications />
         <AuthProvider>
-          <InvoiceUploadSessionProvider>
-            <Router>
+          <Router>
+            <InvoiceUploadSessionProvider>
               <ScrollProvider>
                 <App />
               </ScrollProvider>
-            </Router>
-          </InvoiceUploadSessionProvider>
+            </InvoiceUploadSessionProvider>
+          </Router>
         </AuthProvider>
       </MantineProvider>
     </QueryClientProvider>

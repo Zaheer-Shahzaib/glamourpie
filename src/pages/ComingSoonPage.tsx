@@ -8,8 +8,6 @@ import {
     Group,
 } from '@mantine/core';
 import { IconTools } from '@tabler/icons-react';
-import MainLayout from '../layout/Main';
-
 interface ComingSoonPageProps {
     title?: string;
     description?: string;
@@ -20,8 +18,7 @@ export default function ComingSoonPage({
     description = 'This feature is currently under development and will be available soon.'
 }: ComingSoonPageProps) {
     return (
-        <MainLayout>
-            <Container size="md" py="xl">
+        <Container size="md" py="xl">
                 <Paper p="xl" radius="md" withBorder>
                     <Stack align="center" gap="lg" py="xl">
                         <ThemeIcon size={80} radius="xl" variant="light" color="blue">
@@ -44,6 +41,5 @@ export default function ComingSoonPage({
                     </Stack>
                 </Paper>
             </Container>
-        </MainLayout>
     );
 }

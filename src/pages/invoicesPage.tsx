@@ -27,10 +27,9 @@ import { useInvoices } from "../hooks/useInvoices";
 import InvoiceList from "../Components/Invoice/InvoiceList";
 import InvoiceDetailsModal from "../Components/Invoice/InvoiceDetailsModal";
 import InvoiceExportModal from "../Components/Invoice/InvoiceExportModal";
-import MainLayout from "../layout/Main";
 import { downloadInvoiceDocument } from "../Services/invoice-services";
 import { getSubscriptionStatus } from "../Services/stripeService";
-import { getPastInvoiceBalance } from "../Services/past-invoice-services";
+import { useHasHistoricalAccess } from "../hooks/usePastInvoiceBalance";
 
 const LIMIT = 20;
 
@@ -50,7 +49,7 @@ export default function InvoicesPage() {
   // Subscription info — used to gate/configure the export modal
   const [activePlan, setActivePlan] = useState<string | null>(null);
   const [subLoading, setSubLoading] = useState(true);
-  const [hasHistoricalAccess, setHasHistoricalAccess] = useState(false);
+  const hasHistoricalAccess = useHasHistoricalAccess();
 
   // Real stats from the backend (total amounts across all pages + usage limits)
   const [stats, setStats] = useState<any>(null);
@@ -90,16 +89,6 @@ export default function InvoicesPage() {
         .catch(console.error);
     });
 
-    getPastInvoiceBalance(token)
-      .then((res) => {
-        setHasHistoricalAccess(
-          Boolean(
-            res.hasHistoricalAccess ??
-              (res.pastInvoiceBalance?.purchasedQuantity ?? 0) > 0,
-          ),
-        );
-      })
-      .catch(() => setHasHistoricalAccess(false));
   }, [token]);
 
   useEffect(() => {
@@ -191,8 +180,8 @@ export default function InvoicesPage() {
   const isLimitReached = usageGenerated >= usageLimit;
 
   return (
-    <MainLayout>
-      <Container fluid py="xl">
+    <>
+    <Container fluid py="xl">
         <Stack gap="lg">
           {/* ── Header ──────────────────────────────────────────── */}
           <Group justify="space-between" align="flex-start">
@@ -391,6 +380,6 @@ export default function InvoicesPage() {
         onClose={() => setExportOpened(false)}
         userPlan={activePlan}
       />
-    </MainLayout>
+    </>
   );
 }

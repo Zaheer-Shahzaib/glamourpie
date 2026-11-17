@@ -44,6 +44,7 @@ import PaymentCancelled from "./pages/PaymentCancelled";
 import ConnectSellerPage from "./pages/ConnectSellerPage";
 import SsoCallbackPage from "./Components/authentication/ssoCallback/page";
 import SettingsPage from "./pages/settingsPage";
+import AppLayoutRoute from "./layout/AppLayoutRoute";
 
 // --- Auth Simulation ---
 // export const useAuth = () => {
@@ -125,111 +126,97 @@ export default function App() {
         <Route path={PATH_AUTH.otpVerify} element={<OTPVerify />} />
         <Route path={PATH_AUTH.ssoSuccess} element={<SsoCallbackPage />} />
       </Route>
-      {/* Protected Routes */}
+      {/* Protected Routes — one layout shell so Navigation is not remounted on every page */}
       <Route
         path="/connect-amazon"
         element={<ProtectedRoute requireSeller={false} />}
       >
         <Route index element={<ConnectSellerPage />} />
       </Route>
-      <Route path={PATH_DASHBOARD.root} element={<ProtectedRoute />}>
-        <Route path={PATH_DASHBOARD.default} element={<Dashboard />} />
-      </Route>
-      <Route path={PATH_APPS.profile.root} element={<ProtectedRoute />}>
-        <Route
-          path={PATH_APPS.profile.personal}
-          element={<ProfilePersonalPage />}
-        />
-        <Route
-          path={PATH_APPS.profile.security}
-          element={<ProfileSecurityPage />}
-        />
-        <Route
-          path={PATH_APPS.profile.credentials}
-          element={<ProfileCredentialsPage />}
-        />
-        <Route
-          path={PATH_APPS.profile.statistics}
-          element={<ProfileStatisticsPage />}
-        />
-      </Route>
-      <Route path={"/settings"} element={<SettingsPage />} />
-      <Route path={PATH_APPS.orders} element={<ProtectedRoute />}>
-        <Route index element={<OrdersPage />} />
-      </Route>
-      <Route path={PATH_APPS.invoices.root} element={<ProtectedRoute />}>
-        <Route index element={<InvoicesPage />} />
-        <Route path="upload">
-          <Route path="missing" element={<MissingInvoicesPage />} />
-          <Route path="historical" element={<HistoricalOrdersPage />} />
+      <Route element={<ProtectedRoute />}>
+        <Route element={<AppLayoutRoute />}>
+          <Route path={PATH_DASHBOARD.default} element={<Dashboard />} />
+          <Route
+            path={PATH_APPS.profile.personal}
+            element={<ProfilePersonalPage />}
+          />
+          <Route
+            path={PATH_APPS.profile.security}
+            element={<ProfileSecurityPage />}
+          />
+          <Route
+            path={PATH_APPS.profile.credentials}
+            element={<ProfileCredentialsPage />}
+          />
+          <Route
+            path={PATH_APPS.profile.statistics}
+            element={<ProfileStatisticsPage />}
+          />
+          <Route path="/settings" element={<SettingsPage />} />
+          <Route path={PATH_APPS.orders} element={<OrdersPage />} />
+          <Route path={PATH_APPS.invoices.root}>
+            <Route index element={<InvoicesPage />} />
+            <Route path="upload">
+              <Route path="missing" element={<MissingInvoicesPage />} />
+              <Route path="historical" element={<HistoricalOrdersPage />} />
+            </Route>
+            <Route path="missing" element={<MissingInvoicesPage />} />
+            <Route path="historical" element={<HistoricalOrdersPage />} />
+            <Route path="past" element={<HistoricalOrdersPage />} />
+          </Route>
+          <Route
+            path={PATH_APPS.settings.spApi}
+            element={<SettingsSpApiPage />}
+          />
+          <Route
+            path={PATH_APPS.settings.marketplace}
+            element={<SettingsMarketplacePage />}
+          />
+          <Route
+            path={PATH_APPS.settings.invoices}
+            element={<SettingsInvoicesPage />}
+          />
+          <Route
+            path={PATH_APPS.settings.notifications}
+            element={<SettingsNotificationsPage />}
+          />
+          <Route
+            path={PATH_APPS.settings.business}
+            element={<SettingsBusinessPage />}
+          />
+          <Route
+            path={PATH_APPS.settings.billing}
+            element={<SettingsBillingPage />}
+          />
+          <Route
+            path={PATH_APPS.tasks}
+            element={
+              <ComingSoonPage
+                title="Tasks"
+                description="Task management feature is coming soon."
+              />
+            }
+          />
+          <Route
+            path={PATH_APPS.calendar}
+            element={
+              <ComingSoonPage
+                title="Calendar"
+                description="Calendar feature is coming soon."
+              />
+            }
+          />
+          <Route
+            path={PATH_APPS.fileManager}
+            element={
+              <ComingSoonPage
+                title="File Manager"
+                description="File management feature is coming soon."
+              />
+            }
+          />
+          <Route path={PATH_APPS.analytics} element={<AnalyticsPage />} />
         </Route>
-        <Route path="missing" element={<MissingInvoicesPage />} />
-        <Route path="historical" element={<HistoricalOrdersPage />} />
-        <Route path="past" element={<HistoricalOrdersPage />} />
-      </Route>
-      {/* Settings Child Routes */}
-      <Route path={PATH_APPS.settings.root} element={<ProtectedRoute />}>
-        <Route
-          path={PATH_APPS.settings.spApi}
-          element={<SettingsSpApiPage />}
-        />
-        <Route
-          path={PATH_APPS.settings.marketplace}
-          element={<SettingsMarketplacePage />}
-        />
-        <Route
-          path={PATH_APPS.settings.invoices}
-          element={<SettingsInvoicesPage />}
-        />
-        <Route
-          path={PATH_APPS.settings.notifications}
-          element={<SettingsNotificationsPage />}
-        />
-        <Route
-          path={PATH_APPS.settings.business}
-          element={<SettingsBusinessPage />}
-        />
-        <Route
-          path={PATH_APPS.settings.billing}
-          element={<SettingsBillingPage />}
-        />
-      </Route>
-      {/* Placeholder Routes */}
-      <Route path={PATH_APPS.tasks} element={<ProtectedRoute />}>
-        <Route
-          index
-          element={
-            <ComingSoonPage
-              title="Tasks"
-              description="Task management feature is coming soon."
-            />
-          }
-        />
-      </Route>
-      <Route path={PATH_APPS.calendar} element={<ProtectedRoute />}>
-        <Route
-          index
-          element={
-            <ComingSoonPage
-              title="Calendar"
-              description="Calendar feature is coming soon."
-            />
-          }
-        />
-      </Route>
-      <Route path={PATH_APPS.fileManager} element={<ProtectedRoute />}>
-        <Route
-          index
-          element={
-            <ComingSoonPage
-              title="File Manager"
-              description="File management feature is coming soon."
-            />
-          }
-        />
-      </Route>
-      <Route path={PATH_APPS.analytics} element={<ProtectedRoute />}>
-        <Route index element={<AnalyticsPage />} />
       </Route>
       <Route path="*" element={<ErrorPage />} />
     </Routes>

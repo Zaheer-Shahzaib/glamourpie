@@ -40,7 +40,6 @@ import {
 } from "../../Services/stripeService";
 import { PATH_APPS } from "../../routes";
 import { estimateHistoricalCheckoutTotalAed } from "../../utils/historicalInvoiceCheckout";
-import MainLayout from "../../layout/Main";
 import { Link } from "react-router-dom";
 import { getBillingStatusColor } from "../../utils/helperFunctions";
 import { useScroll } from "../../Context/scrollContext";
@@ -298,8 +297,8 @@ export default function SettingsBillingPage() {
   };
 
   return (
-    <MainLayout>
-      <Container size="lg" py="xl">
+    <>
+    <Container size="lg" py="xl">
         <Paper p="xl" radius="md" withBorder>
           <Stack gap="xl">
             <Box>
@@ -822,6 +821,6 @@ export default function SettingsBillingPage() {
           </Stack>
         )}
       </Modal>
-    </MainLayout>
+    </>
   );
 }

@@ -12,7 +12,6 @@ import {
 } from "@mantine/core";
 import { useAuth } from "../../Context/useAuth";
 import { notifications } from "@mantine/notifications";
-import MainLayout from "../../layout/Main";
 import { AMAZON_MARKETPLACES, CURRENCIES } from "../../constants/marketplaces";
 import { fetchSellerSettings, updateSellerSettings } from '../../Services/settings-services';
 import { useEffect } from "react";
@@ -71,8 +70,7 @@ export default function SettingsMarketplacePage() {
   };
 
   return (
-    <MainLayout>
-      <Container size="lg" py="xl">
+    <Container size="lg" py="xl">
         <Paper p="xl" radius="md" withBorder>
           <Stack gap="md">
             <div>
@@ -134,6 +132,5 @@ export default function SettingsMarketplacePage() {
           </Stack>
         </Paper>
       </Container>
-    </MainLayout>
   );
 }

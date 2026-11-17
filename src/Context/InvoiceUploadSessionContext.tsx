@@ -110,12 +110,14 @@ export function InvoiceUploadSessionProvider({
   );
 
   useEffect(() => {
-    if (!token) {
-      setHistorical(defaultHistorical());
-      setMissing(defaultMissing());
-      sessionStorage.removeItem(STORAGE_KEY);
-      return;
-    }
+    if (token) return;
+    setHistorical(defaultHistorical());
+    setMissing(defaultMissing());
+    sessionStorage.removeItem(STORAGE_KEY);
+  }, [token]);
+
+  useEffect(() => {
+    if (!token) return;
     const payload: PersistedSession = { historical, missing };
     sessionStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
   }, [token, historical, missing]);
@@ -134,8 +136,7 @@ export function InvoiceUploadSessionProvider({
       setRows: (updater) =>
         setHistorical((prev) => ({
           ...prev,
-          rows:
-            typeof updater === "function" ? updater(prev.rows) : updater,
+          rows: typeof updater === "function" ? updater(prev.rows) : updater,
         })),
       setDateRange: (updater) =>
         setHistorical((prev) => {
@@ -152,9 +153,7 @@ export function InvoiceUploadSessionProvider({
         setHistorical((prev) => ({
           ...prev,
           lastLookup:
-            typeof updater === "function"
-              ? updater(prev.lastLookup)
-              : updater,
+            typeof updater === "function" ? updater(prev.lastLookup) : updater,
         })),
       setDatePageTokens: (updater) =>
         setHistorical((prev) => ({
@@ -191,8 +190,7 @@ export function InvoiceUploadSessionProvider({
       setRows: (updater) =>
         setMissing((prev) => ({
           ...prev,
-          rows:
-            typeof updater === "function" ? updater(prev.rows) : updater,
+          rows: typeof updater === "function" ? updater(prev.rows) : updater,
         })),
       setOrderIdsText: (updater) =>
         setMissing((prev) => ({
@@ -206,9 +204,7 @@ export function InvoiceUploadSessionProvider({
         setMissing((prev) => ({
           ...prev,
           lastLookup:
-            typeof updater === "function"
-              ? updater(prev.lastLookup)
-              : updater,
+            typeof updater === "function" ? updater(prev.lastLookup) : updater,
         })),
       resetMissingSession,
     }),

@@ -23,7 +23,6 @@ import {
   IconUpload,
 } from "@tabler/icons-react";
 import { notifications } from "@mantine/notifications";
-import MainLayout from "../layout/Main";
 import { useAuth } from "../Context/useAuth";
 import {
   bulkGenerateMissingInvoices,
@@ -402,8 +401,7 @@ export default function MissingInvoicesPage() {
   };
 
   return (
-    <MainLayout>
-      <Container size="xl" py="md">
+    <Container size="xl" py="md">
         <Stack gap="md">
           <InvoiceUploadSubNav />
 
@@ -606,6 +604,5 @@ export default function MissingInvoicesPage() {
           invoiceId={selectedInvoiceId}
         />
       </Container>
-    </MainLayout>
   );
 }

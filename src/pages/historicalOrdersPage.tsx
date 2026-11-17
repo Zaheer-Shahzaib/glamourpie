@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Badge,
   Button,
@@ -20,12 +20,10 @@ import {
   IconSearch,
 } from "@tabler/icons-react";
 import { notifications } from "@mantine/notifications";
-import MainLayout from "../layout/Main";
 import { useAuth } from "../Context/useAuth";
 import {
   bulkGenerateHistoricalInvoices,
   bulkUploadHistoricalInvoices,
-  getPastInvoiceBalance,
   lookupHistoricalOrders,
   refreshHistoricalUploadStatus,
   uploadHistoricalInvoiceToAmazon,
@@ -51,6 +49,11 @@ import {
 import InvoiceDetailsModal from "../Components/Invoice/InvoiceDetailsModal";
 import InvoiceUploadSubNav from "../Components/Invoice/InvoiceUploadSubNav";
 import { useHistoricalUploadSession } from "../Context/InvoiceUploadSessionContext";
+import {
+  pastInvoiceBalanceQueryKey,
+  usePastInvoiceBalance,
+} from "../hooks/usePastInvoiceBalance";
+import { useQueryClient } from "@tanstack/react-query";
 
 /** Mantine DatePickerInput may yield Date or ISO/date strings depending on version. */
 const toApiDateString = (value: Date | string | null | undefined): string | null => {
@@ -86,6 +89,7 @@ const uploadStatusColor = (status: string | null) => {
 
 export default function HistoricalOrdersPage() {
   const { token } = useAuth();
+  const queryClient = useQueryClient();
   const {
     rows,
     setRows,
@@ -100,8 +104,6 @@ export default function HistoricalOrdersPage() {
     dateRangePagination,
     setDateRangePagination,
   } = useHistoricalUploadSession();
-  const [accessChecked, setAccessChecked] = useState(false);
-  const [hasHistoricalAccess, setHasHistoricalAccess] = useState(false);
   const [loading, setLoading] = useState(false);
   const [bulkGenLoading, setBulkGenLoading] = useState(false);
   const [bulkUploadLoading, setBulkUploadLoading] = useState(false);
@@ -109,30 +111,18 @@ export default function HistoricalOrdersPage() {
   const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | null>(
     null,
   );
-  const [pastBalance, setPastBalance] = useState<PastInvoiceBalance | null>(
-    null,
+  const {
+    data: balanceRes,
+    refetch: reloadPastBalance,
+    isFetched: accessChecked,
+  } = usePastInvoiceBalance();
+  const pastBalance: PastInvoiceBalance | null = balanceRes?.success
+    ? balanceRes.pastInvoiceBalance
+    : null;
+  const hasHistoricalAccess = Boolean(
+    balanceRes?.hasHistoricalAccess ??
+      (balanceRes?.pastInvoiceBalance?.purchasedQuantity ?? 0) > 0,
   );
-  const reloadPastBalance = async () => {
-    if (!token) return;
-    try {
-      const res = await getPastInvoiceBalance(token);
-      if (res.success) {
-        setPastBalance(res.pastInvoiceBalance);
-        setHasHistoricalAccess(
-          res.hasHistoricalAccess ??
-            (res.pastInvoiceBalance.purchasedQuantity ?? 0) > 0,
-        );
-      }
-    } catch {
-      /* ignore */
-    } finally {
-      setAccessChecked(true);
-    }
-  };
-
-  useEffect(() => {
-    reloadPastBalance();
-  }, [token]);
 
   const eligibleOrderIds = useMemo(
     () => rows.filter((r) => r.generationEligible).map((r) => r.orderId),
@@ -149,8 +139,15 @@ export default function HistoricalOrdersPage() {
     options?: { quiet?: boolean },
   ) => {
     setRows(res.results);
-    if (res.pastInvoiceBalance) {
-      setPastBalance(res.pastInvoiceBalance);
+    if (res.pastInvoiceBalance && token) {
+      queryClient.setQueryData(
+        pastInvoiceBalanceQueryKey(token),
+        (prev: typeof balanceRes | undefined) => ({
+          ...(prev ?? { success: true }),
+          success: true,
+          pastInvoiceBalance: res.pastInvoiceBalance,
+        }),
+      );
     }
     if (res.pagination) {
       setDateRangePagination(res.pagination);
@@ -458,11 +455,9 @@ export default function HistoricalOrdersPage() {
 
   if (!accessChecked) {
     return (
-      <MainLayout>
-        <Container size="xl" py="xl">
+      <Container size="xl" py="xl">
           <Text c="dimmed">Loading…</Text>
         </Container>
-      </MainLayout>
     );
   }
 
@@ -471,8 +466,7 @@ export default function HistoricalOrdersPage() {
   }
 
   return (
-    <MainLayout>
-      <Container size="xl" py="md">
+    <Container size="xl" py="md">
         <Stack gap="md">
           <InvoiceUploadSubNav showHistorical />
 
@@ -727,6 +721,5 @@ export default function HistoricalOrdersPage() {
           invoiceId={selectedInvoiceId}
         />
       </Container>
-    </MainLayout>
   );
 }

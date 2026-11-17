@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { Fragment, useState, useEffect } from 'react';
 import {
     Container,
     Paper,
@@ -20,7 +20,6 @@ import { IconRefresh, IconCheck, IconX, IconInfoCircle } from '@tabler/icons-rea
 import { useAuth } from '../../Context/useAuth';
 import { notifications } from '@mantine/notifications';
 import { api } from '../../Services/api';
-import MainLayout from '../../layout/Main';
 import { useDisclosure } from '@mantine/hooks';
 
 export default function SettingsSpApiPage() {
@@ -197,8 +196,8 @@ export default function SettingsSpApiPage() {
     }, []);
 
     return (
-        <MainLayout>
-            <Container size="lg" py="xl">
+        <Fragment>
+        <Container size="lg" py="xl">
                 <Paper p="xl" radius="md" withBorder>
                     <Stack gap="md">
                         <Group justify="space-between">
@@ -342,6 +341,6 @@ export default function SettingsSpApiPage() {
                     <Button onClick={close}>Close Result</Button>
                 </Group>
             </Modal>
-        </MainLayout>
+        </Fragment>
     );
 }

@@ -20,7 +20,6 @@ import {
 import { IconTrash, IconUpload } from "@tabler/icons-react";
 import { useAuth } from "../../Context/useAuth";
 import { notifications } from "@mantine/notifications";
-import MainLayout from "../../layout/Main";
 import {
   deleteInvoiceLetterhead,
   fetchInvoiceLetterheadPreview,
@@ -281,8 +280,7 @@ export default function SettingsInvoicesPage() {
   };
 
   return (
-    <MainLayout>
-      <Container size="lg" py="xl">
+    <Container size="lg" py="xl">
         <Paper p="xl" radius="md" withBorder>
           <Stack gap="md">
             <div>
@@ -504,6 +502,5 @@ export default function SettingsInvoicesPage() {
           </Stack>
         </Paper>
       </Container>
-    </MainLayout>
   );
 }
