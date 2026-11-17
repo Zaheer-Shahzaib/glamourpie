@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo } from "react";
 
 import {
   ActionIcon,
@@ -36,9 +36,8 @@ import UserProfileButton from "../UserButton";
 import { useNavigate } from "react-router-dom";
 import { PATH_DASHBOARD, PATH_APPS } from "../../routes";
 import { useAuth } from "../../Context/useAuth";
-import { fetchUserProfile } from "../../Services/user-services";
-import { UserProfile } from "../../types/profile.types";
 import { getAvatarUrl } from "../../utils/helperFunctions";
+import { useHasHistoricalAccess } from "../../hooks/usePastInvoiceBalance";
 const mockdata = [
   {
     title: "Dashboard",
@@ -54,6 +53,16 @@ const mockdata = [
         label: "Invoices",
         icon: IconFileInvoice,
         link: PATH_APPS.invoices.root,
+      },
+      {
+        label: "Invoice Upload",
+        icon: IconFiles,
+        links: [
+          {
+            label: "Missing Invoice",
+            link: PATH_APPS.invoices.upload.missing,
+          },
+        ],
       },
     ],
   },
@@ -103,18 +112,8 @@ const Navigation = ({
 }: NavigationProps) => {
   const tablet_match = useMediaQuery("(max-width: 768px)");
   const navigate = useNavigate();
-  const { token } = useAuth();
-  const [profile, setProfile] = useState<UserProfile>();
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (token) {
-      fetchUserProfile(token)
-        .then((data) => setProfile(data))
-        .catch((err) => console.error(err))
-        .finally(() => setLoading(false));
-    }
-  }, [token]);
+  const { profile } = useAuth();
+  const hasHistoricalAccess = useHasHistoricalAccess();
 
   useEffect(() => {
     if (tablet_match) {
@@ -122,7 +121,33 @@ const Navigation = ({
     }
   }, [onSidebarStateChange, tablet_match]);
 
-  const links = mockdata.map((m) => (
+  const navSections = useMemo(() => {
+    const uploadSubLinks = [
+      {
+        label: "Missing Invoice",
+        link: PATH_APPS.invoices.upload.missing,
+      },
+      ...(hasHistoricalAccess
+        ? [
+            {
+              label: "Historical Amazon Invoice",
+              link: PATH_APPS.invoices.upload.historical,
+            },
+          ]
+        : []),
+    ];
+
+    return mockdata.map((section) => {
+      if (section.title !== "Dashboard") return section;
+      const links = section.links.map((item) => {
+        if (item.label !== "Invoice Upload") return item;
+        return { ...item, links: uploadSubLinks };
+      });
+      return { ...section, links };
+    });
+  }, [hasHistoricalAccess]);
+
+  const links = navSections.map((m) => (
     <Box
       key={m.title}
       pl={0}

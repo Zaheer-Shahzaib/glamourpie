@@ -12,6 +12,7 @@ type AuthContextType = {
   loading?: boolean;
   isSellerConnected?: boolean | null;
   refreshSellerStatus?: () => Promise<void>;
+  refreshProfile?: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -71,6 +72,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  const refreshProfile = async () => {
+    if (!token) return;
+    try {
+      const userData = await fetchUserProfile(token);
+      setProfile(userData);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const login = (newToken: string, rememberMe?: boolean) => {
     if (rememberMe) {
       Cookies.set("token", newToken, { expires: 30 });
@@ -99,7 +110,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <AuthContext.Provider
-      value={{ isAuthenticated, token, login, logout, profile, loading, isSellerConnected, refreshSellerStatus }}
+      value={{
+        isAuthenticated,
+        token,
+        login,
+        logout,
+        profile,
+        loading,
+        isSellerConnected,
+        refreshSellerStatus,
+        refreshProfile,
+      }}
     >
       {children}
     </AuthContext.Provider>

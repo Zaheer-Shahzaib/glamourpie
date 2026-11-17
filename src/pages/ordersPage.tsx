@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   Container,
   Paper,
@@ -38,8 +38,8 @@ import { useOrders, useOrderStats } from "../hooks/useOrders";
 import { useInvoices } from "../hooks/useInvoices";
 import { fetchOrderDetails } from "../Services/order-services";
 import { generateManualInvoice } from "../Services/invoice-services";
+import { getInvoiceGenerationError } from "../utils/vatDisplay";
 import { OrderStatus, OrderQueryParams } from "../types/order.types";
-import MainLayout from "../layout/Main";
 import CountUp from "react-countup";
 
 // Statuses that are eligible for invoice generation
@@ -130,7 +130,12 @@ export default function OrdersPage() {
   }, [pageTokens, pageIndex]);
 
   // ── React Query: one SP-API page + invoices in parallel ──────────────────
-  const { data: ordersData, isFetching: loading } = useOrders(orderQueryParams);
+  const {
+    data: ordersData,
+    isFetching: loading,
+    error: ordersError,
+    isError: ordersIsError,
+  } = useOrders(orderQueryParams);
   const { data: stats } = useOrderStats();
   const { invoices: existingInvoices } = useInvoices({ limit: 9999 });
 
@@ -240,6 +245,23 @@ export default function OrdersPage() {
     setPageIndex((i) => Math.max(0, i - 1));
   };
 
+  useEffect(() => {
+    if (!ordersIsError || !ordersError) return;
+    const code = (ordersError as { response?: { data?: { code?: string } } })
+      ?.response?.data?.code;
+    if (code !== "PAGINATION_SESSION_EXPIRED") return;
+
+    setPageTokens([undefined]);
+    setPageIndex(0);
+    queryClient.invalidateQueries({ queryKey: ["orders"] });
+    notifications.show({
+      title: "Order list refreshed",
+      message:
+        "Pagination expired (for example after a server restart). Showing page 1 again.",
+      color: "yellow",
+    });
+  }, [ordersIsError, ordersError, queryClient]);
+
   const handleViewDetails = async (orderId: string) => {
     if (!token) return;
 
@@ -280,22 +302,21 @@ export default function OrdersPage() {
         icon: <IconCheck size={16} />,
       });
     } catch (error: any) {
-      let message = "Failed to generate invoice";
+      let parsedError = error;
 
-      if (error.response?.data?.error === "Blob") {
+      if (error.response?.data instanceof Blob) {
         try {
           const text = await error.response.data.text();
-          const parse = JSON.parse(text);
-          if (parse.error) message = parse.error;
+          parsedError = {
+            response: { data: JSON.parse(text) },
+          };
         } catch (e) {}
-      } else if (error.response?.data?.error) {
-        message = error.response.data.error;
-      } else if (error.response?.data?.message) {
-        message = error.response.data.message;
       }
 
+      const { title, message } = getInvoiceGenerationError(parsedError);
+
       notifications.show({
-        title: "Generation Failed",
+        title,
         message,
         color: "red",
         icon: <IconX size={16} />,
@@ -306,8 +327,8 @@ export default function OrdersPage() {
   };
 
   return (
-    <MainLayout>
-      <Container fluid py="xl">
+    <>
+    <Container fluid py="xl">
         <Stack gap="lg">
           {/* Header */}
           <Group justify="space-between">
@@ -1011,6 +1032,6 @@ export default function OrdersPage() {
           </Stack>
         )}
       </Modal>
-    </MainLayout>
+    </>
   );
 }

@@ -12,8 +12,6 @@ import {
 import { useAuth } from '../../Context/useAuth';
 import { getProfileStats } from '../../Services/user-services';
 import { ProfileStats } from '../../types/profile.types';
-import MainLayout from '../../layout/Main';
-
 export default function ProfileStatisticsPage() {
     const { token } = useAuth();
     const [stats, setStats] = useState<ProfileStats | null>(null);
@@ -34,8 +32,7 @@ export default function ProfileStatisticsPage() {
     };
 
     return (
-        <MainLayout>
-            <Container size="lg" py="xl">
+        <Container size="lg" py="xl">
                 <Paper p="xl" radius="md" withBorder>
                     <Group justify="space-between" mb="lg">
                         <Title order={3}>Account Statistics</Title>
@@ -76,6 +73,5 @@ export default function ProfileStatisticsPage() {
                     )}
                 </Paper>
             </Container>
-        </MainLayout>
     );
 }

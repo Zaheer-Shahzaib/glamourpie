@@ -12,7 +12,26 @@ import {
 import { IconChevronRight } from "@tabler/icons-react";
 import classes from "./Links.module.scss";
 import { useLocation, useNavigate } from "react-router-dom";
-import * as _ from "lodash";
+
+function normalizePath(path: string) {
+  return path.toLowerCase().replace(/\/+$/, "");
+}
+
+function isChildNavActive(childLink: string, pathname: string) {
+  const path = normalizePath(pathname);
+  const child = normalizePath(childLink);
+  return path === child || path.startsWith(`${child}/`);
+}
+
+/** Top-level link (no submenu): match route but not Invoice Upload subtree. */
+function isLeafNavActive(itemLink: string, pathname: string) {
+  const path = normalizePath(pathname);
+  const base = normalizePath(itemLink);
+  if (path === base) return true;
+  if (!path.startsWith(`${base}/`)) return false;
+  if (path.startsWith(`${base}/upload`)) return false;
+  return true;
+}
 
 export interface LinksGroupProps {
   icon?: any;
@@ -40,7 +59,19 @@ export function LinksGroup(props: LinksGroupProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const hasLinks = Array.isArray(links);
-  const [opened, setOpened] = useState(initiallyOpened || false);
+  const childLinks = hasLinks ? links : [];
+  const anyChildActive = childLinks.some((l) =>
+    isChildNavActive(l.link, location.pathname),
+  );
+  const leafActive =
+    !hasLinks && link
+      ? isLeafNavActive(link, location.pathname)
+      : false;
+  const groupActive = hasLinks && anyChildActive;
+
+  const [opened, setOpened] = useState(
+    initiallyOpened || anyChildActive || false,
+  );
   const ChevronIcon = IconChevronRight;
 
   const LinkItem = ({ linkData }: { linkData: { label: string; link: string } }) => {
@@ -53,7 +84,9 @@ export function LinksGroup(props: LinksGroupProps) {
           navigate(linkData.link);
           closeSidebar();
         }}
-        data-active={linkData.link.toLowerCase() === location.pathname.toLowerCase() || undefined}
+        data-active={
+          isChildNavActive(linkData.link, location.pathname) || undefined
+        }
         data-mini={isMini}
         style={{
           padding: "4px 10px 2px 40px",
@@ -77,8 +110,46 @@ export function LinksGroup(props: LinksGroupProps) {
     )
   );
 
+  useEffect(() => {
+    if (!hasLinks) return;
+    setOpened(anyChildActive);
+  }, [anyChildActive, hasLinks]);
+
   const content: React.ReactElement = useMemo(() => {
     let view: React.ReactElement;
+
+    if (!hasLinks && link) {
+      view = (
+        <UnstyledButton
+          onClick={() => {
+            navigate(link);
+            closeSidebar();
+          }}
+          className={classes.control}
+          data-active={leafActive || undefined}
+          data-mini={isMini}
+        >
+          {isMini ? (
+            <Tooltip
+              label={label}
+              position="right"
+              transitionProps={{ duration: 0 }}
+            >
+              <Icon size={24} />
+            </Tooltip>
+          ) : (
+            <Group justify="space-between" gap={0}>
+              <Box style={{ display: "flex", alignItems: "center" }}>
+                <Icon size={18} />
+                <Box ml="md">{label}</Box>
+              </Box>
+            </Group>
+          )}
+        </UnstyledButton>
+      );
+      return view;
+    }
+
     if (isMini) {
       view = (
         <>
@@ -94,11 +165,9 @@ export function LinksGroup(props: LinksGroupProps) {
               <UnstyledButton
                 onClick={() => {
                   setOpened((o) => !o);
-                  link && navigate(link || "#");
-                  closeSidebar();
                 }}
                 className={classes.control}
-                data-active={opened || undefined}
+                data-active={groupActive || undefined}
                 data-mini={isMini}
               >
                 <Tooltip
@@ -120,11 +189,9 @@ export function LinksGroup(props: LinksGroupProps) {
           <UnstyledButton
             onClick={() => {
               setOpened((o) => !o);
-              link && navigate(link || "#");
-              closeSidebar();
             }}
             className={classes.control}
-            data-active={opened || undefined}
+            data-active={groupActive || undefined}
             data-mini={isMini}
           >
             <Group
@@ -161,15 +228,11 @@ export function LinksGroup(props: LinksGroupProps) {
     isMini,
     items,
     label,
-    link,
+    groupActive,
+    leafActive,
     opened,
     navigate,
   ]);
-
-  useEffect(() => {
-    const paths = location.pathname.split("/");
-    setOpened(paths.includes(label.toLowerCase()));
-  }, [location.pathname, label]);
 
   return <div className='menu_content'>{content}</div>;
 }

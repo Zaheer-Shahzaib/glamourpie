@@ -28,11 +28,15 @@ export interface SellerSettings {
     invoiceSettings: {
         autoGenerateInvoices: boolean;
         invoicePrefix: string;
-        invoiceNumberFormat: 'sequential' | 'date-based' | 'custom';
+        invoiceStartNumber: number;
+        invoiceNextNumber: number;
+        invoiceNumberPadding: number;
+        nextInvoiceNumber?: string;
         includeVAT: boolean;
         vatRate: number;
         invoiceTemplate: 'simple' | 'premium';
         autoUploadToAmazon: boolean;
+        letterheadUrl?: string | null;
     };
 
     // Notification Settings

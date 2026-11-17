@@ -30,6 +30,20 @@ import {
   getStatusColor,
   getTypeColor,
 } from "../../utils/helperFunctions";
+import {
+  formatTaxRate,
+  getGrandTotalLabel,
+  getNetUnitPrice,
+  getSubtotalLabel,
+  getVatLineLabel,
+  isVatApplied,
+} from "../../utils/vatDisplay";
+import {
+  getInvoiceItemSubtotalExclVat,
+  getInvoiceItemVat,
+  getInvoiceShippingRow,
+  invoiceHasShippingSection,
+} from "../../utils/invoiceShippingDisplay";
 
 interface InvoiceDetailsModalProps {
   invoiceId: string | null;
@@ -220,11 +234,26 @@ export default function InvoiceDetailsModal({
                       </Table.Td>
                       <Table.Td>
                         <Text size="sm">
-                          {formatCurrency(item.unitPrice, invoice.currency)}
+                          {formatCurrency(
+                            getNetUnitPrice(
+                              item.unitPrice,
+                              item.taxAmount,
+                              item.quantity,
+                              {
+                                taxAmount: item.taxAmount,
+                                taxRate: item.taxRate,
+                                priceIncludesVat: invoice.priceIncludesVat,
+                                vatStatus: invoice.vatStatus,
+                              },
+                            ),
+                            invoice.currency,
+                          )}
                         </Text>
                       </Table.Td>
                       <Table.Td>
-                        <Text size="sm">{(item.taxRate ?? 5).toFixed(0)}%</Text>
+                        <Text size="sm">
+                          {formatTaxRate(item.taxRate) || "—"}
+                        </Text>
                       </Table.Td>
                       <Table.Td>
                         <Text size="sm">
@@ -243,47 +272,172 @@ export default function InvoiceDetailsModal({
             </Table.ScrollContainer>
           </Paper>
 
+          {invoiceHasShippingSection(invoice) && (
+            <Paper p="md" withBorder>
+              <Text fw={600} mb="md">
+                Shipping
+              </Text>
+              <Table.ScrollContainer minWidth={500}>
+                <Table striped>
+                  <Table.Thead>
+                    <Table.Tr>
+                      <Table.Th>Shipping Items</Table.Th>
+                      <Table.Th>Shipping amount</Table.Th>
+                      <Table.Th>Shipping Vat</Table.Th>
+                      <Table.Th>Total Shipping amount</Table.Th>
+                    </Table.Tr>
+                  </Table.Thead>
+                  <Table.Tbody>
+                    {(() => {
+                      const row = getInvoiceShippingRow(invoice);
+                      return (
+                        <Table.Tr>
+                          <Table.Td>
+                            <Text size="sm">{row.label}</Text>
+                          </Table.Td>
+                          <Table.Td>
+                            <Text size="sm">
+                              {formatCurrency(
+                                row.amountExclVat,
+                                invoice.currency,
+                              )}
+                            </Text>
+                          </Table.Td>
+                          <Table.Td>
+                            <Text size="sm">
+                              {formatCurrency(row.vat, invoice.currency)}
+                            </Text>
+                          </Table.Td>
+                          <Table.Td>
+                            <Text size="sm" fw={600}>
+                              {formatCurrency(
+                                row.totalInclVat,
+                                invoice.currency,
+                              )}
+                            </Text>
+                          </Table.Td>
+                        </Table.Tr>
+                      );
+                    })()}
+                  </Table.Tbody>
+                </Table>
+              </Table.ScrollContainer>
+            </Paper>
+          )}
+
           {/* Financial Summary */}
           <Paper p="md" withBorder>
             <Text fw={600} mb="md">
               Financial Summary
             </Text>
             <Stack gap="xs">
-              <Group justify="space-between">
-                <Text size="sm">Subtotal:</Text>
-                <Text size="sm" fw={600}>
-                  {formatCurrency(invoice.subtotal || 0, invoice.currency)}
-                </Text>
-              </Group>
-              {(invoice.discounts ?? 0) > 0 && (
-                <Group justify="space-between">
-                  <Text size="sm">Discounts:</Text>
-                  <Text size="sm" c="red">
-                    -{formatCurrency(invoice.discounts || 0, invoice.currency)}
-                  </Text>
-                </Group>
-              )}
-              <Group justify="space-between">
-                <Text size="sm">Tax Amount ({invoice.taxRate ?? 5}%):</Text>
-                <Text size="sm" fw={600}>
-                  {formatCurrency(invoice.taxAmount ?? 0, invoice.currency)}
-                </Text>
-              </Group>
-              {(invoice.shippingCharges ?? 0) > 0 && (
-                <Group justify="space-between">
-                  <Text size="sm">Shipping:</Text>
-                  <Text size="sm" fw={600}>
-                    {formatCurrency(
-                      invoice.shippingCharges || 0,
-                      invoice.currency,
+              {(() => {
+                const vatInfo = {
+                  taxAmount: invoice.taxAmount,
+                  taxRate: invoice.taxRate,
+                  priceIncludesVat: invoice.priceIncludesVat,
+                  vatStatus: invoice.vatStatus,
+                };
+                const row = getInvoiceShippingRow(invoice);
+                const vatApplied = isVatApplied(vatInfo);
+                const showShippingSummary =
+                  vatApplied && invoiceHasShippingSection(invoice);
+                const itemSubtotalExclVat =
+                  getInvoiceItemSubtotalExclVat(invoice);
+                const itemVat = getInvoiceItemVat(invoice);
+                // const shippingInclVat = invoice.shippingCharges ?? 0;
+
+                return (
+                  <>
+                    {showShippingSummary ? (
+                      <>
+                        <Group justify="space-between">
+                          <Text size="sm">Subtotal (excl. VAT):</Text>
+                          <Text size="sm" fw={600}>
+                            {formatCurrency(
+                              itemSubtotalExclVat + row.amountExclVat,
+                              invoice.currency,
+                            )}
+                          </Text>
+                        </Group>
+                        <Group justify="space-between">
+                          <Text size="sm">VAT ({invoice.taxRate}%):</Text>
+                          <Text size="sm" fw={600}>
+                            {formatCurrency(
+                              itemVat + row.vat,
+                              invoice.currency,
+                            )}
+                          </Text>
+                        </Group>
+                        {/* <Group justify="space-between">
+                          <Text size="sm">Shipping Include VAT:</Text>
+                          <Text size="sm" fw={600}>
+                            {formatCurrency(shippingInclVat, invoice.currency)}
+                          </Text>
+                        </Group> */}
+                      </>
+                    ) : (
+                      <>
+                        <Group justify="space-between">
+                          <Text size="sm">{getSubtotalLabel(vatInfo)}:</Text>
+                          <Text size="sm" fw={600}>
+                            {formatCurrency(
+                              invoice.subtotal - (invoice.shippingCharges ?? 0),
+                              invoice.currency,
+                            )}
+                          </Text>
+                        </Group>
+                        {invoice.shippingCharges &&
+                        invoice.shippingCharges > 0 ? (
+                          <Group justify="space-between">
+                            <Text size="sm">Shipping Amount:</Text>
+                            <Text size="sm" fw={600}>
+                              {formatCurrency(
+                                invoice.shippingCharges ?? 0,
+                                invoice.currency,
+                              )}
+                            </Text>
+                          </Group>
+                        ) : null}
+
+                        {(invoice.discounts ?? 0) > 0 && (
+                          <Group justify="space-between">
+                            <Text size="sm">Discounts:</Text>
+                            <Text size="sm" c="red">
+                              -
+                              {formatCurrency(
+                                invoice.discounts || 0,
+                                invoice.currency,
+                              )}
+                            </Text>
+                          </Group>
+                        )}
+                        {vatApplied && (
+                          <Group justify="space-between">
+                            <Text size="sm">{getVatLineLabel(vatInfo)}:</Text>
+                            <Text size="sm" fw={600}>
+                              {formatCurrency(
+                                invoice.taxAmount ?? 0,
+                                invoice.currency,
+                              )}
+                            </Text>
+                          </Group>
+                        )}
+                      </>
                     )}
-                  </Text>
-                </Group>
-              )}
+                  </>
+                );
+              })()}
               <Divider />
               <Group justify="space-between">
                 <Text fw={600} size="md">
-                  Total Amount:
+                  {getGrandTotalLabel({
+                    taxAmount: invoice.taxAmount,
+                    taxRate: invoice.taxRate,
+                    priceIncludesVat: invoice.priceIncludesVat,
+                    vatStatus: invoice.vatStatus,
+                  })}
+                  :
                 </Text>
                 <Text fw={600} size="md">
                   {formatCurrency(invoice.totalAmount ?? 0, invoice.currency)}

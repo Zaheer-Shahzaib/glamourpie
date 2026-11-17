@@ -8,7 +8,11 @@ export const getAvatarUrl = (avatarPath: string | undefined) => {
         return avatarPath;
     }
 
-    const path = avatarPath.startsWith('/') ? avatarPath : `/${avatarPath}`;
+    let path = avatarPath.startsWith('/') ? avatarPath : `/${avatarPath}`;
+    // Uploads are served by the API. Production only proxies /api, not /uploads.
+    if (path.startsWith('/uploads/')) {
+        path = `/api${path}`;
+    }
     return `${API_BASE_URL}${path}`;
 };
 export const getStatusColor = (status: any): string => {

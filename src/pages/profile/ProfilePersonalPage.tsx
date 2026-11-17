@@ -32,7 +32,6 @@ import {
   updateUserProfile,
   uploadAvatar,
 } from "../../Services/user-services";
-import MainLayout from "../../layout/Main";
 import { getAvatarUrl } from "../../utils/helperFunctions";
 
 export default function ProfilePersonalPage() {
@@ -159,17 +158,14 @@ export default function ProfilePersonalPage() {
 
   if (loading || !profile) {
     return (
-      <MainLayout>
-        <Container size="lg" py="xl">
+      <Container size="lg" py="xl">
           <Text>Loading profile...</Text>
         </Container>
-      </MainLayout>
     );
   }
 
   return (
-    <MainLayout>
-      <Container size="lg" py="xl">
+    <Container size="lg" py="xl">
         <Stack gap="lg">
           {/* Header with Avatar */}
           <Paper p="xl" radius="md" withBorder>
@@ -451,6 +447,5 @@ export default function ProfilePersonalPage() {
           </Paper>
         </Stack>
       </Container>
-    </MainLayout>
   );
 }

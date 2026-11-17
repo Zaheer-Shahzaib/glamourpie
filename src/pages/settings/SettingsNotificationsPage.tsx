@@ -13,8 +13,6 @@ import {
 } from '@mantine/core';
 import { useAuth } from '../../Context/useAuth';
 import { notifications } from '@mantine/notifications';
-import MainLayout from '../../layout/Main';
-
 export default function SettingsNotificationsPage() {
     const { token } = useAuth();
     const [saving, setSaving] = useState(false);
@@ -50,8 +48,7 @@ export default function SettingsNotificationsPage() {
     };
 
     return (
-        <MainLayout>
-            <Container size="lg" py="xl">
+        <Container size="lg" py="xl">
                 <Paper p="xl" radius="md" withBorder>
                     <Stack gap="md">
                         <div>
@@ -121,6 +118,5 @@ export default function SettingsNotificationsPage() {
                     </Stack>
                 </Paper>
             </Container>
-        </MainLayout>
     );
 }

@@ -42,8 +42,6 @@ import {
     getProfileStats,
 } from '../Services/user-services';
 import { UpdateProfileData, ChangePasswordData, ApiCredentials, ProfileStats } from '../types/profile.types';
-import MainLayout from '../layout/Main';
-
 export default function ProfilePage() {
     const { profile, token, loading } = useAuth();
     const [editMode, setEditMode] = useState(false);
@@ -218,17 +216,14 @@ export default function ProfilePage() {
 
     if (loading || !profile) {
         return (
-            <MainLayout>
-                <Container size="lg" py="xl">
+            <Container size="lg" py="xl">
                     <Text>Loading profile...</Text>
                 </Container>
-            </MainLayout>
         );
     }
 
     return (
-        <MainLayout>
-            <Container size="lg" py="xl">
+        <Container size="lg" py="xl">
                 <Stack gap="lg">
                     {/* Header */}
                     <Paper p="xl" radius="md" withBorder>
@@ -622,6 +617,5 @@ export default function ProfilePage() {
                     </Tabs>
                 </Stack>
             </Container>
-        </MainLayout>
     );
 }

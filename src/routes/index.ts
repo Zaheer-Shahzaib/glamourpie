@@ -28,6 +28,13 @@ export const PATH_APPS = {
   chat: path(ROOT_APPS, "/chat"),
   invoices: {
     root: path(ROOT_APPS, ROOTS_INVOICES),
+    upload: {
+      missing: path(ROOT_APPS, ROOTS_INVOICES + "/upload/missing"),
+      historical: path(ROOT_APPS, ROOTS_INVOICES + "/upload/historical"),
+    },
+    missing: path(ROOT_APPS, ROOTS_INVOICES + "/missing"),
+    past: path(ROOT_APPS, ROOTS_INVOICES + "/past"),
+    historical: path(ROOT_APPS, ROOTS_INVOICES + "/historical"),
     all: path(ROOT_APPS, ROOTS_INVOICES + "/list"),
     sample: path(ROOT_APPS, ROOTS_INVOICES + `/details/`),
     invoice_details: (id: string): string =>

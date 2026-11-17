@@ -14,7 +14,6 @@ import {
 } from "@mantine/core";
 import { useAuth } from "../../Context/useAuth";
 import { notifications } from "@mantine/notifications";
-import MainLayout from "../../layout/Main";
 import { fetchSellerSettings, updateSellerSettings } from "../../Services/settings-services";
 
 export default function SettingsBusinessPage() {
@@ -73,8 +72,7 @@ export default function SettingsBusinessPage() {
   };
 
   return (
-    <MainLayout>
-      <Container size="lg" py="xl">
+    <Container size="lg" py="xl">
         <Paper p="xl" radius="md" withBorder>
           <Stack gap="md">
             <div>
@@ -142,6 +140,5 @@ export default function SettingsBusinessPage() {
           </Stack>
         </Paper>
       </Container>
-    </MainLayout>
   );
 }

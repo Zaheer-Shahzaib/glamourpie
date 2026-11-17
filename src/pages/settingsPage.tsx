@@ -45,8 +45,6 @@ import {
     syncAmazonOrders,
 } from '../Services/settings-services';
 import { SellerSettings, UpdateSettingsData } from '../types/settings.types';
-import MainLayout from '../layout/Main';
-
 export default function SettingsPage() {
     const { token } = useAuth();
     const [loading, setLoading] = useState(true);
@@ -351,20 +349,17 @@ export default function SettingsPage() {
 
     if (loading) {
         return (
-            <MainLayout>
-                <Container size="lg" py="xl">
+            <Container size="lg" py="xl">
                     <Stack align="center" gap="md">
                         <Loader size="lg" />
                         <Text>Loading settings...</Text>
                     </Stack>
                 </Container>
-            </MainLayout>
         );
     }
 
     return (
-        <MainLayout>
-            <Container size="lg" py="xl">
+        <Container size="lg" py="xl">
                 <Stack gap="lg">
                     {/* Header */}
                     <Group justify="space-between">
@@ -876,6 +871,5 @@ export default function SettingsPage() {
                     </Tabs>
                 </Stack>
             </Container>
-        </MainLayout>
     );
 }

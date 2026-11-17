@@ -13,8 +13,6 @@ import {
 import { useAuth } from '../../Context/useAuth';
 import { getApiCredentials } from '../../Services/user-services';
 import { ApiCredentials } from '../../types/profile.types';
-import MainLayout from '../../layout/Main';
-
 export default function ProfileCredentialsPage() {
     const { token } = useAuth();
     const [credentials, setCredentials] = useState<ApiCredentials | null>(null);
@@ -35,8 +33,7 @@ export default function ProfileCredentialsPage() {
     };
 
     return (
-        <MainLayout>
-            <Container size="lg" py="xl">
+        <Container size="lg" py="xl">
                 <Paper p="xl" radius="md" withBorder>
                     <Group justify="space-between" mb="lg">
                         <Title order={3}>Amazon SP-API Credentials</Title>
@@ -71,6 +68,5 @@ export default function ProfileCredentialsPage() {
                     )}
                 </Paper>
             </Container>
-        </MainLayout>
     );
 }

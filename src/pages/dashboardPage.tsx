@@ -11,7 +11,6 @@ import {
 } from "@mantine/core";
 import { IconFileExport, IconPlus, IconAlertCircle } from "@tabler/icons-react";
 import { useState, useEffect } from "react";
-import MainLayout from "../layout/Main";
 import { useAuth } from "../Context/useAuth";
 import InvoiceStatsGrid from "../Components/Invoice/InvoiceStatsGrid";
 import InvoiceList from "../Components/Invoice/InvoiceList";
@@ -201,8 +200,7 @@ function DashBoard() {
           content="Manage your Amazon invoices with automated generation, tracking, and compliance tools."
         />
       </>
-      <MainLayout>
-        <Container fluid>
+      <Container fluid>
           <Stack gap="lg">
             {/* Header */}
             <Group justify="space-between">
@@ -281,7 +279,6 @@ function DashBoard() {
           onClose={() => setExportModalOpened(false)}
           userPlan={activePlan}
         />
-      </MainLayout>
     </>
   );
 }
